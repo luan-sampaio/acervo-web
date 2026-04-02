@@ -1,8 +1,11 @@
 from fastapi import FastAPI, Depends
+from fastapi import status
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 
 from . import database
+from . import models
+from . import schemas
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
@@ -38,3 +41,12 @@ def health_check(db: Session = Depends(database.get_db)):
         db_error = str(e)
     
     return {"api_status": "ok", "db_status": db_status, "db_error": db_error}
+
+
+@app.post("/books", response_model=schemas.BookResponse, status_code=status.HTTP_201_CREATED, tags=["Books"])
+def create_book(book: schemas.BookCreate, db: Session = Depends(database.get_db)):
+    db_book = models.Book(titulo=book.titulo, autor=book.autor)
+    db.add(db_book)
+    db.commit()
+    db.refresh(db_book)
+    return db_book
