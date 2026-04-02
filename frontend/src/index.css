@@ -1,10 +1,10 @@
 :root {
-  color-scheme: dark;
+  color-scheme: light;
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   line-height: 1.5;
   font-weight: 400;
-  color: #f7f7fb;
-  background: #0f1020;
+  color: #1a1a1a;
+  background: #f4f7f9;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -19,9 +19,7 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background:
-    radial-gradient(circle at top, rgba(124, 92, 255, 0.22), transparent 28%),
-    linear-gradient(180deg, #111225 0%, #090b13 100%);
+  background: linear-gradient(180deg, #f4f7f9 0%, #edf1f5 100%);
 }
 
 button,
@@ -48,19 +46,19 @@ button {
   height: 32rem;
   border-radius: 999px;
   filter: blur(120px);
-  opacity: 0.25;
+  opacity: 0.12;
 }
 
 .background-glow-left {
   top: -8rem;
   left: -10rem;
-  background: #7c5cff;
+  background: #6c63ff;
 }
 
 .background-glow-right {
   right: -12rem;
   bottom: -14rem;
-  background: #1ec8a5;
+  background: #d9def5;
 }
 
 .container {
@@ -73,10 +71,9 @@ button {
 
 .hero-card,
 .panel {
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(13, 16, 31, 0.72);
-  box-shadow: 0 20px 80px rgba(0, 0, 0, 0.35);
-  backdrop-filter: blur(18px);
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  background: #ffffff;
+  box-shadow: 0 14px 40px rgba(15, 23, 42, 0.08);
 }
 
 .hero-card {
@@ -89,8 +86,8 @@ button {
   align-items: center;
   padding: 0.4rem 0.75rem;
   border-radius: 999px;
-  background: rgba(124, 92, 255, 0.18);
-  color: #c6bcff;
+  background: rgba(108, 99, 255, 0.12);
+  color: #6c63ff;
   font-size: 0.8rem;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -101,12 +98,13 @@ button {
   margin: 1rem 0 0.75rem;
   font-size: clamp(2rem, 4vw, 3.5rem);
   line-height: 1.05;
+  color: #1a1a1a;
 }
 
 .hero-card p {
   max-width: 42rem;
   margin: 0;
-  color: #b4b8cf;
+  color: #5c5c5c;
 }
 
 .hero-stats {
@@ -119,18 +117,19 @@ button {
 .stat-card {
   padding: 1rem 1.25rem;
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: #f8fafc;
+  border: 1px solid #e7ecf2;
 }
 
 .stat-card strong {
   display: block;
   font-size: 1.4rem;
   margin-bottom: 0.35rem;
+  color: #1a1a1a;
 }
 
 .stat-card span {
-  color: #a6abc7;
+  color: #5c5c5c;
   word-break: break-all;
 }
 
@@ -160,11 +159,12 @@ button {
 .panel-header h2 {
   margin: 0;
   font-size: 1.35rem;
+  color: #1a1a1a;
 }
 
 .panel-header p {
   margin: 0.35rem 0 0;
-  color: #9ea4c3;
+  color: #5c5c5c;
 }
 
 .book-form {
@@ -178,7 +178,7 @@ button {
 }
 
 .book-form span {
-  color: #d8dcf1;
+  color: #1a1a1a;
   font-size: 0.95rem;
   font-weight: 600;
 }
@@ -187,40 +187,52 @@ button {
   width: 100%;
   padding: 0.9rem 1rem;
   border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.04);
-  color: #f5f7ff;
+  border: 1px solid #d7dde5;
+  background: #ffffff;
+  color: #1a1a1a;
   outline: none;
-  transition: border-color 0.2s ease, transform 0.2s ease;
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.03);
+  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.book-form input::placeholder {
+  color: #9ca3af;
 }
 
 .book-form input:focus {
-  border-color: #7c5cff;
+  border-color: #6c63ff;
+  box-shadow: 0 0 0 4px rgba(108, 99, 255, 0.12);
   transform: translateY(-1px);
 }
 
 .book-form button,
 .secondary-button {
-  border: 0;
+  border: 1px solid transparent;
   border-radius: 14px;
   padding: 0.9rem 1rem;
   font-weight: 700;
-  transition: transform 0.2s ease, opacity 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, box-shadow 0.2s ease;
 }
 
 .book-form button {
-  background: linear-gradient(135deg, #7c5cff 0%, #5a8bff 100%);
+  background: #6c63ff;
   color: white;
+  box-shadow: 0 10px 24px rgba(108, 99, 255, 0.24);
 }
 
 .secondary-button {
-  background: rgba(255, 255, 255, 0.06);
-  color: #eef0ff;
+  background: #d1d5db;
+  color: #1a1a1a;
+  border-color: #cfd4db;
 }
 
 .book-form button:hover,
 .secondary-button:hover {
   transform: translateY(-1px);
+}
+
+.book-form button:hover {
+  box-shadow: 0 12px 28px rgba(108, 99, 255, 0.28);
 }
 
 .book-form button:disabled {
@@ -236,24 +248,27 @@ button {
 }
 
 .feedback.success {
-  background: rgba(30, 200, 165, 0.14);
-  color: #85f0d3;
+  background: #ecfdf5;
+  color: #166534;
+  border: 1px solid #bbf7d0;
 }
 
 .feedback.error {
-  background: rgba(255, 107, 107, 0.14);
-  color: #ffb2b2;
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
 }
 
 .empty-state {
   display: grid;
   place-items: center;
   min-height: 240px;
-  border: 1px dashed rgba(255, 255, 255, 0.12);
+  border: 1px dashed #d6dce5;
   border-radius: 20px;
-  color: #9ea4c3;
+  color: #5c5c5c;
   text-align: center;
   padding: 1.5rem;
+  background: #fbfcfe;
 }
 
 .book-list {
@@ -264,8 +279,9 @@ button {
 .book-card {
   padding: 1.15rem;
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.035);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #f9fbfc;
+  border: 1px solid #e6ebf2;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
 }
 
 .book-card-header {
@@ -277,23 +293,24 @@ button {
 }
 
 .book-id {
-  color: #c6bcff;
+  color: #6c63ff;
   font-weight: 700;
 }
 
 .book-date {
-  color: #8f96b8;
+  color: #5c5c5c;
   font-size: 0.9rem;
 }
 
 .book-card h3 {
   margin: 0;
   font-size: 1.05rem;
+  color: #1a1a1a;
 }
 
 .book-card p {
   margin: 0.4rem 0 0;
-  color: #aeb4d1;
+  color: #5c5c5c;
 }
 
 @media (max-width: 860px) {
