@@ -12,6 +12,20 @@ const initialEditForm = {
   autor: '',
 }
 
+function getTextFieldError(label, value) {
+  const trimmedValue = value.trim()
+
+  if (trimmedValue.length === 0) {
+    return `${label} é obrigatório`
+  }
+
+  if (trimmedValue.length < 2) {
+    return `${label} deve ter pelo menos 2 caracteres`
+  }
+
+  return ''
+}
+
 function formatDate(value) {
   if (!value) {
     return '-'
@@ -47,12 +61,16 @@ function formatLatestAddition(value) {
 export default function App() {
   const [form, setForm] = useState(initialForm)
   const [books, setBooks] = useState([])
+  const [searchTerm, setSearchTerm] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [formTouched, setFormTouched] = useState({ titulo: false, autor: false })
   const [editingBookId, setEditingBookId] = useState(null)
   const [editForm, setEditForm] = useState(initialEditForm)
+  const [editTouched, setEditTouched] = useState({ titulo: false, autor: false })
   const [savingBookId, setSavingBookId] = useState(null)
   const [deletingBookId, setDeletingBookId] = useState(null)
+  const [bookPendingDelete, setBookPendingDelete] = useState(null)
   const [error, setError] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
 
@@ -107,14 +125,51 @@ export default function App() {
     return formatLatestAddition(displayBooks[0]?.created_at)
   }, [displayBooks])
 
-  const isFormValid = form.titulo.trim().length >= 2 && form.autor.trim().length >= 2
-  const isEditFormValid = editForm.titulo.trim().length >= 2 && editForm.autor.trim().length >= 2
+  const filteredBooks = useMemo(() => {
+    const normalizedSearchTerm = searchTerm.trim().toLowerCase()
+
+    if (!normalizedSearchTerm) {
+      return displayBooks
+    }
+
+    return displayBooks.filter((book) => {
+      return (
+        book.titulo.toLowerCase().includes(normalizedSearchTerm)
+        || book.autor.toLowerCase().includes(normalizedSearchTerm)
+      )
+    })
+  }, [displayBooks, searchTerm])
+
+  const formErrors = useMemo(() => ({
+    titulo: getTextFieldError('Título', form.titulo),
+    autor: getTextFieldError('Autor', form.autor),
+  }), [form.autor, form.titulo])
+
+  const editErrors = useMemo(() => ({
+    titulo: getTextFieldError('Título', editForm.titulo),
+    autor: getTextFieldError('Autor', editForm.autor),
+  }), [editForm.autor, editForm.titulo])
+
+  const isFormValid = !formErrors.titulo && !formErrors.autor
+  const isEditFormValid = !editErrors.titulo && !editErrors.autor
 
   function handleChange(event) {
     const { name, value } = event.target
     setForm((current) => ({
       ...current,
       [name]: value,
+    }))
+  }
+
+  function handleSearchChange(event) {
+    setSearchTerm(event.target.value)
+  }
+
+  function handleFieldBlur(event) {
+    const { name } = event.target
+    setFormTouched((current) => ({
+      ...current,
+      [name]: true,
     }))
   }
 
@@ -126,6 +181,14 @@ export default function App() {
     }))
   }
 
+  function handleEditBlur(event) {
+    const { name } = event.target
+    setEditTouched((current) => ({
+      ...current,
+      [name]: true,
+    }))
+  }
+
   function startEditing(book) {
     setError('')
     setEditingBookId(book.id)
@@ -133,17 +196,20 @@ export default function App() {
       titulo: book.titulo,
       autor: book.autor,
     })
+    setEditTouched({ titulo: false, autor: false })
   }
 
   function cancelEditing() {
     setEditingBookId(null)
     setEditForm(initialEditForm)
+    setEditTouched({ titulo: false, autor: false })
   }
 
   async function handleSubmit(event) {
     event.preventDefault()
 
     if (!isFormValid) {
+      setFormTouched({ titulo: true, autor: true })
       return
     }
 
@@ -159,6 +225,7 @@ export default function App() {
       const createdBook = await createBook(payload)
       setBooks((current) => [createdBook, ...current])
       setForm(initialForm)
+      setFormTouched({ titulo: false, autor: false })
       setSuccessMessage('✓ Livro cadastrado com sucesso')
     } catch (err) {
       setError(err.message)
@@ -169,6 +236,7 @@ export default function App() {
 
   async function handleUpdateBook(bookId) {
     if (!isEditFormValid) {
+      setEditTouched({ titulo: true, autor: true })
       return
     }
 
@@ -192,12 +260,24 @@ export default function App() {
     }
   }
 
-  async function handleDeleteBook(bookId) {
-    const confirmed = window.confirm('Deseja remover este livro?')
+  function requestDeleteBook(book) {
+    setBookPendingDelete(book)
+  }
 
-    if (!confirmed) {
+  function closeDeleteModal() {
+    if (deletingBookId !== null) {
       return
     }
+
+    setBookPendingDelete(null)
+  }
+
+  async function handleDeleteBook() {
+    if (!bookPendingDelete) {
+      return
+    }
+
+    const bookId = bookPendingDelete.id
 
     try {
       setDeletingBookId(bookId)
@@ -210,6 +290,7 @@ export default function App() {
         cancelEditing()
       }
 
+      setBookPendingDelete(null)
       setSuccessMessage('✓ Livro removido com sucesso')
     } catch (err) {
       setError(err.message)
@@ -257,10 +338,14 @@ export default function App() {
                   name="titulo"
                   value={form.titulo}
                   onChange={handleChange}
+                  onBlur={handleFieldBlur}
                   placeholder="Ex.: Dom Casmurro"
+                  aria-invalid={formTouched.titulo && Boolean(formErrors.titulo)}
+                  className={formTouched.titulo && formErrors.titulo ? 'input-error' : ''}
                   minLength={2}
                   required
                 />
+                {formTouched.titulo && formErrors.titulo ? <span className="field-error">{formErrors.titulo}</span> : null}
               </label>
 
               <label>
@@ -269,10 +354,14 @@ export default function App() {
                   name="autor"
                   value={form.autor}
                   onChange={handleChange}
+                  onBlur={handleFieldBlur}
                   placeholder="Ex.: Machado de Assis"
+                  aria-invalid={formTouched.autor && Boolean(formErrors.autor)}
+                  className={formTouched.autor && formErrors.autor ? 'input-error' : ''}
                   minLength={2}
                   required
                 />
+                {formTouched.autor && formErrors.autor ? <span className="field-error">{formErrors.autor}</span> : null}
               </label>
 
               <button type="submit" disabled={isSubmitting || !isFormValid}>
@@ -295,13 +384,34 @@ export default function App() {
               </div>
             </div>
 
+            <div className="list-toolbar">
+              <label className="search-field">
+                <span>Buscar por título ou autor</span>
+                <input
+                  value={searchTerm}
+                  onChange={handleSearchChange}
+                  placeholder="Ex.: Machado de Assis"
+                />
+              </label>
+
+              {searchTerm ? (
+                <button type="button" className="secondary-button" onClick={() => setSearchTerm('')}>
+                  Limpar
+                </button>
+              ) : null}
+            </div>
+
             {isLoading ? (
               <div className="empty-state">Carregando livros...</div>
+            ) : filteredBooks.length === 0 ? (
+              <div className="empty-state">
+                {searchTerm ? 'Nenhum livro encontrado para a busca informada.' : 'Nenhum livro cadastrado até o momento.'}
+              </div>
             ) : displayBooks.length === 0 ? (
               <div className="empty-state">Nenhum livro cadastrado até o momento.</div>
             ) : (
               <div className="book-list">
-                {displayBooks.map((book) => (
+                {filteredBooks.map((book) => (
                   <article key={book.id} className="book-card">
                     <div className="book-card-top">
                       {editingBookId === book.id ? (
@@ -313,9 +423,13 @@ export default function App() {
                                 name="titulo"
                                 value={editForm.titulo}
                                 onChange={handleEditChange}
+                                onBlur={handleEditBlur}
+                                aria-invalid={editTouched.titulo && Boolean(editErrors.titulo)}
+                                className={editTouched.titulo && editErrors.titulo ? 'input-error' : ''}
                                 minLength={2}
                                 required
                               />
+                              {editTouched.titulo && editErrors.titulo ? <span className="field-error">{editErrors.titulo}</span> : null}
                             </label>
                             <label>
                               <span>Autor</span>
@@ -323,9 +437,13 @@ export default function App() {
                                 name="autor"
                                 value={editForm.autor}
                                 onChange={handleEditChange}
+                                onBlur={handleEditBlur}
+                                aria-invalid={editTouched.autor && Boolean(editErrors.autor)}
+                                className={editTouched.autor && editErrors.autor ? 'input-error' : ''}
                                 minLength={2}
                                 required
                               />
+                              {editTouched.autor && editErrors.autor ? <span className="field-error">{editErrors.autor}</span> : null}
                             </label>
                           </div>
                         </div>
@@ -375,7 +493,7 @@ export default function App() {
                             type="button"
                             className="action-button danger-button"
                             disabled={deletingBookId === book.id}
-                            onClick={() => handleDeleteBook(book.id)}
+                            onClick={() => requestDeleteBook(book)}
                           >
                             {deletingBookId === book.id ? 'Removendo...' : 'Excluir'}
                           </button>
@@ -390,6 +508,25 @@ export default function App() {
         </section>
 
         {successMessage ? <div className="toast toast-success">{successMessage}</div> : null}
+
+        {bookPendingDelete ? (
+          <div className="modal-overlay" role="presentation">
+            <div className="modal-card" role="dialog" aria-modal="true" aria-labelledby="delete-modal-title">
+              <h3 id="delete-modal-title">Confirmar exclusão</h3>
+              <p>
+                Tem certeza que deseja remover <strong>{bookPendingDelete.titulo}</strong> de <strong>{bookPendingDelete.autor}</strong>?
+              </p>
+              <div className="modal-actions">
+                <button type="button" className="action-button secondary-button" disabled={deletingBookId !== null} onClick={closeDeleteModal}>
+                  Cancelar
+                </button>
+                <button type="button" className="action-button danger-button" disabled={deletingBookId !== null} onClick={handleDeleteBook}>
+                  {deletingBookId !== null ? 'Excluindo...' : 'Confirmar exclusão'}
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : null}
       </main>
     </div>
   )
