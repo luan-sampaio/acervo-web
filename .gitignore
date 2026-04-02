@@ -9,6 +9,9 @@
 *.pyc
 .venv/
 venv/
+node_modules/
+dist/
+frontend/.env
 
 # IDE
 .vscode/
