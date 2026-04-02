@@ -50,3 +50,8 @@ def create_book(book: schemas.BookCreate, db: Session = Depends(database.get_db)
     db.commit()
     db.refresh(db_book)
     return db_book
+
+
+@app.get("/books", response_model=list[schemas.BookResponse], tags=["Books"])
+def list_books(db: Session = Depends(database.get_db)):
+    return db.query(models.Book).all()
