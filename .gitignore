@@ -1,8 +1,11 @@
 # Environments
 .env
 
-# Python
-__pycache__/
+# Postman
+/postman/
+
+# Documentation
+/docs/
 *.pyc
 .venv/
 venv/
