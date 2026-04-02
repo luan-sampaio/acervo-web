@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Depends
-from fastapi import HTTPException, status
+from fastapi import HTTPException, Response, status
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 
@@ -50,6 +50,17 @@ def create_book(book: schemas.BookCreate, db: Session = Depends(database.get_db)
     db.commit()
     db.refresh(db_book)
     return db_book
+
+
+@app.delete("/books/{book_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Books"])
+def delete_book(book_id: int, db: Session = Depends(database.get_db)):
+    db_book = db.get(models.Book, book_id)
+    if db_book is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Livro não encontrado")
+
+    db.delete(db_book)
+    db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @app.get("/books", response_model=list[schemas.BookResponse], tags=["Books"])
