@@ -18,6 +18,27 @@ function formatDate(value) {
   }).format(new Date(value))
 }
 
+
+function formatLatestAddition(value) {
+  if (!value) {
+    return 'Sem registros recentes'
+  }
+
+  const date = new Date(value)
+  const now = new Date()
+
+  const isToday = date.toDateString() === now.toDateString()
+
+  if (isToday) {
+    return `Hoje, ${new Intl.DateTimeFormat('pt-BR', { timeStyle: 'short' }).format(date)}`
+  }
+
+  return new Intl.DateTimeFormat('pt-BR', {
+    dateStyle: 'short',
+    timeStyle: 'short',
+  }).format(date)
+}
+
 export default function App() {
   const [form, setForm] = useState(initialForm)
   const [books, setBooks] = useState([])
@@ -43,13 +64,41 @@ export default function App() {
     loadBooks()
   }, [])
 
+  useEffect(() => {
+    if (!successMessage) {
+      return undefined
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setSuccessMessage('')
+    }, 3200)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [successMessage])
+
+  const displayBooks = useMemo(() => {
+    return [...books]
+      .sort((first, second) => {
+        const firstDate = first.created_at ? new Date(first.created_at).getTime() : 0
+        const secondDate = second.created_at ? new Date(second.created_at).getTime() : 0
+
+        return secondDate - firstDate || second.id - first.id
+      })
+  }, [books])
+
   const totalBooksLabel = useMemo(() => {
-    if (books.length === 1) {
+    if (displayBooks.length === 1) {
       return '1 livro cadastrado'
     }
 
-    return `${books.length} livros cadastrados`
-  }, [books.length])
+    return `${displayBooks.length} livros cadastrados`
+  }, [displayBooks.length])
+
+  const latestAdditionLabel = useMemo(() => {
+    return formatLatestAddition(displayBooks[0]?.created_at)
+  }, [displayBooks])
+
+  const isFormValid = form.titulo.trim().length >= 2 && form.autor.trim().length >= 2
 
   function handleChange(event) {
     const { name, value } = event.target
@@ -62,14 +111,23 @@ export default function App() {
   async function handleSubmit(event) {
     event.preventDefault()
 
+    if (!isFormValid) {
+      return
+    }
+
+    const payload = {
+      titulo: form.titulo.trim(),
+      autor: form.autor.trim(),
+    }
+
     try {
       setIsSubmitting(true)
       setError('')
       setSuccessMessage('')
-      const createdBook = await createBook(form)
+      const createdBook = await createBook(payload)
       setBooks((current) => [createdBook, ...current])
       setForm(initialForm)
-      setSuccessMessage('Livro cadastrado com sucesso.')
+      setSuccessMessage('✓ Livro cadastrado com sucesso')
     } catch (err) {
       setError(err.message)
     } finally {
@@ -92,12 +150,12 @@ export default function App() {
           </p>
           <div className="hero-stats">
             <div className="stat-card">
-              <strong>{books.length}</strong>
+              <strong>{displayBooks.length}</strong>
               <span>{totalBooksLabel}</span>
             </div>
             <div className="stat-card">
-              <strong>API</strong>
-              <span>{import.meta.env.VITE_API_URL ?? 'http://localhost:8000'}</span>
+              <strong>Última adição</strong>
+              <span>{latestAdditionLabel}</span>
             </div>
           </div>
         </section>
@@ -117,6 +175,7 @@ export default function App() {
                   value={form.titulo}
                   onChange={handleChange}
                   placeholder="Ex.: Dom Casmurro"
+                  minLength={2}
                   required
                 />
               </label>
@@ -128,16 +187,16 @@ export default function App() {
                   value={form.autor}
                   onChange={handleChange}
                   placeholder="Ex.: Machado de Assis"
+                  minLength={2}
                   required
                 />
               </label>
 
-              <button type="submit" disabled={isSubmitting}>
+              <button type="submit" disabled={isSubmitting || !isFormValid}>
                 {isSubmitting ? 'Salvando...' : 'Cadastrar livro'}
               </button>
             </form>
 
-            {successMessage ? <div className="feedback success">{successMessage}</div> : null}
             {error ? <div className="feedback error">{error}</div> : null}
           </div>
 
@@ -147,31 +206,38 @@ export default function App() {
                 <h2>Livros cadastrados</h2>
                 <p>Lista atualizada com os registros disponíveis na API.</p>
               </div>
-              <button type="button" className="secondary-button" onClick={loadBooks}>
-                Atualizar
-              </button>
+              <div className="sync-status" aria-label="Sincronizado">
+                <span className="sync-icon">✓</span>
+                <span>Sincronizado</span>
+              </div>
             </div>
 
             {isLoading ? (
               <div className="empty-state">Carregando livros...</div>
-            ) : books.length === 0 ? (
+            ) : displayBooks.length === 0 ? (
               <div className="empty-state">Nenhum livro cadastrado até o momento.</div>
             ) : (
               <div className="book-list">
-                {books.map((book) => (
+                {displayBooks.map((book) => (
                   <article key={book.id} className="book-card">
-                    <div className="book-card-header">
-                      <span className="book-id">#{book.id}</span>
-                      <span className="book-date">{formatDate(book.created_at)}</span>
+                    <div className="book-card-top">
+                      <div className="book-main">
+                        <h3>{book.titulo}</h3>
+                        <p className="book-author">{book.autor}</p>
+                      </div>
+                      <div className="book-meta">
+                        <span className="book-id">#{book.id}</span>
+                        <span className="book-date">{formatDate(book.created_at)}</span>
+                      </div>
                     </div>
-                    <h3>{book.titulo}</h3>
-                    <p>{book.autor}</p>
                   </article>
                 ))}
               </div>
             )}
           </div>
         </section>
+
+        {successMessage ? <div className="toast toast-success">{successMessage}</div> : null}
       </main>
     </div>
   )

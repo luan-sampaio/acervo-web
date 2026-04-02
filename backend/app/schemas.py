@@ -4,8 +4,8 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class BookBase(BaseModel):
-    titulo: str = Field(min_length=1, max_length=255)
-    autor: str = Field(min_length=1, max_length=255)
+    titulo: str = Field(min_length=2, max_length=255)
+    autor: str = Field(min_length=2, max_length=255)
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
@@ -15,8 +15,8 @@ class BookCreate(BookBase):
 
 
 class BookUpdate(BaseModel):
-    titulo: str | None = Field(default=None, min_length=1, max_length=255)
-    autor: str | None = Field(default=None, min_length=1, max_length=255)
+    titulo: str | None = Field(default=None, min_length=2, max_length=255)
+    autor: str | None = Field(default=None, min_length=2, max_length=255)
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
