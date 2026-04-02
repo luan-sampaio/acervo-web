@@ -20,6 +20,26 @@ export async function fetchBooks() {
   return parseResponse(response)
 }
 
+export async function updateBook(bookId, payload) {
+  const response = await fetch(`${API_BASE_URL}/books/${bookId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  })
+
+  return parseResponse(response)
+}
+
+export async function deleteBook(bookId) {
+  const response = await fetch(`${API_BASE_URL}/books/${bookId}`, {
+    method: 'DELETE',
+  })
+
+  return parseResponse(response)
+}
+
 export async function createBook(payload) {
   const response = await fetch(`${API_BASE_URL}/books`, {
     method: 'POST',

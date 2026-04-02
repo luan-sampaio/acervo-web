@@ -1,8 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
 
-import { createBook, fetchBooks } from './api'
+import { createBook, deleteBook, fetchBooks, updateBook } from './api'
 
 const initialForm = {
+  titulo: '',
+  autor: '',
+}
+
+const initialEditForm = {
   titulo: '',
   autor: '',
 }
@@ -44,6 +49,10 @@ export default function App() {
   const [books, setBooks] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [editingBookId, setEditingBookId] = useState(null)
+  const [editForm, setEditForm] = useState(initialEditForm)
+  const [savingBookId, setSavingBookId] = useState(null)
+  const [deletingBookId, setDeletingBookId] = useState(null)
   const [error, setError] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
 
@@ -99,6 +108,7 @@ export default function App() {
   }, [displayBooks])
 
   const isFormValid = form.titulo.trim().length >= 2 && form.autor.trim().length >= 2
+  const isEditFormValid = editForm.titulo.trim().length >= 2 && editForm.autor.trim().length >= 2
 
   function handleChange(event) {
     const { name, value } = event.target
@@ -106,6 +116,28 @@ export default function App() {
       ...current,
       [name]: value,
     }))
+  }
+
+  function handleEditChange(event) {
+    const { name, value } = event.target
+    setEditForm((current) => ({
+      ...current,
+      [name]: value,
+    }))
+  }
+
+  function startEditing(book) {
+    setError('')
+    setEditingBookId(book.id)
+    setEditForm({
+      titulo: book.titulo,
+      autor: book.autor,
+    })
+  }
+
+  function cancelEditing() {
+    setEditingBookId(null)
+    setEditForm(initialEditForm)
   }
 
   async function handleSubmit(event) {
@@ -132,6 +164,57 @@ export default function App() {
       setError(err.message)
     } finally {
       setIsSubmitting(false)
+    }
+  }
+
+  async function handleUpdateBook(bookId) {
+    if (!isEditFormValid) {
+      return
+    }
+
+    const payload = {
+      titulo: editForm.titulo.trim(),
+      autor: editForm.autor.trim(),
+    }
+
+    try {
+      setSavingBookId(bookId)
+      setError('')
+      setSuccessMessage('')
+      const updatedBook = await updateBook(bookId, payload)
+      setBooks((current) => current.map((book) => (book.id === bookId ? updatedBook : book)))
+      cancelEditing()
+      setSuccessMessage('✓ Livro atualizado com sucesso')
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSavingBookId(null)
+    }
+  }
+
+  async function handleDeleteBook(bookId) {
+    const confirmed = window.confirm('Deseja remover este livro?')
+
+    if (!confirmed) {
+      return
+    }
+
+    try {
+      setDeletingBookId(bookId)
+      setError('')
+      setSuccessMessage('')
+      await deleteBook(bookId)
+      setBooks((current) => current.filter((book) => book.id !== bookId))
+
+      if (editingBookId === bookId) {
+        cancelEditing()
+      }
+
+      setSuccessMessage('✓ Livro removido com sucesso')
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setDeletingBookId(null)
     }
   }
 
@@ -221,14 +304,83 @@ export default function App() {
                 {displayBooks.map((book) => (
                   <article key={book.id} className="book-card">
                     <div className="book-card-top">
-                      <div className="book-main">
-                        <h3>{book.titulo}</h3>
-                        <p className="book-author">{book.autor}</p>
-                      </div>
+                      {editingBookId === book.id ? (
+                        <div className="book-main book-main-editing">
+                          <div className="inline-form">
+                            <label>
+                              <span>Título</span>
+                              <input
+                                name="titulo"
+                                value={editForm.titulo}
+                                onChange={handleEditChange}
+                                minLength={2}
+                                required
+                              />
+                            </label>
+                            <label>
+                              <span>Autor</span>
+                              <input
+                                name="autor"
+                                value={editForm.autor}
+                                onChange={handleEditChange}
+                                minLength={2}
+                                required
+                              />
+                            </label>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="book-main">
+                          <h3>{book.titulo}</h3>
+                          <p className="book-author">{book.autor}</p>
+                        </div>
+                      )}
                       <div className="book-meta">
                         <span className="book-id">#{book.id}</span>
                         <span className="book-date">{formatDate(book.created_at)}</span>
                       </div>
+                    </div>
+
+                    <div className="book-actions">
+                      {editingBookId === book.id ? (
+                        <>
+                          <button
+                            type="button"
+                            className="action-button primary-button"
+                            disabled={savingBookId === book.id || !isEditFormValid}
+                            onClick={() => handleUpdateBook(book.id)}
+                          >
+                            {savingBookId === book.id ? 'Salvando...' : 'Salvar'}
+                          </button>
+                          <button
+                            type="button"
+                            className="action-button secondary-button"
+                            disabled={savingBookId === book.id}
+                            onClick={cancelEditing}
+                          >
+                            Cancelar
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button
+                            type="button"
+                            className="action-button secondary-button"
+                            disabled={deletingBookId === book.id}
+                            onClick={() => startEditing(book)}
+                          >
+                            Editar
+                          </button>
+                          <button
+                            type="button"
+                            className="action-button danger-button"
+                            disabled={deletingBookId === book.id}
+                            onClick={() => handleDeleteBook(book.id)}
+                          >
+                            {deletingBookId === book.id ? 'Removendo...' : 'Excluir'}
+                          </button>
+                        </>
+                      )}
                     </div>
                   </article>
                 ))}
