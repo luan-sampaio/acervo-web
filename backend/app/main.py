@@ -63,3 +63,18 @@ def get_book(book_id: int, db: Session = Depends(database.get_db)):
     if db_book is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Livro não encontrado")
     return db_book
+
+
+@app.put("/books/{book_id}", response_model=schemas.BookResponse, tags=["Books"])
+def update_book(book_id: int, book: schemas.BookUpdate, db: Session = Depends(database.get_db)):
+    db_book = db.get(models.Book, book_id)
+    if db_book is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Livro não encontrado")
+
+    book_data = book.model_dump(exclude_unset=True)
+    for field, value in book_data.items():
+        setattr(db_book, field, value)
+
+    db.commit()
+    db.refresh(db_book)
+    return db_book
