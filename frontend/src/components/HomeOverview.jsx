@@ -1,7 +1,4 @@
-export default function HomeOverview({
-  onOpenDashboard,
-  onOpenCollection,
-}) {
+export default function HomeOverview({ onOpenCollection }) {
   return (
     <section className="home-grid">
       <div className="home-hero home-hero-centered">
@@ -10,14 +7,9 @@ export default function HomeOverview({
           <h1>Organize seus livros.</h1>
         </div>
 
-        <div className="home-actions home-actions-centered">
-          <button type="button" className="secondary-button home-secondary-action" onClick={onOpenDashboard}>
-            Ver painel
-          </button>
-          <button type="button" className="home-primary-action" onClick={onOpenCollection}>
-            Abrir minha colecao
-          </button>
-        </div>
+        <button type="button" className="home-primary-action" onClick={onOpenCollection}>
+          Abrir minha coleção
+        </button>
       </div>
     </section>
   )

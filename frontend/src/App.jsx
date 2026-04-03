@@ -548,7 +548,6 @@ export default function App() {
       <main className="container">
         {currentView === 'home' ? (
           <HomeOverview
-            onOpenDashboard={() => setCurrentView('dashboard')}
             onOpenCollection={() => setCurrentView('collection')}
           />
         ) : currentView === 'dashboard' ? (

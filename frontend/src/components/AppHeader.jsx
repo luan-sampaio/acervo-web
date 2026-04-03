@@ -22,17 +22,17 @@ export default function AppHeader({ currentView, onNavigate }) {
         </button>
         <button
           type="button"
+          className={currentView === 'collection' ? 'app-nav-link app-nav-link-active' : 'app-nav-link'}
+          onClick={() => onNavigate('collection')}
+        >
+          Coleção
+        </button>
+        <button
+          type="button"
           className={currentView === 'dashboard' ? 'app-nav-link app-nav-link-active' : 'app-nav-link'}
           onClick={() => onNavigate('dashboard')}
         >
           Painel
-        </button>
-        <button
-          type="button"
-          className={currentView === 'collection' ? 'app-nav-link app-nav-link-active' : 'app-nav-link'}
-          onClick={() => onNavigate('collection')}
-        >
-          Colecao
         </button>
       </nav>
     </header>
