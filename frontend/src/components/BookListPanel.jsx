@@ -286,13 +286,29 @@ export default function BookListPanel({
       </div>
 
       {isLoading ? (
-        <div className="empty-state">Carregando livros...</div>
+        <div className="empty-state">
+          <div className="empty-state-card">
+            <span className="empty-state-kicker">Carregando</span>
+            <strong>Buscando livros da sua colecao</strong>
+            <p>Estamos atualizando os registros para mostrar a lista mais recente.</p>
+          </div>
+        </div>
       ) : books.length === 0 ? (
         <div className="empty-state">
-          {totalBooks === 0 ? 'Nenhum livro cadastrado até o momento.' : 'Nenhum livro encontrado para a busca informada.'}
+          <div className="empty-state-card">
+            <span className="empty-state-kicker">Biblioteca vazia</span>
+            <strong>Nenhum livro cadastrado ate o momento</strong>
+            <p>Comece adicionando o primeiro livro para montar sua colecao.</p>
+          </div>
         </div>
       ) : filteredBooks.length === 0 ? (
-        <div className="empty-state">Nenhum livro encontrado para a busca informada.</div>
+        <div className="empty-state">
+          <div className="empty-state-card">
+            <span className="empty-state-kicker">Sem resultados</span>
+            <strong>Nenhum livro encontrado para essa busca</strong>
+            <p>Tente outro termo ou limpe os filtros para ver toda a colecao novamente.</p>
+          </div>
+        </div>
       ) : (
         <div className="book-list">
           {filteredBooks.map((book) => (
@@ -327,10 +343,10 @@ export default function BookListPanel({
           </div>
 
           <div className="pagination-actions">
-            <button type="button" className="secondary-button" disabled={!hasPreviousPage || isLoading} onClick={onPreviousPage}>
+            <button type="button" className="secondary-button pagination-button" disabled={!hasPreviousPage || isLoading} onClick={onPreviousPage}>
               Anterior
             </button>
-            <button type="button" className="secondary-button" disabled={!hasNextPage || isLoading} onClick={onNextPage}>
+            <button type="button" className="secondary-button pagination-button" disabled={!hasNextPage || isLoading} onClick={onNextPage}>
               Próxima
             </button>
           </div>
