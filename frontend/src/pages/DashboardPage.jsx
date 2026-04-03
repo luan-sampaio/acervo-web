@@ -1,36 +1,22 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import DashboardOverview from '../components/DashboardOverview'
 import { fetchBooks } from '../services/api'
 
 export default function DashboardPage() {
   const navigate = useNavigate()
-  const [books, setBooks] = useState([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState('')
+  const booksQuery = useQuery({
+    queryKey: ['dashboard-books'],
+    queryFn: () => fetchBooks({
+      limit: 100,
+      offset: 0,
+      sort_by: 'created_at',
+      sort_order: 'desc',
+    }),
+  })
 
-  useEffect(() => {
-    async function loadDashboardBooks() {
-      try {
-        setIsLoading(true)
-        setError('')
-        const data = await fetchBooks({
-          limit: 100,
-          offset: 0,
-          sort_by: 'created_at',
-          sort_order: 'desc',
-        })
-        setBooks(data.items)
-      } catch (err) {
-        setError(err.message)
-        setBooks([])
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    loadDashboardBooks()
-  }, [])
+  const books = booksQuery.data?.items ?? []
 
   const metrics = useMemo(() => {
     const favoriteCount = books.filter((book) => book.favorito).length
@@ -54,7 +40,7 @@ export default function DashboardPage() {
       .slice(0, 4)
   }, [books])
 
-  if (isLoading) {
+  if (booksQuery.isLoading) {
     return (
       <section className="dashboard-panel">
         <p>Carregando painel...</p>
@@ -62,11 +48,11 @@ export default function DashboardPage() {
     )
   }
 
-  if (error) {
+  if (booksQuery.isError) {
     return (
       <section className="dashboard-panel">
         <div className="feedback error">
-          {error}
+          {booksQuery.error.message}
         </div>
       </section>
     )

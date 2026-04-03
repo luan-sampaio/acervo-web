@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import BookFormPanel from '../components/BookFormPanel'
 import BookListPanel from '../components/BookListPanel'
 import DeleteBookModal from '../components/DeleteBookModal'
 import {
   defaultQuery,
-  initialEditForm,
   initialForm,
   readingStatusOptions,
   sortOptions,
@@ -12,64 +12,102 @@ import {
 import { createBook, deleteBook, fetchBooks, updateBook } from '../services/api'
 import { getTextFieldError } from '../utils'
 
+function mapBooksQueryParams(query) {
+  return {
+    limit: query.limit,
+    offset: query.offset,
+    sort_by: query.sortBy,
+    sort_order: query.sortOrder,
+    search: query.search,
+    status_leitura: ['quero_ler', 'lendo', 'lido'].includes(query.statusFilter) ? query.statusFilter : undefined,
+    favorito_only: query.statusFilter === 'favorito' ? true : undefined,
+  }
+}
+
+function getFieldErrorsFromApi(error) {
+  const fieldErrors = { titulo: '', autor: '' }
+
+  if (!Array.isArray(error?.errors)) {
+    return fieldErrors
+  }
+
+  error.errors.forEach((item) => {
+    if (item.field === 'body.titulo') {
+      fieldErrors.titulo = item.message
+    }
+
+    if (item.field === 'body.autor') {
+      fieldErrors.autor = item.message
+    }
+  })
+
+  return fieldErrors
+}
+
 export default function CollectionPage() {
+  const queryClient = useQueryClient()
   const [form, setForm] = useState(initialForm)
-  const [books, setBooks] = useState([])
   const [query, setQuery] = useState(defaultQuery)
-  const [totalBooks, setTotalBooks] = useState(0)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [isLoading, setIsLoading] = useState(true)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [searchTerm, setSearchTerm] = useState(defaultQuery.search)
   const [formTouched, setFormTouched] = useState({ titulo: false, autor: false })
   const [editingBookId, setEditingBookId] = useState(null)
   const [activeMenuBookId, setActiveMenuBookId] = useState(null)
-  const [editForm, setEditForm] = useState(initialEditForm)
-  const [editTouched, setEditTouched] = useState({ titulo: false, autor: false })
-  const [serverFormErrors, setServerFormErrors] = useState({ titulo: '', autor: '' })
-  const [serverEditErrors, setServerEditErrors] = useState({ titulo: '', autor: '' })
-  const [savingBookId, setSavingBookId] = useState(null)
-  const [deletingBookId, setDeletingBookId] = useState(null)
   const [bookPendingDelete, setBookPendingDelete] = useState(null)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
-  const [error, setError] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
   const actionMenuRef = useRef(null)
 
-  async function loadBooks(params = query) {
-    try {
-      setIsLoading(true)
-      setError('')
-      const data = await fetchBooks({
-        limit: params.limit,
-        offset: params.offset,
-        sort_by: params.sortBy,
-        sort_order: params.sortOrder,
-        search: params.search,
-        status_leitura: ['quero_ler', 'lendo', 'lido'].includes(params.statusFilter) ? params.statusFilter : undefined,
-        favorito_only: params.statusFilter === 'favorito' ? true : undefined,
-      })
-      setBooks(data.items)
-      setTotalBooks(data.total)
-      setQuery({
-        limit: data.limit,
-        offset: data.offset,
-        sortBy: data.sort_by,
-        sortOrder: data.sort_order,
-        search: data.search,
-        author: '',
-        statusFilter: data.favorito_only ? 'favorito' : (data.status_leitura ?? 'all'),
-      })
-      setSearchTerm(data.search)
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  const booksQuery = useQuery({
+    queryKey: ['books', query],
+    queryFn: () => fetchBooks(mapBooksQueryParams(query)),
+  })
 
-  useEffect(() => {
-    loadBooks(defaultQuery)
-  }, [])
+  const createBookMutation = useMutation({
+    mutationFn: createBook,
+    onSuccess: async () => {
+      setForm(initialForm)
+      setFormTouched({ titulo: false, autor: false })
+      setIsCreateModalOpen(false)
+      setSuccessMessage('✓ Livro cadastrado com sucesso')
+      setQuery((current) => ({
+        ...current,
+        offset: 0,
+      }))
+      await queryClient.invalidateQueries({ queryKey: ['books'] })
+    },
+  })
+
+  const updateBookMutation = useMutation({
+    mutationFn: ({ bookId, payload }) => updateBook(bookId, payload),
+    onSuccess: async () => {
+      setEditingBookId(null)
+      setSuccessMessage('✓ Livro atualizado com sucesso')
+      await queryClient.invalidateQueries({ queryKey: ['books'] })
+    },
+  })
+
+  const deleteBookMutation = useMutation({
+    mutationFn: deleteBook,
+    onSuccess: async (_, bookId) => {
+      const totalBooks = booksQuery.data?.total ?? 0
+      const nextTotal = Math.max(totalBooks - 1, 0)
+      const nextOffset = nextTotal === 0
+        ? 0
+        : Math.min(query.offset, Math.floor((nextTotal - 1) / query.limit) * query.limit)
+
+      if (editingBookId === bookId) {
+        setEditingBookId(null)
+      }
+
+      setBookPendingDelete(null)
+      setQuery((current) => ({
+        ...current,
+        offset: nextOffset,
+      }))
+      setSuccessMessage('✓ Livro removido com sucesso')
+      await queryClient.invalidateQueries({ queryKey: ['books'] })
+    },
+  })
 
   useEffect(() => {
     if (!successMessage) {
@@ -115,7 +153,7 @@ export default function CollectionPage() {
     }
 
     function handleKeyDown(event) {
-      if (event.key === 'Escape' && !isSubmitting) {
+      if (event.key === 'Escape' && !createBookMutation.isPending) {
         setIsCreateModalOpen(false)
       }
     }
@@ -125,7 +163,7 @@ export default function CollectionPage() {
     return () => {
       document.removeEventListener('keydown', handleKeyDown)
     }
-  }, [isCreateModalOpen, isSubmitting])
+  }, [createBookMutation.isPending, isCreateModalOpen])
 
   useEffect(() => {
     const normalizedSearch = searchTerm.trim()
@@ -135,42 +173,40 @@ export default function CollectionPage() {
     }
 
     const timeoutId = window.setTimeout(() => {
-      handleQueryUpdate({
-        ...query,
+      setActiveMenuBookId(null)
+      setEditingBookId(null)
+      setQuery((current) => ({
+        ...current,
         search: normalizedSearch,
         author: '',
         offset: 0,
-      })
+      }))
     }, 300)
 
     return () => window.clearTimeout(timeoutId)
-  }, [query, searchTerm])
+  }, [query.search, searchTerm])
 
+  const books = booksQuery.data?.items ?? []
+  const totalBooks = booksQuery.data?.total ?? 0
+  const formServerErrors = getFieldErrorsFromApi(createBookMutation.error)
+  const editServerErrors = getFieldErrorsFromApi(updateBookMutation.error)
   const formErrors = useMemo(() => ({
-    titulo: getTextFieldError('Título', form.titulo) || serverFormErrors.titulo,
-    autor: getTextFieldError('Autor', form.autor) || serverFormErrors.autor,
-  }), [form.autor, form.titulo, serverFormErrors.autor, serverFormErrors.titulo])
-
-  const editErrors = useMemo(() => ({
-    titulo: getTextFieldError('Título', editForm.titulo) || serverEditErrors.titulo,
-    autor: getTextFieldError('Autor', editForm.autor) || serverEditErrors.autor,
-  }), [editForm.autor, editForm.titulo, serverEditErrors.autor, serverEditErrors.titulo])
-
+    titulo: getTextFieldError('Título', form.titulo) || formServerErrors.titulo,
+    autor: getTextFieldError('Autor', form.autor) || formServerErrors.autor,
+  }), [form.autor, form.titulo, formServerErrors.autor, formServerErrors.titulo])
+  const editErrors = editingBookId === null ? { titulo: '', autor: '' } : editServerErrors
   const isFormValid = !formErrors.titulo && !formErrors.autor
-  const isEditFormValid = !editErrors.titulo && !editErrors.autor
   const totalPages = Math.max(1, Math.ceil(totalBooks / query.limit))
   const currentPage = Math.min(totalPages, Math.floor(query.offset / query.limit) + 1)
   const hasPreviousPage = query.offset > 0
   const hasNextPage = query.offset + query.limit < totalBooks
   const visibleRangeStart = totalBooks === 0 ? 0 : query.offset + 1
   const visibleRangeEnd = query.offset + books.length
+  const listError = booksQuery.error?.message ?? updateBookMutation.error?.message ?? deleteBookMutation.error?.message ?? ''
 
   function handleChange(event) {
     const { name, type, checked, value } = event.target
-    setServerFormErrors((current) => ({
-      ...current,
-      [name]: '',
-    }))
+    createBookMutation.reset()
     setForm((current) => ({
       ...current,
       [name]: type === 'checkbox' ? checked : value,
@@ -189,61 +225,19 @@ export default function CollectionPage() {
     }))
   }
 
-  function handleEditChange(event) {
-    const { name, type, checked, value } = event.target
-    setServerEditErrors((current) => ({
-      ...current,
-      [name]: '',
-    }))
-    setEditForm((current) => ({
-      ...current,
-      [name]: type === 'checkbox' ? checked : value,
-    }))
-  }
-
-  function handleEditBlur(event) {
-    const { name } = event.target
-    setEditTouched((current) => ({
-      ...current,
-      [name]: true,
-    }))
-  }
-
   function toggleActionMenu(bookId) {
     setActiveMenuBookId((current) => (current === bookId ? null : bookId))
   }
 
   function cancelEditing() {
+    updateBookMutation.reset()
     setEditingBookId(null)
-    setEditForm(initialEditForm)
-    setEditTouched({ titulo: false, autor: false })
-    setServerEditErrors({ titulo: '', autor: '' })
-  }
-
-  function getFieldErrorsFromApi(err) {
-    const fieldErrors = { titulo: '', autor: '' }
-
-    if (!Array.isArray(err?.errors)) {
-      return fieldErrors
-    }
-
-    err.errors.forEach((item) => {
-      if (item.field === 'body.titulo') {
-        fieldErrors.titulo = item.message
-      }
-
-      if (item.field === 'body.autor') {
-        fieldErrors.autor = item.message
-      }
-    })
-
-    return fieldErrors
   }
 
   function handleQueryUpdate(nextQuery) {
     setActiveMenuBookId(null)
     cancelEditing()
-    loadBooks(nextQuery)
+    setQuery(nextQuery)
   }
 
   function handleClearFilters() {
@@ -259,21 +253,19 @@ export default function CollectionPage() {
   function openCreateModal() {
     setActiveMenuBookId(null)
     cancelEditing()
-    setError('')
-    setServerFormErrors({ titulo: '', autor: '' })
+    createBookMutation.reset()
     setIsCreateModalOpen(true)
   }
 
   function closeCreateModal() {
-    if (isSubmitting) {
+    if (createBookMutation.isPending) {
       return
     }
 
+    createBookMutation.reset()
     setIsCreateModalOpen(false)
-    setError('')
     setForm(initialForm)
     setFormTouched({ titulo: false, autor: false })
-    setServerFormErrors({ titulo: '', autor: '' })
   }
 
   function handleSortByChange(event) {
@@ -323,17 +315,9 @@ export default function CollectionPage() {
   }
 
   function startEditing(book) {
-    setError('')
-    setServerEditErrors({ titulo: '', autor: '' })
+    updateBookMutation.reset()
     setActiveMenuBookId(null)
     setEditingBookId(book.id)
-    setEditForm({
-      titulo: book.titulo,
-      autor: book.autor,
-      status_leitura: book.status_leitura,
-      favorito: book.favorito,
-    })
-    setEditTouched({ titulo: false, autor: false })
   }
 
   async function handleSubmit(event) {
@@ -344,68 +328,29 @@ export default function CollectionPage() {
       return
     }
 
-    const payload = {
+    await createBookMutation.mutateAsync({
       titulo: form.titulo.trim(),
       autor: form.autor.trim(),
       status_leitura: form.status_leitura,
       favorito: form.favorito,
-    }
-
-    try {
-      setIsSubmitting(true)
-      setError('')
-      setServerFormErrors({ titulo: '', autor: '' })
-      setSuccessMessage('')
-      await createBook(payload)
-      await loadBooks({
-        ...query,
-        offset: 0,
-      })
-      setForm(initialForm)
-      setFormTouched({ titulo: false, autor: false })
-      setServerFormErrors({ titulo: '', autor: '' })
-      setIsCreateModalOpen(false)
-      setSuccessMessage('✓ Livro cadastrado com sucesso')
-    } catch (err) {
-      const nextFieldErrors = getFieldErrorsFromApi(err)
-      const hasFieldErrors = Boolean(nextFieldErrors.titulo || nextFieldErrors.autor)
-      setServerFormErrors(nextFieldErrors)
-      setError(hasFieldErrors ? '' : err.message)
-    } finally {
-      setIsSubmitting(false)
-    }
+    })
   }
 
-  async function handleUpdateBook(bookId) {
-    if (!isEditFormValid) {
-      setEditTouched({ titulo: true, autor: true })
+  async function handleUpdateBook(bookId, event) {
+    event.preventDefault()
+    const formData = new FormData(event.currentTarget)
+    const payload = {
+      titulo: String(formData.get('titulo') ?? '').trim(),
+      autor: String(formData.get('autor') ?? '').trim(),
+      status_leitura: String(formData.get('status_leitura') ?? 'quero_ler'),
+      favorito: formData.get('favorito') === 'on',
+    }
+
+    if (getTextFieldError('Título', payload.titulo) || getTextFieldError('Autor', payload.autor)) {
       return
     }
 
-    const payload = {
-      titulo: editForm.titulo.trim(),
-      autor: editForm.autor.trim(),
-      status_leitura: editForm.status_leitura,
-      favorito: editForm.favorito,
-    }
-
-    try {
-      setSavingBookId(bookId)
-      setError('')
-      setServerEditErrors({ titulo: '', autor: '' })
-      setSuccessMessage('')
-      await updateBook(bookId, payload)
-      cancelEditing()
-      await loadBooks(query)
-      setSuccessMessage('✓ Livro atualizado com sucesso')
-    } catch (err) {
-      const nextFieldErrors = getFieldErrorsFromApi(err)
-      const hasFieldErrors = Boolean(nextFieldErrors.titulo || nextFieldErrors.autor)
-      setServerEditErrors(nextFieldErrors)
-      setError(hasFieldErrors ? '' : err.message)
-    } finally {
-      setSavingBookId(null)
-    }
+    await updateBookMutation.mutateAsync({ bookId, payload })
   }
 
   function requestDeleteBook(book) {
@@ -414,7 +359,7 @@ export default function CollectionPage() {
   }
 
   function closeDeleteModal() {
-    if (deletingBookId !== null) {
+    if (deleteBookMutation.isPending) {
       return
     }
 
@@ -426,34 +371,7 @@ export default function CollectionPage() {
       return
     }
 
-    const bookId = bookPendingDelete.id
-
-    try {
-      setDeletingBookId(bookId)
-      setError('')
-      setSuccessMessage('')
-      await deleteBook(bookId)
-
-      const nextTotal = Math.max(totalBooks - 1, 0)
-      const nextOffset = nextTotal === 0
-        ? 0
-        : Math.min(query.offset, Math.floor((nextTotal - 1) / query.limit) * query.limit)
-
-      if (editingBookId === bookId) {
-        cancelEditing()
-      }
-
-      setBookPendingDelete(null)
-      await loadBooks({
-        ...query,
-        offset: nextOffset,
-      })
-      setSuccessMessage('✓ Livro removido com sucesso')
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setDeletingBookId(null)
-    }
+    await deleteBookMutation.mutateAsync(bookPendingDelete.id)
   }
 
   return (
@@ -465,13 +383,11 @@ export default function CollectionPage() {
           filteredBooks={books}
           query={query}
           searchTerm={searchTerm}
-          isLoading={isLoading}
+          isLoading={booksQuery.isLoading}
           editingBookId={editingBookId}
           activeMenuBookId={activeMenuBookId}
-          editForm={editForm}
           editErrors={editErrors}
-          editTouched={editTouched}
-          savingBookId={savingBookId}
+          savingBookId={updateBookMutation.isPending ? updateBookMutation.variables?.bookId ?? null : null}
           readingStatusOptions={readingStatusOptions}
           currentPage={currentPage}
           totalPages={totalPages}
@@ -487,8 +403,6 @@ export default function CollectionPage() {
           onToggleSortOrder={handleToggleSortOrder}
           onPreviousPage={handlePreviousPage}
           onNextPage={handleNextPage}
-          onEditChange={handleEditChange}
-          onEditBlur={handleEditBlur}
           onToggleMenu={toggleActionMenu}
           onStartEditing={startEditing}
           onRequestDelete={requestDeleteBook}
@@ -496,7 +410,7 @@ export default function CollectionPage() {
           onCancelEditing={cancelEditing}
           onOpenCreateModal={openCreateModal}
           onStatusFilterChange={handleStatusFilterChange}
-          error={!isCreateModalOpen ? error : ''}
+          error={!isCreateModalOpen ? listError : ''}
         />
       </section>
 
@@ -513,8 +427,8 @@ export default function CollectionPage() {
             formErrors={formErrors}
             formTouched={formTouched}
             isFormValid={isFormValid}
-            isSubmitting={isSubmitting}
-            error={error}
+            isSubmitting={createBookMutation.isPending}
+            error={createBookMutation.error?.message ?? ''}
             readingStatusOptions={readingStatusOptions}
             onChange={handleChange}
             onBlur={handleFieldBlur}
@@ -527,7 +441,7 @@ export default function CollectionPage() {
 
       <DeleteBookModal
         book={bookPendingDelete}
-        isDeleting={deletingBookId !== null}
+        isDeleting={deleteBookMutation.isPending}
         onCancel={closeDeleteModal}
         onConfirm={handleDeleteBook}
       />

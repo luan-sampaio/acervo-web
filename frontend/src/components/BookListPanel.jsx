@@ -23,15 +23,11 @@ function getReadingStatusClassName(value) {
 function BookCard({
   book,
   isEditing,
-  editForm,
   editErrors,
-  editTouched,
-  savingBookId,
+  isSaving,
   readingStatusOptions,
   activeMenuBookId,
   actionMenuRef,
-  onEditChange,
-  onEditBlur,
   onToggleMenu,
   onStartEditing,
   onRequestDelete,
@@ -42,39 +38,35 @@ function BookCard({
     <article key={book.id} className="book-card">
       <div className="book-card-top">
         {isEditing ? (
-          <div className="book-main book-main-editing">
+          <form id={`edit-book-${book.id}`} className="book-main book-main-editing" onSubmit={(event) => onSave(book.id, event)}>
             <div className="inline-form">
               <label>
                 <span>Título</span>
                 <input
                   name="titulo"
-                  value={editForm.titulo}
-                  onChange={onEditChange}
-                  onBlur={onEditBlur}
-                  aria-invalid={editTouched.titulo && Boolean(editErrors.titulo)}
-                  className={editTouched.titulo && editErrors.titulo ? 'input-error' : ''}
+                  defaultValue={book.titulo}
+                  aria-invalid={Boolean(editErrors.titulo)}
+                  className={editErrors.titulo ? 'input-error' : ''}
                   minLength={2}
                   required
                 />
-                {editTouched.titulo && editErrors.titulo ? <span className="field-error">{editErrors.titulo}</span> : null}
+                {editErrors.titulo ? <span className="field-error">{editErrors.titulo}</span> : null}
               </label>
               <label>
                 <span>Autor</span>
                 <input
                   name="autor"
-                  value={editForm.autor}
-                  onChange={onEditChange}
-                  onBlur={onEditBlur}
-                  aria-invalid={editTouched.autor && Boolean(editErrors.autor)}
-                  className={editTouched.autor && editErrors.autor ? 'input-error' : ''}
+                  defaultValue={book.autor}
+                  aria-invalid={Boolean(editErrors.autor)}
+                  className={editErrors.autor ? 'input-error' : ''}
                   minLength={2}
                   required
                 />
-                {editTouched.autor && editErrors.autor ? <span className="field-error">{editErrors.autor}</span> : null}
+                {editErrors.autor ? <span className="field-error">{editErrors.autor}</span> : null}
               </label>
               <label>
                 <span>Status de leitura</span>
-                <select name="status_leitura" value={editForm.status_leitura} onChange={onEditChange}>
+                <select name="status_leitura" defaultValue={book.status_leitura}>
                   {readingStatusOptions.map((option) => (
                     <option key={option.value} value={option.value}>
                       {option.label}
@@ -86,13 +78,12 @@ function BookCard({
                 <input
                   type="checkbox"
                   name="favorito"
-                  checked={editForm.favorito}
-                  onChange={onEditChange}
+                  defaultChecked={book.favorito}
                 />
                 <span>Favorito</span>
               </label>
             </div>
-          </div>
+          </form>
         ) : (
           <div className="book-main">
             <div className="book-card-kicker-row">
@@ -145,17 +136,17 @@ function BookCard({
       {isEditing ? (
         <div className="book-actions">
           <button
-            type="button"
+            type="submit"
+            form={`edit-book-${book.id}`}
             className="action-button primary-button"
-            disabled={savingBookId === book.id}
-            onClick={() => onSave(book.id)}
+            disabled={isSaving}
           >
-            {savingBookId === book.id ? 'Salvando...' : 'Salvar'}
+            {isSaving ? 'Salvando...' : 'Salvar'}
           </button>
           <button
             type="button"
             className="action-button secondary-button"
-            disabled={savingBookId === book.id}
+            disabled={isSaving}
             onClick={onCancelEditing}
           >
             Cancelar
@@ -175,9 +166,7 @@ export default function BookListPanel({
   isLoading,
   editingBookId,
   activeMenuBookId,
-  editForm,
   editErrors,
-  editTouched,
   savingBookId,
   readingStatusOptions,
   currentPage,
@@ -194,8 +183,6 @@ export default function BookListPanel({
   onToggleSortOrder,
   onPreviousPage,
   onNextPage,
-  onEditChange,
-  onEditBlur,
   onToggleMenu,
   onStartEditing,
   onRequestDelete,
@@ -321,15 +308,11 @@ export default function BookListPanel({
                   key={book.id}
                   book={book}
                   isEditing={editingBookId === book.id}
-                  editForm={editForm}
                   editErrors={editErrors}
-                  editTouched={editTouched}
-                  savingBookId={savingBookId}
+                  isSaving={savingBookId === book.id}
                   readingStatusOptions={readingStatusOptions}
                   activeMenuBookId={activeMenuBookId}
                   actionMenuRef={actionMenuRef}
-                  onEditChange={onEditChange}
-                  onEditBlur={onEditBlur}
                   onToggleMenu={onToggleMenu}
                   onStartEditing={onStartEditing}
                   onRequestDelete={onRequestDelete}
