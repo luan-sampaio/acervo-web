@@ -16,6 +16,22 @@ function getReadingStatusLabel(value) {
   return value
 }
 
+function getReadingStatusClassName(value) {
+  if (value === 'quero_ler') {
+    return 'dashboard-status-tone-want'
+  }
+
+  if (value === 'lendo') {
+    return 'dashboard-status-tone-reading'
+  }
+
+  if (value === 'lido') {
+    return 'dashboard-status-tone-finished'
+  }
+
+  return ''
+}
+
 export default function DashboardOverview({
   metrics,
   recentBooks,
@@ -54,19 +70,25 @@ export default function DashboardOverview({
 
         <div className="dashboard-status-grid">
           <article className="dashboard-status-card dashboard-status-card-want">
-            <strong>{metrics.wantToReadCount}</strong>
-            <span>Quero ler</span>
-            <p>Livros separados para a proxima leva de leitura.</p>
+            <div className="dashboard-status-card-body">
+              <strong>{metrics.wantToReadCount}</strong>
+              <span>Quero ler</span>
+              <p>Livros separados para a proxima leva de leitura.</p>
+            </div>
           </article>
           <article className="dashboard-status-card dashboard-status-card-reading">
-            <strong>{metrics.readingNowCount}</strong>
-            <span>Lendo</span>
-            <p>Leituras em andamento pedindo continuidade.</p>
+            <div className="dashboard-status-card-body">
+              <strong>{metrics.readingNowCount}</strong>
+              <span>Lendo</span>
+              <p>Leituras em andamento pedindo continuidade.</p>
+            </div>
           </article>
           <article className="dashboard-status-card dashboard-status-card-finished">
-            <strong>{metrics.finishedCount}</strong>
-            <span>Lidos</span>
-            <p>Titulos concluidos e ja absorvidos no acervo.</p>
+            <div className="dashboard-status-card-body">
+              <strong>{metrics.finishedCount}</strong>
+              <span>Lidos</span>
+              <p>Titulos concluidos e ja absorvidos no acervo.</p>
+            </div>
           </article>
         </div>
       </section>
@@ -88,7 +110,9 @@ export default function DashboardOverview({
               <article key={book.id} className="dashboard-recent-card">
                 <div className="dashboard-recent-copy">
                   <div className="dashboard-recent-badges">
-                    <span className="dashboard-recent-status">{getReadingStatusLabel(book.status_leitura)}</span>
+                    <span className={`dashboard-recent-status ${getReadingStatusClassName(book.status_leitura)}`}>
+                      {getReadingStatusLabel(book.status_leitura)}
+                    </span>
                     {book.favorito ? <span className="dashboard-recent-favorite">Favorito</span> : null}
                   </div>
                   <h3>{book.titulo}</h3>
