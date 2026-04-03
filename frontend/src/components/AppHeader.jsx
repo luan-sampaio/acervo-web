@@ -1,4 +1,6 @@
-export default function AppHeader({ currentView, onNavigate }) {
+import { NavLink } from 'react-router-dom'
+
+export default function AppHeader() {
   return (
     <header className="app-header">
       <div className="app-brand">
@@ -13,27 +15,25 @@ export default function AppHeader({ currentView, onNavigate }) {
       </div>
 
       <nav className="app-nav" aria-label="Navegacao principal">
-        <button
-          type="button"
-          className={currentView === 'home' ? 'app-nav-link app-nav-link-active' : 'app-nav-link'}
-          onClick={() => onNavigate('home')}
+        <NavLink
+          to="/"
+          end
+          className={({ isActive }) => (isActive ? 'app-nav-link app-nav-link-active' : 'app-nav-link')}
         >
           Inicio
-        </button>
-        <button
-          type="button"
-          className={currentView === 'collection' ? 'app-nav-link app-nav-link-active' : 'app-nav-link'}
-          onClick={() => onNavigate('collection')}
+        </NavLink>
+        <NavLink
+          to="/collection"
+          className={({ isActive }) => (isActive ? 'app-nav-link app-nav-link-active' : 'app-nav-link')}
         >
           Coleção
-        </button>
-        <button
-          type="button"
-          className={currentView === 'dashboard' ? 'app-nav-link app-nav-link-active' : 'app-nav-link'}
-          onClick={() => onNavigate('dashboard')}
+        </NavLink>
+        <NavLink
+          to="/dashboard"
+          className={({ isActive }) => (isActive ? 'app-nav-link app-nav-link-active' : 'app-nav-link')}
         >
           Painel
-        </button>
+        </NavLink>
       </nav>
     </header>
   )
