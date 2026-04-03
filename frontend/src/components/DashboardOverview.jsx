@@ -35,13 +35,13 @@ export default function DashboardOverview({
       </section>
 
       <section className="dashboard-stats">
-        <article className="stat-card dashboard-stat-card">
+        <article className="stat-card dashboard-stat-card dashboard-stat-card-primary">
           <span>Total de livros</span>
           <strong>{totalBooks}</strong>
           <p>{totalBooks === 1 ? '1 livro registrado' : `${totalBooks} livros registrados`}</p>
         </article>
 
-        <article className="stat-card dashboard-stat-card">
+        <article className="stat-card dashboard-stat-card dashboard-stat-card-wide">
           <span>Última adição</span>
           <strong>{latestAdditionLabel}</strong>
           <p>Seu acervo continua em movimento.</p>
