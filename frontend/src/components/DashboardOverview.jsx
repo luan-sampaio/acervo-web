@@ -3,6 +3,7 @@ import { formatDate } from '../utils'
 export default function DashboardOverview({
   totalBooks,
   latestAdditionLabel,
+  metrics,
   recentBooks,
   onOpenCollection,
 }) {
@@ -37,6 +38,46 @@ export default function DashboardOverview({
           <strong>{latestAdditionLabel}</strong>
           <p>Seu acervo continua em movimento.</p>
         </article>
+
+        <article className="stat-card dashboard-stat-card">
+          <span>Favoritos</span>
+          <strong>{metrics.favoriteCount}</strong>
+          <p>Livros marcados para voltar sempre.</p>
+        </article>
+
+        <article className="stat-card dashboard-stat-card">
+          <span>Lendo agora</span>
+          <strong>{metrics.readingNowCount}</strong>
+          <p>Leituras atualmente em andamento.</p>
+        </article>
+      </section>
+
+      <section className="dashboard-reading-panel">
+        <div className="dashboard-panel-head">
+          <div>
+            <span className="eyebrow">Panorama de leitura</span>
+            <h2>Status da coleção</h2>
+          </div>
+        </div>
+
+        <div className="dashboard-status-grid">
+          <article className="dashboard-status-card">
+            <strong>{metrics.wantToReadCount}</strong>
+            <span>Quero ler</span>
+          </article>
+          <article className="dashboard-status-card">
+            <strong>{metrics.readingNowCount}</strong>
+            <span>Lendo</span>
+          </article>
+          <article className="dashboard-status-card">
+            <strong>{metrics.finishedCount}</strong>
+            <span>Lidos</span>
+          </article>
+          <article className="dashboard-status-card dashboard-status-card-highlight">
+            <strong>{metrics.favoriteCount}</strong>
+            <span>Favoritos</span>
+          </article>
+        </div>
       </section>
 
       <section className="dashboard-panel">

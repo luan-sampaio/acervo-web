@@ -22,6 +22,7 @@ export default function App() {
   const [currentView, setCurrentView] = useState('home')
   const [form, setForm] = useState(initialForm)
   const [books, setBooks] = useState([])
+  const [dashboardBooks, setDashboardBooks] = useState([])
   const [query, setQuery] = useState(defaultQuery)
   const [totalBooks, setTotalBooks] = useState(0)
   const [latestCreatedAt, setLatestCreatedAt] = useState(null)
@@ -75,8 +76,26 @@ export default function App() {
     }
   }
 
+  async function loadDashboardBooks() {
+    try {
+      const data = await fetchBooks({
+        limit: 100,
+        offset: 0,
+        sort_by: 'created_at',
+        sort_order: 'desc',
+      })
+      setDashboardBooks(data.items)
+    } catch {
+      setDashboardBooks([])
+    }
+  }
+
   useEffect(() => {
     loadBooks(defaultQuery)
+  }, [])
+
+  useEffect(() => {
+    loadDashboardBooks()
   }, [])
 
   useEffect(() => {
@@ -145,12 +164,26 @@ export default function App() {
   }, [latestCreatedAt])
 
   const recentBooks = useMemo(() => {
-    return [...books]
+    return [...dashboardBooks]
       .sort((firstBook, secondBook) => {
         return new Date(secondBook.created_at).getTime() - new Date(firstBook.created_at).getTime()
       })
       .slice(0, 4)
-  }, [books])
+  }, [dashboardBooks])
+
+  const dashboardMetrics = useMemo(() => {
+    const favoriteCount = dashboardBooks.filter((book) => book.favorito).length
+    const readingNowCount = dashboardBooks.filter((book) => book.status_leitura === 'lendo').length
+    const finishedCount = dashboardBooks.filter((book) => book.status_leitura === 'lido').length
+    const wantToReadCount = dashboardBooks.filter((book) => book.status_leitura === 'quero_ler').length
+
+    return {
+      favoriteCount,
+      readingNowCount,
+      finishedCount,
+      wantToReadCount,
+    }
+  }, [dashboardBooks])
 
   const formErrors = useMemo(() => ({
     titulo: getTextFieldError('Título', form.titulo) || serverFormErrors.titulo,
@@ -350,6 +383,7 @@ export default function App() {
         ...query,
         offset: 0,
       })
+      await loadDashboardBooks()
       setForm(initialForm)
       setFormTouched({ titulo: false, autor: false })
       setServerFormErrors({ titulo: '', autor: '' })
@@ -385,6 +419,7 @@ export default function App() {
       await updateBook(bookId, payload)
       cancelEditing()
       await loadBooks(query)
+      await loadDashboardBooks()
       setSuccessMessage('✓ Livro atualizado com sucesso')
     } catch (err) {
       const nextFieldErrors = getFieldErrorsFromApi(err)
@@ -436,6 +471,7 @@ export default function App() {
         ...query,
         offset: nextOffset,
       })
+      await loadDashboardBooks()
       setSuccessMessage('✓ Livro removido com sucesso')
     } catch (err) {
       setError(err.message)
@@ -522,6 +558,7 @@ export default function App() {
           <DashboardOverview
             totalBooks={totalBooks}
             latestAdditionLabel={latestAdditionLabel}
+            metrics={dashboardMetrics}
             recentBooks={recentBooks}
             onOpenCollection={() => setCurrentView('collection')}
           />
