@@ -23,8 +23,6 @@ export default function App() {
   const [latestCreatedAt, setLatestCreatedAt] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [authorFilter, setAuthorFilter] = useState('')
-  const [createdFromFilter, setCreatedFromFilter] = useState('')
-  const [createdToFilter, setCreatedToFilter] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formTouched, setFormTouched] = useState({ titulo: false, autor: false })
@@ -50,8 +48,6 @@ export default function App() {
         sort_order: params.sortOrder,
         search: params.search,
         author: params.author,
-        created_from: params.createdFrom,
-        created_to: params.createdTo,
       })
       setBooks(data.items)
       setTotalBooks(data.total)
@@ -63,13 +59,9 @@ export default function App() {
         sortOrder: data.sort_order,
         search: data.search,
         author: data.author,
-        createdFrom: data.created_from ?? '',
-        createdTo: data.created_to ?? '',
       })
       setSearchTerm(data.search)
       setAuthorFilter(data.author)
-      setCreatedFromFilter(data.created_from ?? '')
-      setCreatedToFilter(data.created_to ?? '')
     } catch (err) {
       setError(err.message)
     } finally {
@@ -126,8 +118,6 @@ export default function App() {
     if (
       normalizedSearch === query.search
       && normalizedAuthor === query.author
-      && createdFromFilter === query.createdFrom
-      && createdToFilter === query.createdTo
     ) {
       return undefined
     }
@@ -137,14 +127,12 @@ export default function App() {
         ...query,
         search: normalizedSearch,
         author: normalizedAuthor,
-        createdFrom: createdFromFilter,
-        createdTo: createdToFilter,
         offset: 0,
       })
     }, 300)
 
     return () => window.clearTimeout(timeoutId)
-  }, [authorFilter, createdFromFilter, createdToFilter, query, searchTerm])
+  }, [authorFilter, query, searchTerm])
 
   const totalBooksLabel = useMemo(() => {
     if (totalBooks === 1) {
@@ -191,14 +179,6 @@ export default function App() {
 
   function handleAuthorFilterChange(event) {
     setAuthorFilter(event.target.value)
-  }
-
-  function handleCreatedFromFilterChange(event) {
-    setCreatedFromFilter(event.target.value)
-  }
-
-  function handleCreatedToFilterChange(event) {
-    setCreatedToFilter(event.target.value)
   }
 
   function handleFieldBlur(event) {
@@ -253,8 +233,6 @@ export default function App() {
   function handleClearFilters() {
     setSearchTerm('')
     setAuthorFilter('')
-    setCreatedFromFilter('')
-    setCreatedToFilter('')
   }
 
   function handleSortByChange(event) {
@@ -444,8 +422,6 @@ export default function App() {
             query={query}
             searchTerm={searchTerm}
             authorFilter={authorFilter}
-            createdFromFilter={createdFromFilter}
-            createdToFilter={createdToFilter}
             isLoading={isLoading}
             editingBookId={editingBookId}
             activeMenuBookId={activeMenuBookId}
@@ -462,8 +438,6 @@ export default function App() {
             actionMenuRef={actionMenuRef}
             onSearchChange={handleSearchChange}
             onAuthorFilterChange={handleAuthorFilterChange}
-            onCreatedFromFilterChange={handleCreatedFromFilterChange}
-            onCreatedToFilterChange={handleCreatedToFilterChange}
             onClearFilters={handleClearFilters}
             pageSizeOptions={pageSizeOptions}
             sortOptions={sortOptions}

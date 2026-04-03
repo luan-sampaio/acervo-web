@@ -124,8 +124,6 @@ export default function BookListPanel({
   query,
   searchTerm,
   authorFilter,
-  createdFromFilter,
-  createdToFilter,
   isLoading,
   editingBookId,
   activeMenuBookId,
@@ -142,8 +140,6 @@ export default function BookListPanel({
   actionMenuRef,
   onSearchChange,
   onAuthorFilterChange,
-  onCreatedFromFilterChange,
-  onCreatedToFilterChange,
   onClearFilters,
   pageSizeOptions,
   sortOptions,
@@ -161,12 +157,10 @@ export default function BookListPanel({
   onSave,
   onCancelEditing,
 }) {
-  const hasActiveFilters = Boolean(searchTerm || authorFilter || createdFromFilter || createdToFilter)
+  const hasActiveFilters = Boolean(searchTerm || authorFilter)
   const activeFilterLabels = [
     searchTerm ? `Busca: ${searchTerm}` : null,
     authorFilter ? `Autor: ${authorFilter}` : null,
-    createdFromFilter ? `De: ${createdFromFilter}` : null,
-    createdToFilter ? `Até: ${createdToFilter}` : null,
   ].filter(Boolean)
 
   return (
@@ -188,7 +182,7 @@ export default function BookListPanel({
             <span className="toolbar-kicker">Explorar acervo</span>
             <h3>Encontre rapidamente o que importa na sua coleção</h3>
             <p>
-              Use busca, autor e período de cadastro para refinar os resultados sem perder o contexto da listagem.
+              Use busca e autor para refinar os resultados sem perder o contexto da listagem.
             </p>
           </div>
 
@@ -218,24 +212,6 @@ export default function BookListPanel({
                 value={authorFilter}
                 onChange={onAuthorFilterChange}
                 placeholder="Ex.: Ana Almeida"
-              />
-            </label>
-
-            <label className="toolbar-input-field toolbar-date-field">
-              <span>De</span>
-              <input
-                type="date"
-                value={createdFromFilter}
-                onChange={onCreatedFromFilterChange}
-              />
-            </label>
-
-            <label className="toolbar-input-field toolbar-date-field">
-              <span>Até</span>
-              <input
-                type="date"
-                value={createdToFilter}
-                onChange={onCreatedToFilterChange}
               />
             </label>
           </div>

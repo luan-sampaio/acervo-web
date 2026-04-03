@@ -15,8 +15,6 @@ export const defaultQuery = {
   sortOrder: 'desc',
   search: '',
   author: '',
-  createdFrom: '',
-  createdTo: '',
 }
 
 export const pageSizeOptions = [6, 12, 24]
