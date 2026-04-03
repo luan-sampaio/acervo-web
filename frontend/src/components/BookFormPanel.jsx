@@ -5,6 +5,7 @@ export default function BookFormPanel({
   isFormValid,
   isSubmitting,
   error,
+  readingStatusOptions,
   onChange,
   onBlur,
   onSubmit,
@@ -47,6 +48,27 @@ export default function BookFormPanel({
             required
           />
           {formTouched.autor && formErrors.autor ? <span className="field-error">{formErrors.autor}</span> : null}
+        </label>
+
+        <label>
+          <span>Status de leitura</span>
+          <select name="status_leitura" value={form.status_leitura} onChange={onChange}>
+            {readingStatusOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="checkbox-field">
+          <input
+            type="checkbox"
+            name="favorito"
+            checked={form.favorito}
+            onChange={onChange}
+          />
+          <span>Marcar como favorito</span>
         </label>
 
         <button type="submit" disabled={isSubmitting || !isFormValid}>

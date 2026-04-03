@@ -1,5 +1,9 @@
 import { formatDate } from '../utils'
 
+function getReadingStatusLabel(value, readingStatusOptions) {
+  return readingStatusOptions.find((option) => option.value === value)?.label ?? value
+}
+
 function BookCard({
   book,
   isEditing,
@@ -7,6 +11,7 @@ function BookCard({
   editErrors,
   editTouched,
   savingBookId,
+  readingStatusOptions,
   activeMenuBookId,
   actionMenuRef,
   onEditChange,
@@ -51,12 +56,37 @@ function BookCard({
                 />
                 {editTouched.autor && editErrors.autor ? <span className="field-error">{editErrors.autor}</span> : null}
               </label>
+              <label>
+                <span>Status de leitura</span>
+                <select name="status_leitura" value={editForm.status_leitura} onChange={onEditChange}>
+                  {readingStatusOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="checkbox-field checkbox-field-inline">
+                <input
+                  type="checkbox"
+                  name="favorito"
+                  checked={editForm.favorito}
+                  onChange={onEditChange}
+                />
+                <span>Favorito</span>
+              </label>
             </div>
           </div>
         ) : (
           <div className="book-main">
             <h3>{book.titulo}</h3>
             <p className="book-author">{book.autor}</p>
+            <div className="book-badges">
+              <span className="book-status-badge">
+                {getReadingStatusLabel(book.status_leitura, readingStatusOptions)}
+              </span>
+              {book.favorito ? <span className="book-favorite-badge">Favorito</span> : null}
+            </div>
           </div>
         )}
 
@@ -131,6 +161,7 @@ export default function BookListPanel({
   editErrors,
   editTouched,
   savingBookId,
+  readingStatusOptions,
   currentPage,
   totalPages,
   visibleRangeStart,
@@ -291,6 +322,7 @@ export default function BookListPanel({
               editErrors={editErrors}
               editTouched={editTouched}
               savingBookId={savingBookId}
+              readingStatusOptions={readingStatusOptions}
               activeMenuBookId={activeMenuBookId}
               actionMenuRef={actionMenuRef}
               onEditChange={onEditChange}

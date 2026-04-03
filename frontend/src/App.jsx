@@ -11,6 +11,7 @@ import {
   initialEditForm,
   initialForm,
   pageSizeOptions,
+  readingStatusOptions,
   sortOptions,
   sortOrderOptions,
 } from './constants'
@@ -170,14 +171,14 @@ export default function App() {
   const visibleRangeStart = totalBooks === 0 ? 0 : query.offset + 1
   const visibleRangeEnd = query.offset + books.length
   function handleChange(event) {
-    const { name, value } = event.target
+    const { name, type, checked, value } = event.target
     setServerFormErrors((current) => ({
       ...current,
       [name]: '',
     }))
     setForm((current) => ({
       ...current,
-      [name]: value,
+      [name]: type === 'checkbox' ? checked : value,
     }))
   }
 
@@ -198,14 +199,14 @@ export default function App() {
   }
 
   function handleEditChange(event) {
-    const { name, value } = event.target
+    const { name, type, checked, value } = event.target
     setServerEditErrors((current) => ({
       ...current,
       [name]: '',
     }))
     setEditForm((current) => ({
       ...current,
-      [name]: value,
+      [name]: type === 'checkbox' ? checked : value,
     }))
   }
 
@@ -318,6 +319,8 @@ export default function App() {
     setEditForm({
       titulo: book.titulo,
       autor: book.autor,
+      status_leitura: book.status_leitura,
+      favorito: book.favorito,
     })
     setEditTouched({ titulo: false, autor: false })
   }
@@ -333,6 +336,8 @@ export default function App() {
     const payload = {
       titulo: form.titulo.trim(),
       autor: form.autor.trim(),
+      status_leitura: form.status_leitura,
+      favorito: form.favorito,
     }
 
     try {
@@ -368,6 +373,8 @@ export default function App() {
     const payload = {
       titulo: editForm.titulo.trim(),
       autor: editForm.autor.trim(),
+      status_leitura: editForm.status_leitura,
+      favorito: editForm.favorito,
     }
 
     try {
@@ -447,6 +454,7 @@ export default function App() {
           isFormValid={isFormValid}
           isSubmitting={isSubmitting}
           error={error}
+          readingStatusOptions={readingStatusOptions}
           onChange={handleChange}
           onBlur={handleFieldBlur}
           onSubmit={handleSubmit}
@@ -466,6 +474,7 @@ export default function App() {
           editErrors={editErrors}
           editTouched={editTouched}
           savingBookId={savingBookId}
+          readingStatusOptions={readingStatusOptions}
           currentPage={currentPage}
           totalPages={totalPages}
           visibleRangeStart={visibleRangeStart}

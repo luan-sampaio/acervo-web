@@ -1,11 +1,15 @@
 export const initialForm = {
   titulo: '',
   autor: '',
+  status_leitura: 'quero_ler',
+  favorito: false,
 }
 
 export const initialEditForm = {
   titulo: '',
   autor: '',
+  status_leitura: 'quero_ler',
+  favorito: false,
 }
 
 export const defaultQuery = {
@@ -28,4 +32,10 @@ export const sortOptions = [
 export const sortOrderOptions = [
   { value: 'desc', label: 'Decrescente' },
   { value: 'asc', label: 'Crescente' },
+]
+
+export const readingStatusOptions = [
+  { value: 'quero_ler', label: 'Quero ler' },
+  { value: 'lendo', label: 'Lendo' },
+  { value: 'lido', label: 'Lido' },
 ]
