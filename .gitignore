@@ -16,3 +16,5 @@ frontend/.env
 # IDE
 .vscode/
 .idea/
+
+.codex
