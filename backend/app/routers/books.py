@@ -39,6 +39,8 @@ def list_books(
     sort_order: Literal["asc", "desc"] = Query(default="desc"),
     search: str = Query(default="", min_length=0, max_length=255),
     author: str = Query(default="", min_length=0, max_length=255),
+    status_leitura: schemas.ReadingStatus | None = Query(default=None),
+    favorito_only: bool = Query(default=False),
     db: Session = Depends(database.get_db),
 ):
     sort_column = getattr(models.Book, sort_by)
@@ -59,6 +61,12 @@ def list_books(
     if normalized_author:
         author_like_pattern = f"%{normalized_author}%"
         filters.append(models.Book.autor.ilike(author_like_pattern))
+
+    if status_leitura is not None:
+        filters.append(models.Book.status_leitura == status_leitura)
+
+    if favorito_only:
+        filters.append(models.Book.favorito.is_(True))
 
     base_query = db.query(models.Book)
     aggregate_query = db.query(
@@ -90,6 +98,8 @@ def list_books(
         "sort_order": sort_order,
         "search": normalized_search,
         "author": normalized_author,
+        "status_leitura": status_leitura,
+        "favorito_only": favorito_only,
         "latest_created_at": latest_created_at,
     }
 

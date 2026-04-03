@@ -12,7 +12,6 @@ import {
   initialForm,
   readingStatusOptions,
   sortOptions,
-  sortOrderOptions,
 } from './constants'
 import { createBook, deleteBook, fetchBooks, updateBook } from './api'
 import { formatLatestAddition, getTextFieldError } from './utils'
@@ -53,6 +52,8 @@ export default function App() {
         sort_by: params.sortBy,
         sort_order: params.sortOrder,
         search: params.search,
+        status_leitura: params.statusFilter === 'quero_ler' ? 'quero_ler' : undefined,
+        favorito_only: params.statusFilter === 'favorito' ? true : undefined,
       })
       setBooks(data.items)
       setTotalBooks(data.total)
@@ -64,6 +65,7 @@ export default function App() {
         sortOrder: data.sort_order,
         search: data.search,
         author: '',
+        statusFilter: data.favorito_only ? 'favorito' : (data.status_leitura ?? 'all'),
       })
       setSearchTerm(data.search)
     } catch (err) {
@@ -298,6 +300,12 @@ export default function App() {
 
   function handleClearFilters() {
     setSearchTerm('')
+    handleQueryUpdate({
+      ...query,
+      search: '',
+      statusFilter: 'all',
+      offset: 0,
+    })
   }
 
   function handleNavigate(view) {
@@ -332,10 +340,22 @@ export default function App() {
     })
   }
 
-  function handleSortOrderChange(event) {
+  function handleToggleSortOrder() {
     handleQueryUpdate({
       ...query,
-      sortOrder: event.target.value,
+      sortOrder: query.sortOrder === 'asc' ? 'desc' : 'asc',
+      offset: 0,
+    })
+  }
+
+  function handleStatusFilterChange(nextFilter) {
+    if (query.statusFilter === nextFilter) {
+      return
+    }
+
+    handleQueryUpdate({
+      ...query,
+      statusFilter: nextFilter,
       offset: 0,
     })
   }
@@ -526,9 +546,8 @@ export default function App() {
           onSearchChange={handleSearchChange}
           onClearFilters={handleClearFilters}
           sortOptions={sortOptions}
-          sortOrderOptions={sortOrderOptions}
           onSortByChange={handleSortByChange}
-          onSortOrderChange={handleSortOrderChange}
+          onToggleSortOrder={handleToggleSortOrder}
           onPreviousPage={handlePreviousPage}
           onNextPage={handleNextPage}
           onEditChange={handleEditChange}
@@ -539,6 +558,7 @@ export default function App() {
           onSave={handleUpdateBook}
           onCancelEditing={cancelEditing}
           onOpenCreateModal={openCreateModal}
+          onStatusFilterChange={handleStatusFilterChange}
           error={!isCreateModalOpen ? error : ''}
         />
       </section>

@@ -173,9 +173,8 @@ export default function BookListPanel({
   onSearchChange,
   onClearFilters,
   sortOptions,
-  sortOrderOptions,
   onSortByChange,
-  onSortOrderChange,
+  onToggleSortOrder,
   onPreviousPage,
   onNextPage,
   onEditChange,
@@ -186,11 +185,19 @@ export default function BookListPanel({
   onSave,
   onCancelEditing,
   onOpenCreateModal,
+  onStatusFilterChange,
   error,
 }) {
-  const hasActiveFilters = Boolean(searchTerm)
+  const quickFilters = [
+    { value: 'all', label: 'Todos' },
+    { value: 'quero_ler', label: 'Quero ler' },
+    { value: 'favorito', label: 'Favorito' },
+  ]
+  const hasActiveFilters = Boolean(searchTerm) || query.statusFilter !== 'all'
   const activeFilterLabels = [
     searchTerm ? `Busca: ${searchTerm}` : null,
+    query.statusFilter === 'quero_ler' ? 'Status: Quero ler' : null,
+    query.statusFilter === 'favorito' ? 'Favoritos' : null,
   ].filter(Boolean)
 
   return (
@@ -215,57 +222,65 @@ export default function BookListPanel({
       {error ? <div className="feedback error list-feedback">{error}</div> : null}
 
       <div className="list-toolbar">
-        <div className="toolbar-surface">
-          <div className="toolbar-grid toolbar-grid-compact">
-            <label className="search-field search-field-wide">
-              <span>Buscar livros</span>
-              <input
-                value={searchTerm}
-                onChange={onSearchChange}
-                placeholder="Ex.: Machado de Assis"
-              />
-            </label>
-          </div>
+        <div className="toolbar-grid toolbar-grid-compact">
+          <label className="search-field search-field-wide">
+            <span>Buscar livros</span>
+            <input
+              value={searchTerm}
+              onChange={onSearchChange}
+              placeholder="Ex.: Machado de Assis"
+            />
+          </label>
 
-          {hasActiveFilters ? (
-            <div className="toolbar-active-filters">
-              <div className="toolbar-chip-row">
-                {activeFilterLabels.map((label) => (
-                  <span key={label} className="toolbar-chip">
-                    {label}
-                  </span>
-                ))}
-              </div>
-              <button type="button" className="secondary-button toolbar-clear-button" onClick={onClearFilters}>
-                Limpar filtros
-              </button>
+          <label className="toolbar-select-field">
+            <span>Ordenar por</span>
+            <select value={query.sortBy} onChange={onSortByChange}>
+              {sortOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <button
+            type="button"
+            className="secondary-button sort-order-toggle"
+            onClick={onToggleSortOrder}
+            aria-label={query.sortOrder === 'asc' ? 'Ordem crescente' : 'Ordem decrescente'}
+            title={query.sortOrder === 'asc' ? 'Crescente' : 'Decrescente'}
+          >
+            <span className="sort-order-toggle-icon">{query.sortOrder === 'asc' ? '↑' : '↓'}</span>
+          </button>
+        </div>
+
+        <div className="quick-filter-row" aria-label="Filtros rápidos">
+          {quickFilters.map((filter) => (
+            <button
+              key={filter.value}
+              type="button"
+              className={query.statusFilter === filter.value ? 'quick-filter-chip quick-filter-chip-active' : 'quick-filter-chip'}
+              onClick={() => onStatusFilterChange(filter.value)}
+            >
+              {filter.label}
+            </button>
+          ))}
+        </div>
+
+        {hasActiveFilters ? (
+          <div className="toolbar-active-filters">
+            <div className="toolbar-chip-row">
+              {activeFilterLabels.map((label) => (
+                <span key={label} className="toolbar-chip">
+                  {label}
+                </span>
+              ))}
             </div>
-          ) : null}
-
-            <div className="list-control-group list-control-group-compact">
-              <label className="toolbar-select-field">
-                <span>Ordenar por</span>
-                <select value={query.sortBy} onChange={onSortByChange}>
-                  {sortOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label className="toolbar-select-field">
-                <span>Direção</span>
-                <select value={query.sortOrder} onChange={onSortOrderChange}>
-                  {sortOrderOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </div>
+            <button type="button" className="secondary-button toolbar-clear-button" onClick={onClearFilters}>
+              Limpar filtros
+            </button>
           </div>
+        ) : null}
       </div>
 
       <div className="list-content-shell">

@@ -19,17 +19,13 @@ export const defaultQuery = {
   sortOrder: 'desc',
   search: '',
   author: '',
+  statusFilter: 'all',
 }
 
 export const sortOptions = [
   { value: 'created_at', label: 'Data de cadastro' },
   { value: 'titulo', label: 'Título' },
   { value: 'autor', label: 'Autor' },
-]
-
-export const sortOrderOptions = [
-  { value: 'desc', label: 'Decrescente' },
-  { value: 'asc', label: 'Crescente' },
 ]
 
 export const readingStatusOptions = [
