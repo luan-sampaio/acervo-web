@@ -9,10 +9,14 @@ export default function BookFormPanel({
   onChange,
   onBlur,
   onSubmit,
+  variant = 'panel',
+  onCancel,
 }) {
+  const isModal = variant === 'modal'
+
   return (
-    <div className="panel form-panel">
-      <div className="panel-header">
+    <div className={isModal ? 'modal-card form-modal-card' : 'panel form-panel'}>
+      <div className={isModal ? 'panel-header modal-panel-header' : 'panel-header'}>
         <h2>Novo livro</h2>
         <p>Preencha os dados básicos para registrar um livro.</p>
       </div>
@@ -71,9 +75,20 @@ export default function BookFormPanel({
           <span>Marcar como favorito</span>
         </label>
 
-        <button type="submit" disabled={isSubmitting || !isFormValid}>
-          {isSubmitting ? 'Salvando...' : 'Cadastrar livro'}
-        </button>
+        {isModal ? (
+          <div className="modal-actions book-form-modal-actions">
+            <button type="button" className="action-button secondary-button" disabled={isSubmitting} onClick={onCancel}>
+              Cancelar
+            </button>
+            <button type="submit" className="action-button primary-button" disabled={isSubmitting || !isFormValid}>
+              {isSubmitting ? 'Salvando...' : 'Cadastrar livro'}
+            </button>
+          </div>
+        ) : (
+          <button type="submit" disabled={isSubmitting || !isFormValid}>
+            {isSubmitting ? 'Salvando...' : 'Cadastrar livro'}
+          </button>
+        )}
       </form>
 
       {error ? <div className="feedback error">{error}</div> : null}

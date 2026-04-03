@@ -40,6 +40,7 @@ export default function App() {
   const [savingBookId, setSavingBookId] = useState(null)
   const [deletingBookId, setDeletingBookId] = useState(null)
   const [bookPendingDelete, setBookPendingDelete] = useState(null)
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [error, setError] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
   const actionMenuRef = useRef(null)
@@ -135,6 +136,24 @@ export default function App() {
       document.removeEventListener('keydown', handleKeyDown)
     }
   }, [activeMenuBookId])
+
+  useEffect(() => {
+    if (!isCreateModalOpen) {
+      return undefined
+    }
+
+    function handleKeyDown(event) {
+      if (event.key === 'Escape' && !isSubmitting) {
+        setIsCreateModalOpen(false)
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [isCreateModalOpen, isSubmitting])
 
   useEffect(() => {
     const normalizedSearch = searchTerm.trim()
@@ -306,6 +325,26 @@ export default function App() {
     setCurrentView(view)
   }
 
+  function openCreateModal() {
+    setActiveMenuBookId(null)
+    cancelEditing()
+    setError('')
+    setServerFormErrors({ titulo: '', autor: '' })
+    setIsCreateModalOpen(true)
+  }
+
+  function closeCreateModal() {
+    if (isSubmitting) {
+      return
+    }
+
+    setIsCreateModalOpen(false)
+    setError('')
+    setForm(initialForm)
+    setFormTouched({ titulo: false, autor: false })
+    setServerFormErrors({ titulo: '', autor: '' })
+  }
+
   function handleSortByChange(event) {
     handleQueryUpdate({
       ...query,
@@ -387,6 +426,7 @@ export default function App() {
       setForm(initialForm)
       setFormTouched({ titulo: false, autor: false })
       setServerFormErrors({ titulo: '', autor: '' })
+      setIsCreateModalOpen(false)
       setSuccessMessage('✓ Livro cadastrado com sucesso')
     } catch (err) {
       const nextFieldErrors = getFieldErrorsFromApi(err)
@@ -483,19 +523,6 @@ export default function App() {
   function renderCollectionContent() {
     return (
       <section className="content-grid">
-        <BookFormPanel
-          form={form}
-          formErrors={formErrors}
-          formTouched={formTouched}
-          isFormValid={isFormValid}
-          isSubmitting={isSubmitting}
-          error={error}
-          readingStatusOptions={readingStatusOptions}
-          onChange={handleChange}
-          onBlur={handleFieldBlur}
-          onSubmit={handleSubmit}
-        />
-
         <BookListPanel
           books={books}
           totalBooks={totalBooks}
@@ -536,6 +563,8 @@ export default function App() {
           onRequestDelete={requestDeleteBook}
           onSave={handleUpdateBook}
           onCancelEditing={cancelEditing}
+          onOpenCreateModal={openCreateModal}
+          error={!isCreateModalOpen ? error : ''}
         />
       </section>
     )
@@ -564,6 +593,29 @@ export default function App() {
       </main>
 
       {successMessage ? <div className="toast toast-success">{successMessage}</div> : null}
+
+      {isCreateModalOpen ? (
+        <div className="modal-overlay" role="presentation" onClick={(event) => {
+          if (event.target === event.currentTarget) {
+            closeCreateModal()
+          }
+        }}>
+          <BookFormPanel
+            form={form}
+            formErrors={formErrors}
+            formTouched={formTouched}
+            isFormValid={isFormValid}
+            isSubmitting={isSubmitting}
+            error={error}
+            readingStatusOptions={readingStatusOptions}
+            onChange={handleChange}
+            onBlur={handleFieldBlur}
+            onSubmit={handleSubmit}
+            variant="modal"
+            onCancel={closeCreateModal}
+          />
+        </div>
+      ) : null}
 
       <DeleteBookModal
         book={bookPendingDelete}

@@ -187,6 +187,8 @@ export default function BookListPanel({
   onRequestDelete,
   onSave,
   onCancelEditing,
+  onOpenCreateModal,
+  error,
 }) {
   const hasActiveFilters = Boolean(searchTerm || authorFilter)
   const activeFilterLabels = [
@@ -201,11 +203,18 @@ export default function BookListPanel({
           <h2>Livros cadastrados</h2>
           <p>Lista atualizada com os registros disponíveis na API.</p>
         </div>
-        <div className="sync-status" aria-label="Sincronizado">
-          <span className="sync-icon">✓</span>
-          <span>Sincronizado</span>
+        <div className="list-header-actions">
+          <button type="button" className="action-button primary-button list-create-button" onClick={onOpenCreateModal}>
+            Novo livro
+          </button>
+          <div className="sync-status" aria-label="Sincronizado">
+            <span className="sync-icon">✓</span>
+            <span>Sincronizado</span>
+          </div>
         </div>
       </div>
+
+      {error ? <div className="feedback error list-feedback">{error}</div> : null}
 
       <div className="list-toolbar">
         <div className="toolbar-surface">
