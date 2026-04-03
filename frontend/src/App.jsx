@@ -3,8 +3,8 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import AppHeader from './components/AppHeader'
 import BookFormPanel from './components/BookFormPanel'
 import BookListPanel from './components/BookListPanel'
+import DashboardOverview from './components/DashboardOverview'
 import DeleteBookModal from './components/DeleteBookModal'
-import HeroSection from './components/HeroSection'
 import HomeOverview from './components/HomeOverview'
 import {
   defaultQuery,
@@ -139,17 +139,17 @@ export default function App() {
     return () => window.clearTimeout(timeoutId)
   }, [authorFilter, query, searchTerm])
 
-  const totalBooksLabel = useMemo(() => {
-    if (totalBooks === 1) {
-      return '1 livro cadastrado'
-    }
-
-    return `${totalBooks} livros cadastrados`
-  }, [totalBooks])
-
   const latestAdditionLabel = useMemo(() => {
     return formatLatestAddition(latestCreatedAt)
   }, [latestCreatedAt])
+
+  const recentBooks = useMemo(() => {
+    return [...books]
+      .sort((firstBook, secondBook) => {
+        return new Date(secondBook.created_at).getTime() - new Date(firstBook.created_at).getTime()
+      })
+      .slice(0, 4)
+  }, [books])
 
   const formErrors = useMemo(() => ({
     titulo: getTextFieldError('Título', form.titulo) || serverFormErrors.titulo,
@@ -169,8 +169,6 @@ export default function App() {
   const hasNextPage = query.offset + query.limit < totalBooks
   const visibleRangeStart = totalBooks === 0 ? 0 : query.offset + 1
   const visibleRangeEnd = query.offset + books.length
-  const recentBooks = books.slice(0, 6)
-
   function handleChange(event) {
     const { name, value } = event.target
     setServerFormErrors((current) => ({
@@ -439,6 +437,65 @@ export default function App() {
     }
   }
 
+  function renderCollectionContent() {
+    return (
+      <section className="content-grid">
+        <BookFormPanel
+          form={form}
+          formErrors={formErrors}
+          formTouched={formTouched}
+          isFormValid={isFormValid}
+          isSubmitting={isSubmitting}
+          error={error}
+          onChange={handleChange}
+          onBlur={handleFieldBlur}
+          onSubmit={handleSubmit}
+        />
+
+        <BookListPanel
+          books={books}
+          totalBooks={totalBooks}
+          filteredBooks={books}
+          query={query}
+          searchTerm={searchTerm}
+          authorFilter={authorFilter}
+          isLoading={isLoading}
+          editingBookId={editingBookId}
+          activeMenuBookId={activeMenuBookId}
+          editForm={editForm}
+          editErrors={editErrors}
+          editTouched={editTouched}
+          savingBookId={savingBookId}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          visibleRangeStart={visibleRangeStart}
+          visibleRangeEnd={visibleRangeEnd}
+          hasPreviousPage={hasPreviousPage}
+          hasNextPage={hasNextPage}
+          actionMenuRef={actionMenuRef}
+          onSearchChange={handleSearchChange}
+          onAuthorFilterChange={handleAuthorFilterChange}
+          onClearFilters={handleClearFilters}
+          pageSizeOptions={pageSizeOptions}
+          sortOptions={sortOptions}
+          sortOrderOptions={sortOrderOptions}
+          onSortByChange={handleSortByChange}
+          onSortOrderChange={handleSortOrderChange}
+          onPageSizeChange={handlePageSizeChange}
+          onPreviousPage={handlePreviousPage}
+          onNextPage={handleNextPage}
+          onEditChange={handleEditChange}
+          onEditBlur={handleEditBlur}
+          onToggleMenu={toggleActionMenu}
+          onStartEditing={startEditing}
+          onRequestDelete={requestDeleteBook}
+          onSave={handleUpdateBook}
+          onCancelEditing={cancelEditing}
+        />
+      </section>
+    )
+  }
+
   return (
     <div className="app-shell">
       <div className="background-glow background-glow-left" />
@@ -448,75 +505,19 @@ export default function App() {
         <AppHeader currentView={currentView} onNavigate={handleNavigate} />
 
         {currentView === 'home' ? (
-          <>
-            <HeroSection
-              totalBooks={totalBooks}
-              totalBooksLabel={totalBooksLabel}
-              latestAdditionLabel={latestAdditionLabel}
-            />
-
-            <HomeOverview
-              totalBooks={totalBooks}
-              latestAdditionLabel={latestAdditionLabel}
-              recentBooks={recentBooks}
-              onOpenCollection={() => setCurrentView('collection')}
-            />
-          </>
+          <HomeOverview
+            onOpenDashboard={() => setCurrentView('dashboard')}
+            onOpenCollection={() => setCurrentView('collection')}
+          />
+        ) : currentView === 'dashboard' ? (
+          <DashboardOverview
+            totalBooks={totalBooks}
+            latestAdditionLabel={latestAdditionLabel}
+            recentBooks={recentBooks}
+            onOpenCollection={() => setCurrentView('collection')}
+          />
         ) : (
-          <section className="content-grid">
-            <BookFormPanel
-              form={form}
-              formErrors={formErrors}
-              formTouched={formTouched}
-              isFormValid={isFormValid}
-              isSubmitting={isSubmitting}
-              error={error}
-              onChange={handleChange}
-              onBlur={handleFieldBlur}
-              onSubmit={handleSubmit}
-            />
-
-            <BookListPanel
-              books={books}
-              totalBooks={totalBooks}
-              filteredBooks={books}
-              query={query}
-              searchTerm={searchTerm}
-              authorFilter={authorFilter}
-              isLoading={isLoading}
-              editingBookId={editingBookId}
-              activeMenuBookId={activeMenuBookId}
-              editForm={editForm}
-              editErrors={editErrors}
-              editTouched={editTouched}
-              savingBookId={savingBookId}
-              currentPage={currentPage}
-              totalPages={totalPages}
-              visibleRangeStart={visibleRangeStart}
-              visibleRangeEnd={visibleRangeEnd}
-              hasPreviousPage={hasPreviousPage}
-              hasNextPage={hasNextPage}
-              actionMenuRef={actionMenuRef}
-              onSearchChange={handleSearchChange}
-              onAuthorFilterChange={handleAuthorFilterChange}
-              onClearFilters={handleClearFilters}
-              pageSizeOptions={pageSizeOptions}
-              sortOptions={sortOptions}
-              sortOrderOptions={sortOrderOptions}
-              onSortByChange={handleSortByChange}
-              onSortOrderChange={handleSortOrderChange}
-              onPageSizeChange={handlePageSizeChange}
-              onPreviousPage={handlePreviousPage}
-              onNextPage={handleNextPage}
-              onEditChange={handleEditChange}
-              onEditBlur={handleEditBlur}
-              onToggleMenu={toggleActionMenu}
-              onStartEditing={startEditing}
-              onRequestDelete={requestDeleteBook}
-              onSave={handleUpdateBook}
-              onCancelEditing={cancelEditing}
-            />
-          </section>
+          renderCollectionContent()
         )}
 
         {successMessage ? <div className="toast toast-success">{successMessage}</div> : null}
