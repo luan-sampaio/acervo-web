@@ -1,3 +1,4 @@
+from datetime import date, datetime, time, timedelta
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
@@ -38,11 +39,21 @@ def list_books(
     sort_by: Literal["created_at", "titulo", "autor"] = Query(default="created_at"),
     sort_order: Literal["asc", "desc"] = Query(default="desc"),
     search: str = Query(default="", min_length=0, max_length=255),
+    author: str = Query(default="", min_length=0, max_length=255),
+    created_from: date | None = Query(default=None),
+    created_to: date | None = Query(default=None),
     db: Session = Depends(database.get_db),
 ):
+    if created_from and created_to and created_from > created_to:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="A data inicial nao pode ser maior que a data final",
+        )
+
     sort_column = getattr(models.Book, sort_by)
     order_by_clause = sort_column.asc() if sort_order == "asc" else sort_column.desc()
     normalized_search = search.strip()
+    normalized_author = author.strip()
     filters = []
 
     if normalized_search:
@@ -53,6 +64,18 @@ def list_books(
                 models.Book.autor.ilike(like_pattern),
             )
         )
+
+    if normalized_author:
+        author_like_pattern = f"%{normalized_author}%"
+        filters.append(models.Book.autor.ilike(author_like_pattern))
+
+    if created_from:
+        start_datetime = datetime.combine(created_from, time.min)
+        filters.append(models.Book.created_at >= start_datetime)
+
+    if created_to:
+        end_exclusive = datetime.combine(created_to + timedelta(days=1), time.min)
+        filters.append(models.Book.created_at < end_exclusive)
 
     base_query = db.query(models.Book)
     aggregate_query = db.query(
@@ -83,6 +106,9 @@ def list_books(
         "sort_by": sort_by,
         "sort_order": sort_order,
         "search": normalized_search,
+        "author": normalized_author,
+        "created_from": created_from,
+        "created_to": created_to,
         "latest_created_at": latest_created_at,
     }
 

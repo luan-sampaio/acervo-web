@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -44,4 +44,7 @@ class BookListResponse(BaseModel):
     sort_by: Literal["created_at", "titulo", "autor"]
     sort_order: Literal["asc", "desc"]
     search: str = ""
+    author: str = ""
+    created_from: date | None = None
+    created_to: date | None = None
     latest_created_at: datetime | None = None

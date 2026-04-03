@@ -1,12 +1,9 @@
 export default function HeroSection({ totalBooks, totalBooksLabel, latestAdditionLabel }) {
   return (
     <section className="hero-card">
-      <span className="eyebrow">Book Registry</span>
-      <h1>Cadastre e acompanhe sua coleção de livros</h1>
-      <p>
-        Uma interface simples para registrar títulos e visualizar rapidamente
-        o acervo salvo na API FastAPI.
-      </p>
+      <span className="eyebrow">Meus Livros</span>
+      <h1>Meus Livros</h1>
+      <p>Gerencie seu acervo com rapidez e simplicidade.</p>
       <div className="hero-stats">
         <div className="stat-card">
           <strong>{totalBooks}</strong>
