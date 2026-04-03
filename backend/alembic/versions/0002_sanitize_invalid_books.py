@@ -18,21 +18,11 @@ def upgrade() -> None:
     op.execute(
         """
         UPDATE books
-        SET titulo = 'Dom Casmurro',
-            autor = 'Machado de Assis',
+        SET titulo = btrim(titulo),
+            autor = btrim(autor),
             updated_at = now()
-        WHERE lower(btrim(titulo)) = 'dom'
-           OR lower(btrim(autor)) = 'machado de'
-        """
-    )
-
-    op.execute(
-        """
-        UPDATE books
-        SET titulo = 'O Cortiço',
-            autor = 'Aluísio Azevedo',
-            updated_at = now()
-        WHERE lower(btrim(titulo)) = 'a'
+        WHERE titulo <> btrim(titulo)
+           OR autor <> btrim(autor)
         """
     )
 

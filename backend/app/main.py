@@ -1,11 +1,12 @@
-from fastapi import FastAPI, Depends, HTTPException, Request
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from sqlalchemy.orm import Session
 from sqlalchemy import text
+from sqlalchemy.orm import Session
 
 from . import database
-from fastapi.middleware.cors import CORSMiddleware
+from .config import settings
 from .routers import books
 
 app = FastAPI(
@@ -14,16 +15,9 @@ app = FastAPI(
     version="0.1.0"
 )
 
-# Configuração do CORS
-origins = [
-    "http://localhost",
-    "http://localhost:3000", # Porta padrão do React
-    "http://localhost:5173", # Porta padrão do Vite
-]
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=settings.BACKEND_CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
