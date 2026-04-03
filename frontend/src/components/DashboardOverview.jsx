@@ -1,5 +1,21 @@
 import { formatDate } from '../utils'
 
+function getReadingStatusLabel(value) {
+  if (value === 'quero_ler') {
+    return 'Quero ler'
+  }
+
+  if (value === 'lendo') {
+    return 'Lendo'
+  }
+
+  if (value === 'lido') {
+    return 'Lido'
+  }
+
+  return value
+}
+
 export default function DashboardOverview({
   totalBooks,
   latestAdditionLabel,
@@ -104,10 +120,14 @@ export default function DashboardOverview({
             {recentBooks.map((book) => (
               <article key={book.id} className="dashboard-recent-card">
                 <div className="dashboard-recent-copy">
+                  <div className="dashboard-recent-badges">
+                    <span className="dashboard-recent-status">{getReadingStatusLabel(book.status_leitura)}</span>
+                    {book.favorito ? <span className="dashboard-recent-favorite">Favorito</span> : null}
+                  </div>
                   <h3>{book.titulo}</h3>
                   <p>{book.autor}</p>
                 </div>
-                <span>{formatDate(book.created_at)}</span>
+                <span className="dashboard-recent-date">{formatDate(book.created_at)}</span>
               </article>
             ))}
           </div>
