@@ -1,82 +1,19 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 
+import BookFormPanel from './components/BookFormPanel'
+import BookListPanel from './components/BookListPanel'
+import DeleteBookModal from './components/DeleteBookModal'
+import HeroSection from './components/HeroSection'
+import {
+  defaultQuery,
+  initialEditForm,
+  initialForm,
+  pageSizeOptions,
+  sortOptions,
+  sortOrderOptions,
+} from './constants'
 import { createBook, deleteBook, fetchBooks, updateBook } from './api'
-
-const initialForm = {
-  titulo: '',
-  autor: '',
-}
-
-const initialEditForm = {
-  titulo: '',
-  autor: '',
-}
-
-const defaultQuery = {
-  limit: 6,
-  offset: 0,
-  sortBy: 'created_at',
-  sortOrder: 'desc',
-}
-
-const pageSizeOptions = [6, 12, 24]
-
-const sortOptions = [
-  { value: 'created_at', label: 'Data de cadastro' },
-  { value: 'titulo', label: 'Título' },
-  { value: 'autor', label: 'Autor' },
-]
-
-const sortOrderOptions = [
-  { value: 'desc', label: 'Decrescente' },
-  { value: 'asc', label: 'Crescente' },
-]
-
-function getTextFieldError(label, value) {
-  const trimmedValue = value.trim()
-
-  if (trimmedValue.length === 0) {
-    return `${label} é obrigatório`
-  }
-
-  if (trimmedValue.length < 2) {
-    return `${label} deve ter pelo menos 2 caracteres`
-  }
-
-  return ''
-}
-
-function formatDate(value) {
-  if (!value) {
-    return '-'
-  }
-
-  return new Intl.DateTimeFormat('pt-BR', {
-    dateStyle: 'short',
-    timeStyle: 'short',
-  }).format(new Date(value))
-}
-
-
-function formatLatestAddition(value) {
-  if (!value) {
-    return 'Sem registros recentes'
-  }
-
-  const date = new Date(value)
-  const now = new Date()
-
-  const isToday = date.toDateString() === now.toDateString()
-
-  if (isToday) {
-    return `Hoje, ${new Intl.DateTimeFormat('pt-BR', { timeStyle: 'short' }).format(date)}`
-  }
-
-  return new Intl.DateTimeFormat('pt-BR', {
-    dateStyle: 'short',
-    timeStyle: 'short',
-  }).format(date)
-}
+import { formatLatestAddition, getTextFieldError } from './utils'
 
 export default function App() {
   const [form, setForm] = useState(initialForm)
@@ -108,6 +45,7 @@ export default function App() {
         offset: params.offset,
         sort_by: params.sortBy,
         sort_order: params.sortOrder,
+        search: params.search,
       })
       setBooks(data.items)
       setTotalBooks(data.total)
@@ -117,7 +55,9 @@ export default function App() {
         offset: data.offset,
         sortBy: data.sort_by,
         sortOrder: data.sort_order,
+        search: data.search,
       })
+      setSearchTerm(data.search)
     } catch (err) {
       setError(err.message)
     } finally {
@@ -167,7 +107,23 @@ export default function App() {
     }
   }, [activeMenuBookId])
 
-  const displayBooks = books
+  useEffect(() => {
+    const normalizedSearch = searchTerm.trim()
+
+    if (normalizedSearch === query.search) {
+      return undefined
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      handleQueryUpdate({
+        ...query,
+        search: normalizedSearch,
+        offset: 0,
+      })
+    }, 300)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [query, searchTerm])
 
   const totalBooksLabel = useMemo(() => {
     if (totalBooks === 1) {
@@ -180,21 +136,6 @@ export default function App() {
   const latestAdditionLabel = useMemo(() => {
     return formatLatestAddition(latestCreatedAt)
   }, [latestCreatedAt])
-
-  const filteredBooks = useMemo(() => {
-    const normalizedSearchTerm = searchTerm.trim().toLowerCase()
-
-    if (!normalizedSearchTerm) {
-      return displayBooks
-    }
-
-    return displayBooks.filter((book) => {
-      return (
-        book.titulo.toLowerCase().includes(normalizedSearchTerm)
-        || book.autor.toLowerCase().includes(normalizedSearchTerm)
-      )
-    })
-  }, [displayBooks, searchTerm])
 
   const formErrors = useMemo(() => ({
     titulo: getTextFieldError('Título', form.titulo),
@@ -213,7 +154,7 @@ export default function App() {
   const hasPreviousPage = query.offset > 0
   const hasNextPage = query.offset + query.limit < totalBooks
   const visibleRangeStart = totalBooks === 0 ? 0 : query.offset + 1
-  const visibleRangeEnd = query.offset + displayBooks.length
+  const visibleRangeEnd = query.offset + books.length
 
   function handleChange(event) {
     const { name, value } = event.target
@@ -253,6 +194,12 @@ export default function App() {
 
   function toggleActionMenu(bookId) {
     setActiveMenuBookId((current) => (current === bookId ? null : bookId))
+  }
+
+  function cancelEditing() {
+    setEditingBookId(null)
+    setEditForm(initialEditForm)
+    setEditTouched({ titulo: false, autor: false })
   }
 
   function handleQueryUpdate(nextQuery) {
@@ -316,12 +263,6 @@ export default function App() {
       titulo: book.titulo,
       autor: book.autor,
     })
-    setEditTouched({ titulo: false, autor: false })
-  }
-
-  function cancelEditing() {
-    setEditingBookId(null)
-    setEditForm(initialEditForm)
     setEditTouched({ titulo: false, autor: false })
   }
 
@@ -437,289 +378,73 @@ export default function App() {
       <div className="background-glow background-glow-right" />
 
       <main className="container">
-        <section className="hero-card">
-          <span className="eyebrow">Book Registry</span>
-          <h1>Cadastre e acompanhe sua coleção de livros</h1>
-          <p>
-            Uma interface simples para registrar títulos e visualizar rapidamente
-            o acervo salvo na API FastAPI.
-          </p>
-          <div className="hero-stats">
-            <div className="stat-card">
-              <strong>{totalBooks}</strong>
-              <span>{totalBooksLabel}</span>
-            </div>
-            <div className="stat-card">
-              <strong>Última adição</strong>
-              <span>{latestAdditionLabel}</span>
-            </div>
-          </div>
-        </section>
+        <HeroSection
+          totalBooks={totalBooks}
+          totalBooksLabel={totalBooksLabel}
+          latestAdditionLabel={latestAdditionLabel}
+        />
 
         <section className="content-grid">
-          <div className="panel form-panel">
-            <div className="panel-header">
-              <h2>Novo livro</h2>
-              <p>Preencha os dados básicos para registrar um livro.</p>
-            </div>
+          <BookFormPanel
+            form={form}
+            formErrors={formErrors}
+            formTouched={formTouched}
+            isFormValid={isFormValid}
+            isSubmitting={isSubmitting}
+            error={error}
+            onChange={handleChange}
+            onBlur={handleFieldBlur}
+            onSubmit={handleSubmit}
+          />
 
-            <form className="book-form" onSubmit={handleSubmit}>
-              <label>
-                <span>Título</span>
-                <input
-                  name="titulo"
-                  value={form.titulo}
-                  onChange={handleChange}
-                  onBlur={handleFieldBlur}
-                  placeholder="Ex.: Dom Casmurro"
-                  aria-invalid={formTouched.titulo && Boolean(formErrors.titulo)}
-                  className={formTouched.titulo && formErrors.titulo ? 'input-error' : ''}
-                  minLength={2}
-                  required
-                />
-                {formTouched.titulo && formErrors.titulo ? <span className="field-error">{formErrors.titulo}</span> : null}
-              </label>
-
-              <label>
-                <span>Autor</span>
-                <input
-                  name="autor"
-                  value={form.autor}
-                  onChange={handleChange}
-                  onBlur={handleFieldBlur}
-                  placeholder="Ex.: Machado de Assis"
-                  aria-invalid={formTouched.autor && Boolean(formErrors.autor)}
-                  className={formTouched.autor && formErrors.autor ? 'input-error' : ''}
-                  minLength={2}
-                  required
-                />
-                {formTouched.autor && formErrors.autor ? <span className="field-error">{formErrors.autor}</span> : null}
-              </label>
-
-              <button type="submit" disabled={isSubmitting || !isFormValid}>
-                {isSubmitting ? 'Salvando...' : 'Cadastrar livro'}
-              </button>
-            </form>
-
-            {error ? <div className="feedback error">{error}</div> : null}
-          </div>
-
-          <div className="panel list-panel">
-            <div className="panel-header panel-header-inline">
-              <div>
-                <h2>Livros cadastrados</h2>
-                <p>Lista atualizada com os registros disponíveis na API.</p>
-              </div>
-              <div className="sync-status" aria-label="Sincronizado">
-                <span className="sync-icon">✓</span>
-                <span>Sincronizado</span>
-              </div>
-            </div>
-
-            <div className="list-toolbar">
-              <label className="search-field">
-                <span>Buscar por título ou autor</span>
-                <input
-                  value={searchTerm}
-                  onChange={handleSearchChange}
-                  placeholder="Ex.: Machado de Assis"
-                />
-              </label>
-
-              <div className="list-control-group">
-                <label className="toolbar-select-field">
-                  <span>Ordenar por</span>
-                  <select value={query.sortBy} onChange={handleSortByChange}>
-                    {sortOptions.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-
-                <label className="toolbar-select-field">
-                  <span>Direção</span>
-                  <select value={query.sortOrder} onChange={handleSortOrderChange}>
-                    {sortOrderOptions.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-
-                <label className="toolbar-select-field toolbar-select-field-compact">
-                  <span>Por página</span>
-                  <select value={query.limit} onChange={handlePageSizeChange}>
-                    {pageSizeOptions.map((value) => (
-                      <option key={value} value={value}>
-                        {value}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              </div>
-
-              {searchTerm ? (
-                <button type="button" className="secondary-button" onClick={() => setSearchTerm('')}>
-                  Limpar
-                </button>
-              ) : null}
-            </div>
-
-            {isLoading ? (
-              <div className="empty-state">Carregando livros...</div>
-            ) : displayBooks.length === 0 ? (
-              <div className="empty-state">
-                {totalBooks === 0 ? 'Nenhum livro cadastrado até o momento.' : 'Nenhum livro disponível nesta página.'}
-              </div>
-            ) : filteredBooks.length === 0 ? (
-              <div className="empty-state">Nenhum livro encontrado para a busca informada nesta página.</div>
-            ) : (
-              <div className="book-list">
-                {filteredBooks.map((book) => (
-                  <article key={book.id} className="book-card">
-                    <div className="book-card-top">
-                      {editingBookId === book.id ? (
-                        <div className="book-main book-main-editing">
-                          <div className="inline-form">
-                            <label>
-                              <span>Título</span>
-                              <input
-                                name="titulo"
-                                value={editForm.titulo}
-                                onChange={handleEditChange}
-                                onBlur={handleEditBlur}
-                                aria-invalid={editTouched.titulo && Boolean(editErrors.titulo)}
-                                className={editTouched.titulo && editErrors.titulo ? 'input-error' : ''}
-                                minLength={2}
-                                required
-                              />
-                              {editTouched.titulo && editErrors.titulo ? <span className="field-error">{editErrors.titulo}</span> : null}
-                            </label>
-                            <label>
-                              <span>Autor</span>
-                              <input
-                                name="autor"
-                                value={editForm.autor}
-                                onChange={handleEditChange}
-                                onBlur={handleEditBlur}
-                                aria-invalid={editTouched.autor && Boolean(editErrors.autor)}
-                                className={editTouched.autor && editErrors.autor ? 'input-error' : ''}
-                                minLength={2}
-                                required
-                              />
-                              {editTouched.autor && editErrors.autor ? <span className="field-error">{editErrors.autor}</span> : null}
-                            </label>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="book-main">
-                          <h3>{book.titulo}</h3>
-                          <p className="book-author">{book.autor}</p>
-                        </div>
-                      )}
-                      <div className="book-meta">
-                        {editingBookId === book.id ? null : (
-                          <div className="book-menu" ref={activeMenuBookId === book.id ? actionMenuRef : null}>
-                            <button
-                              type="button"
-                              className="menu-trigger"
-                              aria-label={`Ações do livro ${book.titulo}`}
-                              aria-haspopup="menu"
-                              aria-expanded={activeMenuBookId === book.id}
-                              onClick={() => toggleActionMenu(book.id)}
-                            >
-                              <span className="menu-trigger-dot" />
-                              <span className="menu-trigger-dot" />
-                              <span className="menu-trigger-dot" />
-                            </button>
-
-                            {activeMenuBookId === book.id ? (
-                              <div className="card-menu" role="menu">
-                                <button type="button" role="menuitem" onClick={() => startEditing(book)}>
-                                  Editar
-                                </button>
-                                <button type="button" role="menuitem" className="card-menu-danger" onClick={() => requestDeleteBook(book)}>
-                                  Excluir
-                                </button>
-                              </div>
-                            ) : null}
-                          </div>
-                        )}
-                        <span className="book-id">#{book.id}</span>
-                        <span className="book-date">{formatDate(book.created_at)}</span>
-                      </div>
-                    </div>
-
-                    {editingBookId === book.id ? (
-                      <div className="book-actions">
-                        <>
-                          <button
-                            type="button"
-                            className="action-button primary-button"
-                            disabled={savingBookId === book.id || !isEditFormValid}
-                            onClick={() => handleUpdateBook(book.id)}
-                          >
-                            {savingBookId === book.id ? 'Salvando...' : 'Salvar'}
-                          </button>
-                          <button
-                            type="button"
-                            className="action-button secondary-button"
-                            disabled={savingBookId === book.id}
-                            onClick={cancelEditing}
-                          >
-                            Cancelar
-                          </button>
-                        </>
-                      </div>
-                    ) : null}
-                  </article>
-                ))}
-              </div>
-            )}
-
-            {totalBooks > 0 ? (
-              <div className="pagination-bar">
-                <div className="pagination-summary">
-                  <strong>{`Página ${currentPage} de ${totalPages}`}</strong>
-                  <span>{`Mostrando ${visibleRangeStart}-${visibleRangeEnd} de ${totalBooks} livros`}</span>
-                </div>
-
-                <div className="pagination-actions">
-                  <button type="button" className="secondary-button" disabled={!hasPreviousPage || isLoading} onClick={handlePreviousPage}>
-                    Anterior
-                  </button>
-                  <button type="button" className="secondary-button" disabled={!hasNextPage || isLoading} onClick={handleNextPage}>
-                    Próxima
-                  </button>
-                </div>
-              </div>
-            ) : null}
-          </div>
+          <BookListPanel
+            books={books}
+            totalBooks={totalBooks}
+            filteredBooks={books}
+            query={query}
+            searchTerm={searchTerm}
+            isLoading={isLoading}
+            editingBookId={editingBookId}
+            activeMenuBookId={activeMenuBookId}
+            editForm={editForm}
+            editErrors={editErrors}
+            editTouched={editTouched}
+            savingBookId={savingBookId}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            visibleRangeStart={visibleRangeStart}
+            visibleRangeEnd={visibleRangeEnd}
+            hasPreviousPage={hasPreviousPage}
+            hasNextPage={hasNextPage}
+            actionMenuRef={actionMenuRef}
+            onSearchChange={handleSearchChange}
+            onClearSearch={() => setSearchTerm('')}
+            pageSizeOptions={pageSizeOptions}
+            sortOptions={sortOptions}
+            sortOrderOptions={sortOrderOptions}
+            onSortByChange={handleSortByChange}
+            onSortOrderChange={handleSortOrderChange}
+            onPageSizeChange={handlePageSizeChange}
+            onPreviousPage={handlePreviousPage}
+            onNextPage={handleNextPage}
+            onEditChange={handleEditChange}
+            onEditBlur={handleEditBlur}
+            onToggleMenu={toggleActionMenu}
+            onStartEditing={startEditing}
+            onRequestDelete={requestDeleteBook}
+            onSave={handleUpdateBook}
+            onCancelEditing={cancelEditing}
+          />
         </section>
 
         {successMessage ? <div className="toast toast-success">{successMessage}</div> : null}
 
-        {bookPendingDelete ? (
-          <div className="modal-overlay" role="presentation">
-            <div className="modal-card" role="dialog" aria-modal="true" aria-labelledby="delete-modal-title">
-              <h3 id="delete-modal-title">Confirmar exclusão</h3>
-              <p>
-                Tem certeza que deseja remover <strong>{bookPendingDelete.titulo}</strong> de <strong>{bookPendingDelete.autor}</strong>?
-              </p>
-              <div className="modal-actions">
-                <button type="button" className="action-button secondary-button" disabled={deletingBookId !== null} onClick={closeDeleteModal}>
-                  Cancelar
-                </button>
-                <button type="button" className="action-button danger-button" disabled={deletingBookId !== null} onClick={handleDeleteBook}>
-                  {deletingBookId !== null ? 'Excluindo...' : 'Confirmar exclusão'}
-                </button>
-              </div>
-            </div>
-          </div>
-        ) : null}
+        <DeleteBookModal
+          book={bookPendingDelete}
+          isDeleting={deletingBookId !== null}
+          onCancel={closeDeleteModal}
+          onConfirm={handleDeleteBook}
+        />
       </main>
     </div>
   )
