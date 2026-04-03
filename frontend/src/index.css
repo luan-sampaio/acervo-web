@@ -79,9 +79,9 @@ button {
 .container {
   position: relative;
   z-index: 1;
-  width: min(1120px, calc(100% - 2rem));
+  width: min(1480px, calc(100% - 3rem));
   margin: 0 auto;
-  padding: 1.4rem 0 1.8rem;
+  padding: 1.5rem 0 1.9rem;
 }
 
 .hero-card,
@@ -94,9 +94,9 @@ button {
 .hero-card {
   display: grid;
   grid-template-columns: minmax(0, 1.45fr) minmax(260px, 0.9fr);
-  gap: 1rem;
+  gap: 1.4rem;
   align-items: center;
-  padding: 1.2rem 1.3rem;
+  padding: 1.35rem 1.5rem;
   border-radius: 24px;
 }
 
@@ -115,16 +115,17 @@ button {
 
 .hero-card h1 {
   margin: 0.7rem 0 0.35rem;
-  font-size: clamp(1.8rem, 3vw, 2.7rem);
-  line-height: 1;
+  font-size: clamp(2.1rem, 3vw, 3rem);
+  line-height: 0.98;
   color: var(--text);
 }
 
 .hero-card p {
   margin: 0;
   color: var(--muted);
-  max-width: 34rem;
+  max-width: 40rem;
   line-height: 1.5;
+  font-size: 1.02rem;
 }
 
 .hero-stats {
@@ -143,25 +144,26 @@ button {
 
 .stat-card strong {
   display: block;
-  font-size: 1.12rem;
+  font-size: 1.28rem;
   margin-bottom: 0.18rem;
   color: var(--text);
 }
 
 .stat-card span {
   color: var(--muted);
+  font-size: 0.95rem;
 }
 
 .content-grid {
   display: grid;
-  grid-template-columns: 320px minmax(0, 1fr);
-  gap: 1rem;
+  grid-template-columns: 360px minmax(0, 1fr);
+  gap: 1.1rem;
   margin-top: 1rem;
 }
 
 .panel {
   border-radius: 22px;
-  padding: 1rem;
+  padding: 1.15rem;
 }
 
 .panel-header {
@@ -224,12 +226,12 @@ button {
 }
 
 .toolbar-hero-copy {
-  max-width: 38rem;
+  max-width: 48rem;
 }
 
 .toolbar-hero-copy h3 {
   margin: 0.45rem 0 0.25rem;
-  font-size: clamp(1rem, 1.7vw, 1.25rem);
+  font-size: clamp(1.18rem, 1.75vw, 1.5rem);
   line-height: 1.15;
   color: var(--text);
 }
@@ -238,7 +240,7 @@ button {
   margin: 0;
   color: var(--muted);
   line-height: 1.45;
-  font-size: 0.92rem;
+  font-size: 1rem;
 }
 
 .toolbar-kicker {
@@ -266,7 +268,7 @@ button {
 }
 
 .toolbar-stat strong {
-  font-size: clamp(1.35rem, 1.8vw, 1.7rem);
+  font-size: clamp(1.5rem, 1.9vw, 1.95rem);
   line-height: 1;
   color: var(--text);
 }
@@ -437,14 +439,14 @@ button {
 
 .panel-header h2 {
   margin: 0;
-  font-size: 1.15rem;
+  font-size: 1.32rem;
   color: var(--text);
 }
 
 .panel-header p {
   margin: 0.2rem 0 0;
   color: var(--muted);
-  font-size: 0.9rem;
+  font-size: 0.98rem;
 }
 
 .book-form {
@@ -459,7 +461,7 @@ button {
 
 .book-form span {
   color: var(--text);
-  font-size: 0.9rem;
+  font-size: 0.96rem;
   font-weight: 600;
 }
 
@@ -646,12 +648,12 @@ button {
 
 .book-list {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.75rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.85rem;
 }
 
 .book-card {
-  padding: 0.8rem 0.85rem;
+  padding: 0.9rem 0.95rem;
   border-radius: 16px;
   background: linear-gradient(180deg, #fbfdfd, #f6fafb);
   border: 1px solid var(--border);
@@ -796,13 +798,13 @@ button {
 
 .book-date {
   color: var(--muted);
-  font-size: 0.74rem;
+  font-size: 0.8rem;
   white-space: nowrap;
 }
 
 .book-card h3 {
   margin: 0;
-  font-size: 0.98rem;
+  font-size: 1.08rem;
   font-weight: 700;
   line-height: 1.25;
   color: var(--text);
@@ -810,7 +812,7 @@ button {
 
 .book-author {
   margin: 0.25rem 0 0;
-  font-size: 0.86rem;
+  font-size: 0.94rem;
   font-weight: 400;
   color: var(--muted);
 }
@@ -1001,7 +1003,7 @@ button {
 
 @media (max-width: 640px) {
   .container {
-    width: min(100% - 1rem, 1120px);
+    width: min(100% - 1rem, 1480px);
     padding-top: 0.8rem;
   }
 
