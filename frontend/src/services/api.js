@@ -18,4 +18,9 @@ export async function deleteBook(bookId) {
   await api.delete(`/books/${bookId}`)
 }
 
+export async function updateBook(bookId, payload) {
+  const response = await api.put(`/books/${bookId}`, payload)
+  return response.data
+}
+
 export default api
