@@ -208,24 +208,6 @@ export default function BookListPanel({
       </div>
 
       <div className="list-toolbar">
-        <div className="toolbar-hero">
-          <div className="toolbar-hero-copy">
-            <span className="toolbar-kicker">Explorar acervo</span>
-            <h3>Encontre rapidamente o que importa na sua coleção</h3>
-            <p>
-              Use busca e autor para refinar os resultados sem perder o contexto da listagem.
-            </p>
-          </div>
-
-          <div className="toolbar-hero-meta">
-            <div className="toolbar-stat">
-              <strong>{totalBooks}</strong>
-              <span>resultados</span>
-            </div>
-            {hasActiveFilters ? <span className="toolbar-badge">Filtros ativos</span> : null}
-          </div>
-        </div>
-
         <div className="toolbar-surface">
           <div className="toolbar-grid toolbar-grid-search">
             <label className="search-field search-field-wide">

@@ -543,12 +543,9 @@ export default function App() {
 
   return (
     <div className="app-shell">
-      <div className="background-glow background-glow-left" />
-      <div className="background-glow background-glow-right" />
+      <AppHeader currentView={currentView} onNavigate={handleNavigate} />
 
       <main className="container">
-        <AppHeader currentView={currentView} onNavigate={handleNavigate} />
-
         {currentView === 'home' ? (
           <HomeOverview
             onOpenDashboard={() => setCurrentView('dashboard')}
@@ -565,16 +562,16 @@ export default function App() {
         ) : (
           renderCollectionContent()
         )}
-
-        {successMessage ? <div className="toast toast-success">{successMessage}</div> : null}
-
-        <DeleteBookModal
-          book={bookPendingDelete}
-          isDeleting={deletingBookId !== null}
-          onCancel={closeDeleteModal}
-          onConfirm={handleDeleteBook}
-        />
       </main>
+
+      {successMessage ? <div className="toast toast-success">{successMessage}</div> : null}
+
+      <DeleteBookModal
+        book={bookPendingDelete}
+        isDeleting={deletingBookId !== null}
+        onCancel={closeDeleteModal}
+        onConfirm={handleDeleteBook}
+      />
     </div>
   )
 }
