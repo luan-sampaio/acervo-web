@@ -17,8 +17,6 @@ function getReadingStatusLabel(value) {
 }
 
 export default function DashboardOverview({
-  totalBooks,
-  latestAdditionLabel,
   metrics,
   recentBooks,
   onOpenCollection,
@@ -33,24 +31,14 @@ export default function DashboardOverview({
             Acompanhe o crescimento da sua biblioteca, veja o que merece atenção agora e
             avance para a coleção sempre que quiser cadastrar ou revisar livros.
           </p>
-        </div>
-
-        <div className="dashboard-hero-side">
-          <div className="dashboard-hero-highlight">
-            <span className="dashboard-hero-highlight-label">Resumo do momento</span>
-            <strong>{totalBooks === 1 ? '1 livro no acervo' : `${totalBooks} livros no acervo`}</strong>
-            <p>{latestAdditionLabel}</p>
-            <span className="dashboard-hero-favorite-pill">
-              {metrics.favoriteCount === 1 ? '1 favorito' : `${metrics.favoriteCount} favoritos`}
-            </span>
-          </div>
-
           <div className="dashboard-actions">
             <button type="button" className="home-primary-action" onClick={onOpenCollection}>
               Ir para a coleção
             </button>
           </div>
         </div>
+
+        <div className="dashboard-hero-side" aria-hidden="true" />
       </section>
 
       <section className="dashboard-reading-panel">
