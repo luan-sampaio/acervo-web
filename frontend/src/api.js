@@ -1,4 +1,8 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
+import axios from 'axios'
+
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL ?? 'http://localhost:8000',
+})
 
 class ApiError extends Error {
   constructor(message, options = {}) {
@@ -9,68 +13,55 @@ class ApiError extends Error {
   }
 }
 
-async function parseResponse(response) {
-  if (response.status === 204) {
-    return null
+function normalizeApiError(error) {
+  const detail = error.response?.data?.detail
+  const message =
+    typeof detail === 'string'
+      ? detail
+      : error.response?.data?.message ?? 'Ocorreu um erro ao processar a requisição.'
+
+  throw new ApiError(message, {
+    status: error.response?.status,
+    errors: Array.isArray(detail) ? detail : [],
+  })
+}
+
+async function request(config) {
+  try {
+    const response = await api.request(config)
+    return response.data ?? null
+  } catch (error) {
+    normalizeApiError(error)
   }
-
-  const data = await response.json()
-
-  if (!response.ok) {
-    const message = data.message ?? 'Ocorreu um erro ao processar a requisição.'
-    throw new ApiError(message, {
-      status: response.status,
-      errors: data.errors,
-    })
-  }
-
-  return data
 }
 
 export async function fetchBooks(params = {}) {
-  const searchParams = new URLSearchParams()
-
-  Object.entries(params).forEach(([key, value]) => {
-    if (value !== undefined && value !== null && value !== '') {
-      searchParams.set(key, String(value))
-    }
+  return request({
+    method: 'GET',
+    url: '/books',
+    params,
   })
-
-  const queryString = searchParams.toString()
-  const url = queryString ? `${API_BASE_URL}/books?${queryString}` : `${API_BASE_URL}/books`
-
-  const response = await fetch(url)
-  return parseResponse(response)
 }
 
 export async function updateBook(bookId, payload) {
-  const response = await fetch(`${API_BASE_URL}/books/${bookId}`, {
+  return request({
     method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(payload),
+    url: `/books/${bookId}`,
+    data: payload,
   })
-
-  return parseResponse(response)
 }
 
 export async function deleteBook(bookId) {
-  const response = await fetch(`${API_BASE_URL}/books/${bookId}`, {
+  return request({
     method: 'DELETE',
+    url: `/books/${bookId}`,
   })
-
-  return parseResponse(response)
 }
 
 export async function createBook(payload) {
-  const response = await fetch(`${API_BASE_URL}/books`, {
+  return request({
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(payload),
+    url: '/books',
+    data: payload,
   })
-
-  return parseResponse(response)
 }
