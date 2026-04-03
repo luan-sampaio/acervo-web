@@ -52,7 +52,7 @@ export default function App() {
         sort_by: params.sortBy,
         sort_order: params.sortOrder,
         search: params.search,
-        status_leitura: params.statusFilter === 'quero_ler' ? 'quero_ler' : undefined,
+        status_leitura: ['quero_ler', 'lendo', 'lido'].includes(params.statusFilter) ? params.statusFilter : undefined,
         favorito_only: params.statusFilter === 'favorito' ? true : undefined,
       })
       setBooks(data.items)

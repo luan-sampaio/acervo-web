@@ -190,7 +190,10 @@ export default function BookListPanel({
 }) {
   const quickFilters = [
     { value: 'all', label: 'Todos' },
-    { value: 'quero_ler', label: 'Quero ler' },
+    ...readingStatusOptions.map((option) => ({
+      value: option.value,
+      label: option.label,
+    })),
     { value: 'favorito', label: 'Favorito' },
   ]
   const hasActiveFilters = Boolean(searchTerm) || query.statusFilter !== 'all'
@@ -325,7 +328,7 @@ export default function BookListPanel({
           <div className="pagination-bar">
             <div className="pagination-summary">
               <strong>{`Página ${currentPage} de ${totalPages}`}</strong>
-              <span>{`Mostrando ${visibleRangeStart}-${visibleRangeEnd} de ${totalBooks} livros`}</span>
+              <span>{`Exibindo ${visibleRangeStart} a ${visibleRangeEnd} de ${totalBooks} livros`}</span>
             </div>
 
             <div className="pagination-actions">
