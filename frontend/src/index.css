@@ -854,11 +854,20 @@ button { cursor: pointer; }
 
 .toolbar-hero { display: none; }
 
-.toolbar-surface { display: contents; }
+.toolbar-surface {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding: 0.35rem;
+  border: 1px solid rgba(209, 213, 219, 0.9);
+  border-radius: calc(var(--r-xl) - 2px);
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
 
 .toolbar-grid {
   display: grid;
-  gap: 0.55rem;
+  gap: 0.75rem;
 }
 
 .toolbar-grid-search {
@@ -869,15 +878,15 @@ button { cursor: pointer; }
 
 .toolbar-divider {
   height: 1px;
-  background: var(--border);
-  margin: 0.1rem 0;
+  background: linear-gradient(90deg, rgba(229, 231, 235, 0) 0%, rgba(209, 213, 219, 1) 18%, rgba(209, 213, 219, 1) 82%, rgba(229, 231, 235, 0) 100%);
+  margin: 0.1rem 0 0.05rem;
 }
 
 .search-field,
 .toolbar-input-field {
   display: flex;
   flex-direction: column;
-  gap: 0.32rem;
+  gap: 0.42rem;
 }
 
 .search-field span,
@@ -895,7 +904,7 @@ button { cursor: pointer; }
   padding: 0.78rem 0.95rem;
   border-radius: var(--r-md);
   border: 1.5px solid var(--border);
-  background: var(--surface-2);
+  background: #fff;
   color: var(--text);
   font-size: 0.98rem;
   transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
@@ -918,7 +927,7 @@ button { cursor: pointer; }
 .toolbar-select-field {
   display: flex;
   flex-direction: column;
-  gap: 0.32rem;
+  gap: 0.42rem;
   min-width: 0;
   flex: 1;
 }
@@ -938,7 +947,7 @@ button { cursor: pointer; }
   padding: 0.78rem 0.95rem;
   border-radius: var(--r-md);
   border: 1.5px solid var(--border);
-  background: var(--surface-2);
+  background: #fff;
   color: var(--text);
   font-size: 0.98rem;
   transition: border-color 0.15s, box-shadow 0.15s;
@@ -953,6 +962,7 @@ button { cursor: pointer; }
   display: flex;
   gap: 0.55rem;
   flex-wrap: wrap;
+  align-items: flex-end;
 }
 
 .toolbar-active-filters {
@@ -961,11 +971,12 @@ button { cursor: pointer; }
   justify-content: space-between;
   gap: 0.75rem;
   flex-wrap: wrap;
+  padding: 0 0.15rem;
 }
 
 .toolbar-chip-row {
   display: flex;
-  gap: 0.4rem;
+  gap: 0.5rem;
   flex-wrap: wrap;
 }
 
