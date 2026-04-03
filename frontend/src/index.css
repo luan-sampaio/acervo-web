@@ -79,7 +79,8 @@ button {
 .container {
   position: relative;
   z-index: 1;
-  width: min(1480px, calc(100% - 3rem));
+  width: calc(100% - 1.2rem);
+  max-width: none;
   margin: 0 auto;
   padding: 1.5rem 0 1.9rem;
 }
@@ -93,11 +94,16 @@ button {
 
 .hero-card {
   display: grid;
-  grid-template-columns: minmax(0, 1.45fr) minmax(260px, 0.9fr);
-  gap: 1.4rem;
+  grid-template-columns: minmax(0, 1.75fr) minmax(320px, 0.95fr);
+  gap: 1.8rem;
   align-items: center;
-  padding: 1.35rem 1.5rem;
+  padding: 1.45rem 1.7rem;
   border-radius: 24px;
+}
+
+.hero-copy {
+  min-width: 0;
+  max-width: 58rem;
 }
 
 .eyebrow {
@@ -115,59 +121,62 @@ button {
 
 .hero-card h1 {
   margin: 0.7rem 0 0.35rem;
-  font-size: clamp(2.1rem, 3vw, 3rem);
+  font-size: clamp(2.3rem, 3.2vw, 3.35rem);
   line-height: 0.98;
   color: var(--text);
+  max-width: 12ch;
 }
 
 .hero-card p {
   margin: 0;
   color: var(--muted);
-  max-width: 40rem;
-  line-height: 1.5;
-  font-size: 1.02rem;
+  max-width: 46rem;
+  line-height: 1.45;
+  font-size: 1.12rem;
 }
 
 .hero-stats {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 0.7rem;
+  gap: 0.8rem;
   margin-top: 0;
+  align-self: stretch;
 }
 
 .stat-card {
-  padding: 0.85rem 1rem;
+  padding: 1rem 1.1rem;
   border-radius: 16px;
   background: linear-gradient(180deg, #f7fbfb, #f2f8f8);
   border: 1px solid var(--border);
+  min-height: 100%;
 }
 
 .stat-card strong {
   display: block;
-  font-size: 1.28rem;
+  font-size: 1.4rem;
   margin-bottom: 0.18rem;
   color: var(--text);
 }
 
 .stat-card span {
   color: var(--muted);
-  font-size: 0.95rem;
+  font-size: 1rem;
 }
 
 .content-grid {
   display: grid;
   grid-template-columns: 360px minmax(0, 1fr);
-  gap: 1.1rem;
-  margin-top: 1rem;
+  gap: 0.9rem;
+  margin-top: 0.8rem;
 }
 
 .panel {
   border-radius: 22px;
-  padding: 1.15rem;
+  padding: 1rem;
 }
 
 .panel-header {
-  margin-bottom: 0.9rem;
+  margin-bottom: 0.7rem;
 }
 
 .panel-header-inline {
@@ -205,8 +214,8 @@ button {
 
 .list-toolbar {
   display: grid;
-  gap: 0.9rem;
-  margin-bottom: 1.25rem;
+  gap: 0.7rem;
+  margin-bottom: 0.85rem;
 }
 
 .toolbar-hero {
@@ -214,7 +223,7 @@ button {
   align-items: end;
   justify-content: space-between;
   gap: 1rem;
-  padding: 0.9rem 1rem;
+  padding: 0.75rem 0.9rem;
   border-radius: 20px;
   border: 1px solid rgba(31, 122, 140, 0.12);
   background:
@@ -231,7 +240,7 @@ button {
 
 .toolbar-hero-copy h3 {
   margin: 0.45rem 0 0.25rem;
-  font-size: clamp(1.18rem, 1.75vw, 1.5rem);
+  font-size: clamp(1.32rem, 2vw, 1.76rem);
   line-height: 1.15;
   color: var(--text);
 }
@@ -240,7 +249,7 @@ button {
   margin: 0;
   color: var(--muted);
   line-height: 1.45;
-  font-size: 1rem;
+  font-size: 1.1rem;
 }
 
 .toolbar-kicker {
@@ -268,7 +277,7 @@ button {
 }
 
 .toolbar-stat strong {
-  font-size: clamp(1.5rem, 1.9vw, 1.95rem);
+  font-size: clamp(1.78rem, 2.1vw, 2.25rem);
   line-height: 1;
   color: var(--text);
 }
@@ -293,7 +302,7 @@ button {
 .toolbar-surface {
   border: 1px solid var(--border);
   border-radius: 20px;
-  padding: 0.9rem;
+  padding: 0.75rem 0.8rem;
   background: linear-gradient(180deg, rgba(247, 251, 251, 0.98), rgba(255, 255, 255, 0.98));
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.88),
@@ -302,7 +311,7 @@ button {
 
 .toolbar-grid {
   display: grid;
-  gap: 0.65rem;
+  gap: 0.55rem;
 }
 
 .toolbar-grid-search {
@@ -317,7 +326,7 @@ button {
 
 .toolbar-divider {
   height: 1px;
-  margin: 0.8rem 0;
+  margin: 0.6rem 0;
   background: linear-gradient(90deg, rgba(148, 163, 184, 0), rgba(148, 163, 184, 0.45), rgba(148, 163, 184, 0));
 }
 
@@ -340,14 +349,14 @@ button {
 .search-field span,
 .toolbar-input-field span {
   color: var(--muted);
-  font-size: 0.82rem;
+  font-size: 0.84rem;
   font-weight: 600;
 }
 
 .search-field input,
 .toolbar-input-field input {
   width: 100%;
-  padding: 0.78rem 0.9rem;
+  padding: 0.72rem 0.85rem;
   border-radius: 12px;
   border: 1px solid var(--border);
   background: var(--surface);
@@ -386,13 +395,13 @@ button {
 
 .toolbar-select-field span {
   color: var(--muted);
-  font-size: 0.82rem;
+  font-size: 0.84rem;
   font-weight: 600;
 }
 
 .toolbar-select-field select {
   width: 100%;
-  padding: 0.78rem 0.9rem;
+  padding: 0.72rem 0.85rem;
   border-radius: 12px;
   border: 1px solid var(--border);
   background: var(--surface);
@@ -416,7 +425,7 @@ button {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  margin-top: 0.75rem;
+  margin-top: 0.55rem;
 }
 
 .toolbar-chip-row {
@@ -428,30 +437,30 @@ button {
 .toolbar-chip {
   display: inline-flex;
   align-items: center;
-  padding: 0.45rem 0.75rem;
+  padding: 0.38rem 0.65rem;
   border-radius: 999px;
   background: #e8f4f5;
   color: var(--primary-strong);
   border: 1px solid rgba(31, 122, 140, 0.12);
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   font-weight: 600;
 }
 
 .panel-header h2 {
   margin: 0;
-  font-size: 1.32rem;
+  font-size: 1.52rem;
   color: var(--text);
 }
 
 .panel-header p {
   margin: 0.2rem 0 0;
   color: var(--muted);
-  font-size: 0.98rem;
+  font-size: 1.08rem;
 }
 
 .book-form {
   display: grid;
-  gap: 0.85rem;
+  gap: 0.75rem;
 }
 
 .book-form label {
@@ -461,13 +470,13 @@ button {
 
 .book-form span {
   color: var(--text);
-  font-size: 0.96rem;
+  font-size: 1.04rem;
   font-weight: 600;
 }
 
 .book-form input {
   width: 100%;
-  padding: 0.78rem 0.9rem;
+  padding: 0.72rem 0.85rem;
   border-radius: 12px;
   border: 1px solid var(--border);
   background: var(--surface);
@@ -502,7 +511,7 @@ button {
 .secondary-button {
   border: 1px solid transparent;
   border-radius: 14px;
-  padding: 0.9rem 1rem;
+  padding: 0.78rem 0.92rem;
   font-weight: 700;
   transition: transform 0.22s ease, opacity 0.2s ease, box-shadow 0.22s ease, border-color 0.22s ease, background 0.22s ease, color 0.22s ease;
 }
@@ -616,10 +625,10 @@ button {
 }
 
 .feedback {
-  margin-top: 1rem;
-  padding: 0.9rem 1rem;
+  margin-top: 0.8rem;
+  padding: 0.75rem 0.9rem;
   border-radius: 14px;
-  font-size: 0.95rem;
+  font-size: 0.98rem;
 }
 
 .feedback.success {
@@ -637,23 +646,23 @@ button {
 .empty-state {
   display: grid;
   place-items: center;
-  min-height: 180px;
+  min-height: 150px;
   border: 1px dashed var(--border-strong);
   border-radius: 20px;
   color: var(--muted);
   text-align: center;
-  padding: 1.5rem;
+  padding: 1.1rem;
   background: var(--surface-soft);
 }
 
 .book-list {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.85rem;
+  gap: 0.7rem;
 }
 
 .book-card {
-  padding: 0.9rem 0.95rem;
+  padding: 0.72rem 0.8rem;
   border-radius: 16px;
   background: linear-gradient(180deg, #fbfdfd, #f6fafb);
   border: 1px solid var(--border);
@@ -664,7 +673,7 @@ button {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.85rem;
+  gap: 0.7rem;
 }
 
 .book-main {
@@ -677,7 +686,7 @@ button {
 
 .inline-form {
   display: grid;
-  gap: 0.8rem;
+  gap: 0.6rem;
 }
 
 .inline-form label {
@@ -687,13 +696,13 @@ button {
 
 .inline-form span {
   color: var(--muted);
-  font-size: 0.74rem;
+  font-size: 0.78rem;
   font-weight: 600;
 }
 
 .inline-form input {
   width: 100%;
-  padding: 0.78rem 0.9rem;
+  padding: 0.7rem 0.82rem;
   border-radius: 12px;
   border: 1px solid var(--border);
   background: #ffffff;
@@ -798,13 +807,13 @@ button {
 
 .book-date {
   color: var(--muted);
-  font-size: 0.8rem;
+  font-size: 0.88rem;
   white-space: nowrap;
 }
 
 .book-card h3 {
   margin: 0;
-  font-size: 1.08rem;
+  font-size: 1.22rem;
   font-weight: 700;
   line-height: 1.25;
   color: var(--text);
@@ -812,7 +821,7 @@ button {
 
 .book-author {
   margin: 0.25rem 0 0;
-  font-size: 0.94rem;
+  font-size: 1.05rem;
   font-weight: 400;
   color: var(--muted);
 }
@@ -821,7 +830,7 @@ button {
   display: flex;
   gap: 0.75rem;
   justify-content: flex-end;
-  margin-top: 0.65rem;
+  margin-top: 0.5rem;
 }
 
 .pagination-bar {
@@ -829,8 +838,8 @@ button {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  margin-top: 0.9rem;
-  padding-top: 0.8rem;
+  margin-top: 0.7rem;
+  padding-top: 0.65rem;
   border-top: 1px solid var(--border);
 }
 
@@ -841,12 +850,12 @@ button {
 
 .pagination-summary strong {
   color: var(--text);
-  font-size: 0.9rem;
+  font-size: 0.98rem;
 }
 
 .pagination-summary span {
   color: var(--muted);
-  font-size: 0.82rem;
+  font-size: 0.9rem;
 }
 
 .pagination-actions {
@@ -928,6 +937,10 @@ button {
     grid-template-columns: 1fr;
   }
 
+  .hero-copy {
+    max-width: none;
+  }
+
   .book-card-top {
     flex-direction: column;
     align-items: flex-start;
@@ -1003,7 +1016,7 @@ button {
 
 @media (max-width: 640px) {
   .container {
-    width: min(100% - 1rem, 1480px);
+    width: calc(100% - 0.8rem);
     padding-top: 0.8rem;
   }
 
