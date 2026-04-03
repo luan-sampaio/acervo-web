@@ -15,8 +15,19 @@ async function parseResponse(response) {
   return data
 }
 
-export async function fetchBooks() {
-  const response = await fetch(`${API_BASE_URL}/books`)
+export async function fetchBooks(params = {}) {
+  const searchParams = new URLSearchParams()
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '') {
+      searchParams.set(key, String(value))
+    }
+  })
+
+  const queryString = searchParams.toString()
+  const url = queryString ? `${API_BASE_URL}/books?${queryString}` : `${API_BASE_URL}/books`
+
+  const response = await fetch(url)
   return parseResponse(response)
 }
 

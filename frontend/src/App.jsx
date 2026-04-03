@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { createBook, deleteBook, fetchBooks, updateBook } from './api'
 
@@ -11,6 +11,26 @@ const initialEditForm = {
   titulo: '',
   autor: '',
 }
+
+const defaultQuery = {
+  limit: 6,
+  offset: 0,
+  sortBy: 'created_at',
+  sortOrder: 'desc',
+}
+
+const pageSizeOptions = [6, 12, 24]
+
+const sortOptions = [
+  { value: 'created_at', label: 'Data de cadastro' },
+  { value: 'titulo', label: 'Título' },
+  { value: 'autor', label: 'Autor' },
+]
+
+const sortOrderOptions = [
+  { value: 'desc', label: 'Decrescente' },
+  { value: 'asc', label: 'Crescente' },
+]
 
 function getTextFieldError(label, value) {
   const trimmedValue = value.trim()
@@ -61,11 +81,15 @@ function formatLatestAddition(value) {
 export default function App() {
   const [form, setForm] = useState(initialForm)
   const [books, setBooks] = useState([])
+  const [query, setQuery] = useState(defaultQuery)
+  const [totalBooks, setTotalBooks] = useState(0)
+  const [latestCreatedAt, setLatestCreatedAt] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formTouched, setFormTouched] = useState({ titulo: false, autor: false })
   const [editingBookId, setEditingBookId] = useState(null)
+  const [activeMenuBookId, setActiveMenuBookId] = useState(null)
   const [editForm, setEditForm] = useState(initialEditForm)
   const [editTouched, setEditTouched] = useState({ titulo: false, autor: false })
   const [savingBookId, setSavingBookId] = useState(null)
@@ -73,13 +97,27 @@ export default function App() {
   const [bookPendingDelete, setBookPendingDelete] = useState(null)
   const [error, setError] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
+  const actionMenuRef = useRef(null)
 
-  async function loadBooks() {
+  async function loadBooks(params = query) {
     try {
       setIsLoading(true)
       setError('')
-      const data = await fetchBooks()
-      setBooks(data)
+      const data = await fetchBooks({
+        limit: params.limit,
+        offset: params.offset,
+        sort_by: params.sortBy,
+        sort_order: params.sortOrder,
+      })
+      setBooks(data.items)
+      setTotalBooks(data.total)
+      setLatestCreatedAt(data.latest_created_at)
+      setQuery({
+        limit: data.limit,
+        offset: data.offset,
+        sortBy: data.sort_by,
+        sortOrder: data.sort_order,
+      })
     } catch (err) {
       setError(err.message)
     } finally {
@@ -88,7 +126,7 @@ export default function App() {
   }
 
   useEffect(() => {
-    loadBooks()
+    loadBooks(defaultQuery)
   }, [])
 
   useEffect(() => {
@@ -103,27 +141,45 @@ export default function App() {
     return () => window.clearTimeout(timeoutId)
   }, [successMessage])
 
-  const displayBooks = useMemo(() => {
-    return [...books]
-      .sort((first, second) => {
-        const firstDate = first.created_at ? new Date(first.created_at).getTime() : 0
-        const secondDate = second.created_at ? new Date(second.created_at).getTime() : 0
+  useEffect(() => {
+    if (activeMenuBookId === null) {
+      return undefined
+    }
 
-        return secondDate - firstDate || second.id - first.id
-      })
-  }, [books])
+    function handlePointerDown(event) {
+      if (actionMenuRef.current && !actionMenuRef.current.contains(event.target)) {
+        setActiveMenuBookId(null)
+      }
+    }
+
+    function handleKeyDown(event) {
+      if (event.key === 'Escape') {
+        setActiveMenuBookId(null)
+      }
+    }
+
+    document.addEventListener('mousedown', handlePointerDown)
+    document.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [activeMenuBookId])
+
+  const displayBooks = books
 
   const totalBooksLabel = useMemo(() => {
-    if (displayBooks.length === 1) {
+    if (totalBooks === 1) {
       return '1 livro cadastrado'
     }
 
-    return `${displayBooks.length} livros cadastrados`
-  }, [displayBooks.length])
+    return `${totalBooks} livros cadastrados`
+  }, [totalBooks])
 
   const latestAdditionLabel = useMemo(() => {
-    return formatLatestAddition(displayBooks[0]?.created_at)
-  }, [displayBooks])
+    return formatLatestAddition(latestCreatedAt)
+  }, [latestCreatedAt])
 
   const filteredBooks = useMemo(() => {
     const normalizedSearchTerm = searchTerm.trim().toLowerCase()
@@ -152,6 +208,12 @@ export default function App() {
 
   const isFormValid = !formErrors.titulo && !formErrors.autor
   const isEditFormValid = !editErrors.titulo && !editErrors.autor
+  const totalPages = Math.max(1, Math.ceil(totalBooks / query.limit))
+  const currentPage = Math.min(totalPages, Math.floor(query.offset / query.limit) + 1)
+  const hasPreviousPage = query.offset > 0
+  const hasNextPage = query.offset + query.limit < totalBooks
+  const visibleRangeStart = totalBooks === 0 ? 0 : query.offset + 1
+  const visibleRangeEnd = query.offset + displayBooks.length
 
   function handleChange(event) {
     const { name, value } = event.target
@@ -189,8 +251,66 @@ export default function App() {
     }))
   }
 
+  function toggleActionMenu(bookId) {
+    setActiveMenuBookId((current) => (current === bookId ? null : bookId))
+  }
+
+  function handleQueryUpdate(nextQuery) {
+    setActiveMenuBookId(null)
+    cancelEditing()
+    loadBooks(nextQuery)
+  }
+
+  function handlePageSizeChange(event) {
+    const nextLimit = Number(event.target.value)
+    handleQueryUpdate({
+      ...query,
+      limit: nextLimit,
+      offset: 0,
+    })
+  }
+
+  function handleSortByChange(event) {
+    handleQueryUpdate({
+      ...query,
+      sortBy: event.target.value,
+      offset: 0,
+    })
+  }
+
+  function handleSortOrderChange(event) {
+    handleQueryUpdate({
+      ...query,
+      sortOrder: event.target.value,
+      offset: 0,
+    })
+  }
+
+  function handlePreviousPage() {
+    if (!hasPreviousPage) {
+      return
+    }
+
+    handleQueryUpdate({
+      ...query,
+      offset: Math.max(0, query.offset - query.limit),
+    })
+  }
+
+  function handleNextPage() {
+    if (!hasNextPage) {
+      return
+    }
+
+    handleQueryUpdate({
+      ...query,
+      offset: query.offset + query.limit,
+    })
+  }
+
   function startEditing(book) {
     setError('')
+    setActiveMenuBookId(null)
     setEditingBookId(book.id)
     setEditForm({
       titulo: book.titulo,
@@ -222,8 +342,11 @@ export default function App() {
       setIsSubmitting(true)
       setError('')
       setSuccessMessage('')
-      const createdBook = await createBook(payload)
-      setBooks((current) => [createdBook, ...current])
+      await createBook(payload)
+      await loadBooks({
+        ...query,
+        offset: 0,
+      })
       setForm(initialForm)
       setFormTouched({ titulo: false, autor: false })
       setSuccessMessage('✓ Livro cadastrado com sucesso')
@@ -249,9 +372,9 @@ export default function App() {
       setSavingBookId(bookId)
       setError('')
       setSuccessMessage('')
-      const updatedBook = await updateBook(bookId, payload)
-      setBooks((current) => current.map((book) => (book.id === bookId ? updatedBook : book)))
+      await updateBook(bookId, payload)
       cancelEditing()
+      await loadBooks(query)
       setSuccessMessage('✓ Livro atualizado com sucesso')
     } catch (err) {
       setError(err.message)
@@ -261,6 +384,7 @@ export default function App() {
   }
 
   function requestDeleteBook(book) {
+    setActiveMenuBookId(null)
     setBookPendingDelete(book)
   }
 
@@ -284,13 +408,21 @@ export default function App() {
       setError('')
       setSuccessMessage('')
       await deleteBook(bookId)
-      setBooks((current) => current.filter((book) => book.id !== bookId))
+
+      const nextTotal = Math.max(totalBooks - 1, 0)
+      const nextOffset = nextTotal === 0
+        ? 0
+        : Math.min(query.offset, Math.floor((nextTotal - 1) / query.limit) * query.limit)
 
       if (editingBookId === bookId) {
         cancelEditing()
       }
 
       setBookPendingDelete(null)
+      await loadBooks({
+        ...query,
+        offset: nextOffset,
+      })
       setSuccessMessage('✓ Livro removido com sucesso')
     } catch (err) {
       setError(err.message)
@@ -314,7 +446,7 @@ export default function App() {
           </p>
           <div className="hero-stats">
             <div className="stat-card">
-              <strong>{displayBooks.length}</strong>
+              <strong>{totalBooks}</strong>
               <span>{totalBooksLabel}</span>
             </div>
             <div className="stat-card">
@@ -394,6 +526,41 @@ export default function App() {
                 />
               </label>
 
+              <div className="list-control-group">
+                <label className="toolbar-select-field">
+                  <span>Ordenar por</span>
+                  <select value={query.sortBy} onChange={handleSortByChange}>
+                    {sortOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label className="toolbar-select-field">
+                  <span>Direção</span>
+                  <select value={query.sortOrder} onChange={handleSortOrderChange}>
+                    {sortOrderOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label className="toolbar-select-field toolbar-select-field-compact">
+                  <span>Por página</span>
+                  <select value={query.limit} onChange={handlePageSizeChange}>
+                    {pageSizeOptions.map((value) => (
+                      <option key={value} value={value}>
+                        {value}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+
               {searchTerm ? (
                 <button type="button" className="secondary-button" onClick={() => setSearchTerm('')}>
                   Limpar
@@ -403,12 +570,12 @@ export default function App() {
 
             {isLoading ? (
               <div className="empty-state">Carregando livros...</div>
-            ) : filteredBooks.length === 0 ? (
-              <div className="empty-state">
-                {searchTerm ? 'Nenhum livro encontrado para a busca informada.' : 'Nenhum livro cadastrado até o momento.'}
-              </div>
             ) : displayBooks.length === 0 ? (
-              <div className="empty-state">Nenhum livro cadastrado até o momento.</div>
+              <div className="empty-state">
+                {totalBooks === 0 ? 'Nenhum livro cadastrado até o momento.' : 'Nenhum livro disponível nesta página.'}
+              </div>
+            ) : filteredBooks.length === 0 ? (
+              <div className="empty-state">Nenhum livro encontrado para a busca informada nesta página.</div>
             ) : (
               <div className="book-list">
                 {filteredBooks.map((book) => (
@@ -454,13 +621,40 @@ export default function App() {
                         </div>
                       )}
                       <div className="book-meta">
+                        {editingBookId === book.id ? null : (
+                          <div className="book-menu" ref={activeMenuBookId === book.id ? actionMenuRef : null}>
+                            <button
+                              type="button"
+                              className="menu-trigger"
+                              aria-label={`Ações do livro ${book.titulo}`}
+                              aria-haspopup="menu"
+                              aria-expanded={activeMenuBookId === book.id}
+                              onClick={() => toggleActionMenu(book.id)}
+                            >
+                              <span className="menu-trigger-dot" />
+                              <span className="menu-trigger-dot" />
+                              <span className="menu-trigger-dot" />
+                            </button>
+
+                            {activeMenuBookId === book.id ? (
+                              <div className="card-menu" role="menu">
+                                <button type="button" role="menuitem" onClick={() => startEditing(book)}>
+                                  Editar
+                                </button>
+                                <button type="button" role="menuitem" className="card-menu-danger" onClick={() => requestDeleteBook(book)}>
+                                  Excluir
+                                </button>
+                              </div>
+                            ) : null}
+                          </div>
+                        )}
                         <span className="book-id">#{book.id}</span>
                         <span className="book-date">{formatDate(book.created_at)}</span>
                       </div>
                     </div>
 
-                    <div className="book-actions">
-                      {editingBookId === book.id ? (
+                    {editingBookId === book.id ? (
+                      <div className="book-actions">
                         <>
                           <button
                             type="button"
@@ -479,31 +673,30 @@ export default function App() {
                             Cancelar
                           </button>
                         </>
-                      ) : (
-                        <>
-                          <button
-                            type="button"
-                            className="action-button secondary-button"
-                            disabled={deletingBookId === book.id}
-                            onClick={() => startEditing(book)}
-                          >
-                            Editar
-                          </button>
-                          <button
-                            type="button"
-                            className="action-button danger-button"
-                            disabled={deletingBookId === book.id}
-                            onClick={() => requestDeleteBook(book)}
-                          >
-                            {deletingBookId === book.id ? 'Removendo...' : 'Excluir'}
-                          </button>
-                        </>
-                      )}
-                    </div>
+                      </div>
+                    ) : null}
                   </article>
                 ))}
               </div>
             )}
+
+            {totalBooks > 0 ? (
+              <div className="pagination-bar">
+                <div className="pagination-summary">
+                  <strong>{`Página ${currentPage} de ${totalPages}`}</strong>
+                  <span>{`Mostrando ${visibleRangeStart}-${visibleRangeEnd} de ${totalBooks} livros`}</span>
+                </div>
+
+                <div className="pagination-actions">
+                  <button type="button" className="secondary-button" disabled={!hasPreviousPage || isLoading} onClick={handlePreviousPage}>
+                    Anterior
+                  </button>
+                  <button type="button" className="secondary-button" disabled={!hasNextPage || isLoading} onClick={handleNextPage}>
+                    Próxima
+                  </button>
+                </div>
+              </div>
+            ) : null}
           </div>
         </section>
 

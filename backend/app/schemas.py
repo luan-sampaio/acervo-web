@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -33,3 +34,13 @@ class BookResponse(BookBase):
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class BookListResponse(BaseModel):
+    items: list[BookResponse]
+    total: int = Field(ge=0)
+    limit: int = Field(ge=1)
+    offset: int = Field(ge=0)
+    sort_by: Literal["created_at", "titulo", "autor"]
+    sort_order: Literal["asc", "desc"]
+    latest_created_at: datetime | None = None
