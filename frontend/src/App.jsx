@@ -3,14 +3,15 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import AppHeader from './components/AppHeader'
 import BookFormPanel from './components/BookFormPanel'
 import BookListPanel from './components/BookListPanel'
+import DashboardOverview from './components/DashboardOverview'
 import DeleteBookModal from './components/DeleteBookModal'
-import HeroSection from './components/HeroSection'
 import HomeOverview from './components/HomeOverview'
 import {
   defaultQuery,
   initialEditForm,
   initialForm,
   pageSizeOptions,
+  readingStatusOptions,
   sortOptions,
   sortOrderOptions,
 } from './constants'
@@ -21,6 +22,7 @@ export default function App() {
   const [currentView, setCurrentView] = useState('home')
   const [form, setForm] = useState(initialForm)
   const [books, setBooks] = useState([])
+  const [dashboardBooks, setDashboardBooks] = useState([])
   const [query, setQuery] = useState(defaultQuery)
   const [totalBooks, setTotalBooks] = useState(0)
   const [latestCreatedAt, setLatestCreatedAt] = useState(null)
@@ -74,8 +76,26 @@ export default function App() {
     }
   }
 
+  async function loadDashboardBooks() {
+    try {
+      const data = await fetchBooks({
+        limit: 100,
+        offset: 0,
+        sort_by: 'created_at',
+        sort_order: 'desc',
+      })
+      setDashboardBooks(data.items)
+    } catch {
+      setDashboardBooks([])
+    }
+  }
+
   useEffect(() => {
     loadBooks(defaultQuery)
+  }, [])
+
+  useEffect(() => {
+    loadDashboardBooks()
   }, [])
 
   useEffect(() => {
@@ -139,17 +159,31 @@ export default function App() {
     return () => window.clearTimeout(timeoutId)
   }, [authorFilter, query, searchTerm])
 
-  const totalBooksLabel = useMemo(() => {
-    if (totalBooks === 1) {
-      return '1 livro cadastrado'
-    }
-
-    return `${totalBooks} livros cadastrados`
-  }, [totalBooks])
-
   const latestAdditionLabel = useMemo(() => {
     return formatLatestAddition(latestCreatedAt)
   }, [latestCreatedAt])
+
+  const recentBooks = useMemo(() => {
+    return [...dashboardBooks]
+      .sort((firstBook, secondBook) => {
+        return new Date(secondBook.created_at).getTime() - new Date(firstBook.created_at).getTime()
+      })
+      .slice(0, 4)
+  }, [dashboardBooks])
+
+  const dashboardMetrics = useMemo(() => {
+    const favoriteCount = dashboardBooks.filter((book) => book.favorito).length
+    const readingNowCount = dashboardBooks.filter((book) => book.status_leitura === 'lendo').length
+    const finishedCount = dashboardBooks.filter((book) => book.status_leitura === 'lido').length
+    const wantToReadCount = dashboardBooks.filter((book) => book.status_leitura === 'quero_ler').length
+
+    return {
+      favoriteCount,
+      readingNowCount,
+      finishedCount,
+      wantToReadCount,
+    }
+  }, [dashboardBooks])
 
   const formErrors = useMemo(() => ({
     titulo: getTextFieldError('Título', form.titulo) || serverFormErrors.titulo,
@@ -169,17 +203,15 @@ export default function App() {
   const hasNextPage = query.offset + query.limit < totalBooks
   const visibleRangeStart = totalBooks === 0 ? 0 : query.offset + 1
   const visibleRangeEnd = query.offset + books.length
-  const recentBooks = books.slice(0, 6)
-
   function handleChange(event) {
-    const { name, value } = event.target
+    const { name, type, checked, value } = event.target
     setServerFormErrors((current) => ({
       ...current,
       [name]: '',
     }))
     setForm((current) => ({
       ...current,
-      [name]: value,
+      [name]: type === 'checkbox' ? checked : value,
     }))
   }
 
@@ -200,14 +232,14 @@ export default function App() {
   }
 
   function handleEditChange(event) {
-    const { name, value } = event.target
+    const { name, type, checked, value } = event.target
     setServerEditErrors((current) => ({
       ...current,
       [name]: '',
     }))
     setEditForm((current) => ({
       ...current,
-      [name]: value,
+      [name]: type === 'checkbox' ? checked : value,
     }))
   }
 
@@ -320,6 +352,8 @@ export default function App() {
     setEditForm({
       titulo: book.titulo,
       autor: book.autor,
+      status_leitura: book.status_leitura,
+      favorito: book.favorito,
     })
     setEditTouched({ titulo: false, autor: false })
   }
@@ -335,6 +369,8 @@ export default function App() {
     const payload = {
       titulo: form.titulo.trim(),
       autor: form.autor.trim(),
+      status_leitura: form.status_leitura,
+      favorito: form.favorito,
     }
 
     try {
@@ -347,6 +383,7 @@ export default function App() {
         ...query,
         offset: 0,
       })
+      await loadDashboardBooks()
       setForm(initialForm)
       setFormTouched({ titulo: false, autor: false })
       setServerFormErrors({ titulo: '', autor: '' })
@@ -370,6 +407,8 @@ export default function App() {
     const payload = {
       titulo: editForm.titulo.trim(),
       autor: editForm.autor.trim(),
+      status_leitura: editForm.status_leitura,
+      favorito: editForm.favorito,
     }
 
     try {
@@ -380,6 +419,7 @@ export default function App() {
       await updateBook(bookId, payload)
       cancelEditing()
       await loadBooks(query)
+      await loadDashboardBooks()
       setSuccessMessage('✓ Livro atualizado com sucesso')
     } catch (err) {
       const nextFieldErrors = getFieldErrorsFromApi(err)
@@ -431,12 +471,74 @@ export default function App() {
         ...query,
         offset: nextOffset,
       })
+      await loadDashboardBooks()
       setSuccessMessage('✓ Livro removido com sucesso')
     } catch (err) {
       setError(err.message)
     } finally {
       setDeletingBookId(null)
     }
+  }
+
+  function renderCollectionContent() {
+    return (
+      <section className="content-grid">
+        <BookFormPanel
+          form={form}
+          formErrors={formErrors}
+          formTouched={formTouched}
+          isFormValid={isFormValid}
+          isSubmitting={isSubmitting}
+          error={error}
+          readingStatusOptions={readingStatusOptions}
+          onChange={handleChange}
+          onBlur={handleFieldBlur}
+          onSubmit={handleSubmit}
+        />
+
+        <BookListPanel
+          books={books}
+          totalBooks={totalBooks}
+          filteredBooks={books}
+          query={query}
+          searchTerm={searchTerm}
+          authorFilter={authorFilter}
+          isLoading={isLoading}
+          editingBookId={editingBookId}
+          activeMenuBookId={activeMenuBookId}
+          editForm={editForm}
+          editErrors={editErrors}
+          editTouched={editTouched}
+          savingBookId={savingBookId}
+          readingStatusOptions={readingStatusOptions}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          visibleRangeStart={visibleRangeStart}
+          visibleRangeEnd={visibleRangeEnd}
+          hasPreviousPage={hasPreviousPage}
+          hasNextPage={hasNextPage}
+          actionMenuRef={actionMenuRef}
+          onSearchChange={handleSearchChange}
+          onAuthorFilterChange={handleAuthorFilterChange}
+          onClearFilters={handleClearFilters}
+          pageSizeOptions={pageSizeOptions}
+          sortOptions={sortOptions}
+          sortOrderOptions={sortOrderOptions}
+          onSortByChange={handleSortByChange}
+          onSortOrderChange={handleSortOrderChange}
+          onPageSizeChange={handlePageSizeChange}
+          onPreviousPage={handlePreviousPage}
+          onNextPage={handleNextPage}
+          onEditChange={handleEditChange}
+          onEditBlur={handleEditBlur}
+          onToggleMenu={toggleActionMenu}
+          onStartEditing={startEditing}
+          onRequestDelete={requestDeleteBook}
+          onSave={handleUpdateBook}
+          onCancelEditing={cancelEditing}
+        />
+      </section>
+    )
   }
 
   return (
@@ -448,75 +550,20 @@ export default function App() {
         <AppHeader currentView={currentView} onNavigate={handleNavigate} />
 
         {currentView === 'home' ? (
-          <>
-            <HeroSection
-              totalBooks={totalBooks}
-              totalBooksLabel={totalBooksLabel}
-              latestAdditionLabel={latestAdditionLabel}
-            />
-
-            <HomeOverview
-              totalBooks={totalBooks}
-              latestAdditionLabel={latestAdditionLabel}
-              recentBooks={recentBooks}
-              onOpenCollection={() => setCurrentView('collection')}
-            />
-          </>
+          <HomeOverview
+            onOpenDashboard={() => setCurrentView('dashboard')}
+            onOpenCollection={() => setCurrentView('collection')}
+          />
+        ) : currentView === 'dashboard' ? (
+          <DashboardOverview
+            totalBooks={totalBooks}
+            latestAdditionLabel={latestAdditionLabel}
+            metrics={dashboardMetrics}
+            recentBooks={recentBooks}
+            onOpenCollection={() => setCurrentView('collection')}
+          />
         ) : (
-          <section className="content-grid">
-            <BookFormPanel
-              form={form}
-              formErrors={formErrors}
-              formTouched={formTouched}
-              isFormValid={isFormValid}
-              isSubmitting={isSubmitting}
-              error={error}
-              onChange={handleChange}
-              onBlur={handleFieldBlur}
-              onSubmit={handleSubmit}
-            />
-
-            <BookListPanel
-              books={books}
-              totalBooks={totalBooks}
-              filteredBooks={books}
-              query={query}
-              searchTerm={searchTerm}
-              authorFilter={authorFilter}
-              isLoading={isLoading}
-              editingBookId={editingBookId}
-              activeMenuBookId={activeMenuBookId}
-              editForm={editForm}
-              editErrors={editErrors}
-              editTouched={editTouched}
-              savingBookId={savingBookId}
-              currentPage={currentPage}
-              totalPages={totalPages}
-              visibleRangeStart={visibleRangeStart}
-              visibleRangeEnd={visibleRangeEnd}
-              hasPreviousPage={hasPreviousPage}
-              hasNextPage={hasNextPage}
-              actionMenuRef={actionMenuRef}
-              onSearchChange={handleSearchChange}
-              onAuthorFilterChange={handleAuthorFilterChange}
-              onClearFilters={handleClearFilters}
-              pageSizeOptions={pageSizeOptions}
-              sortOptions={sortOptions}
-              sortOrderOptions={sortOrderOptions}
-              onSortByChange={handleSortByChange}
-              onSortOrderChange={handleSortOrderChange}
-              onPageSizeChange={handlePageSizeChange}
-              onPreviousPage={handlePreviousPage}
-              onNextPage={handleNextPage}
-              onEditChange={handleEditChange}
-              onEditBlur={handleEditBlur}
-              onToggleMenu={toggleActionMenu}
-              onStartEditing={startEditing}
-              onRequestDelete={requestDeleteBook}
-              onSave={handleUpdateBook}
-              onCancelEditing={cancelEditing}
-            />
-          </section>
+          renderCollectionContent()
         )}
 
         {successMessage ? <div className="toast toast-success">{successMessage}</div> : null}
