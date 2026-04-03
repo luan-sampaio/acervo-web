@@ -9,7 +9,7 @@ import {
   readingStatusOptions,
   sortOptions,
 } from '../constants'
-import { createBook, deleteBook, fetchBooks, updateBook } from '../api'
+import { createBook, deleteBook, fetchBooks, updateBook } from '../services/api'
 import { getTextFieldError } from '../utils'
 
 export default function CollectionPage() {
