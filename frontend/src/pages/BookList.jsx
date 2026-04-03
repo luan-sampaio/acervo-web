@@ -1,11 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
-import api from '../services/api'
-
-async function fetchBooks() {
-  const response = await api.get('/books')
-  return response.data.items
-}
+import { getBooks } from '../services/api'
 
 export default function BookList() {
   const {
@@ -15,7 +10,7 @@ export default function BookList() {
     error,
   } = useQuery({
     queryKey: ['books'],
-    queryFn: fetchBooks,
+    queryFn: getBooks,
   })
 
   if (isLoading) {

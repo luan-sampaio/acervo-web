@@ -2,12 +2,7 @@ import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link, useNavigate } from 'react-router-dom'
 import { initialForm, readingStatusOptions } from '../constants'
-import api from '../services/api'
-
-async function createBook(payload) {
-  const response = await api.post('/books', payload)
-  return response.data
-}
+import { createBook } from '../services/api'
 
 export default function NewBook() {
   const navigate = useNavigate()
