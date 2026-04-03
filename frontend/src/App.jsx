@@ -349,13 +349,9 @@ export default function App() {
   }
 
   function handleStatusFilterChange(nextFilter) {
-    if (query.statusFilter === nextFilter) {
-      return
-    }
-
     handleQueryUpdate({
       ...query,
-      statusFilter: nextFilter,
+      statusFilter: query.statusFilter === nextFilter ? 'all' : nextFilter,
       offset: 0,
     })
   }

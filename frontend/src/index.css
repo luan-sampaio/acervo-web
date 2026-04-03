@@ -1095,14 +1095,16 @@ button { cursor: pointer; }
 
 .sort-order-toggle {
   min-height: 2.4rem;
+  height: 2.4rem;
   width: 2.4rem;
   padding: 0;
   border-color: var(--border);
   align-self: end;
+  margin-bottom: 0;
 }
 
 .sort-order-toggle-icon {
-  font-size: 0.95rem;
+  font-size: 1rem;
   line-height: 1;
 }
 
@@ -1140,37 +1142,14 @@ button { cursor: pointer; }
   color: var(--primary-strong);
 }
 
-.toolbar-active-filters {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.55rem;
-  flex-wrap: wrap;
-  padding: 0 0.05rem;
-}
-
-.toolbar-chip-row {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.toolbar-chip {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.26rem 0.58rem;
-  border-radius: var(--r-full);
-  background: var(--primary-soft);
-  color: var(--primary);
-  border: 1px solid rgba(79, 70, 229, 0.2);
-  font-size: 0.76rem;
-  font-weight: 600;
-}
-
 .toolbar-clear-button {
   white-space: nowrap;
   font-size: 0.78rem;
   padding: 0.34rem 0.62rem;
+}
+
+.toolbar-clear-button-inline {
+  margin-left: auto;
 }
 
 .toolbar-badge {

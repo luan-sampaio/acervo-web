@@ -194,11 +194,6 @@ export default function BookListPanel({
     { value: 'favorito', label: 'Favorito' },
   ]
   const hasActiveFilters = Boolean(searchTerm) || query.statusFilter !== 'all'
-  const activeFilterLabels = [
-    searchTerm ? `Busca: ${searchTerm}` : null,
-    query.statusFilter === 'quero_ler' ? 'Status: Quero ler' : null,
-    query.statusFilter === 'favorito' ? 'Favoritos' : null,
-  ].filter(Boolean)
 
   return (
     <div className="panel list-panel">
@@ -265,22 +260,12 @@ export default function BookListPanel({
               {filter.label}
             </button>
           ))}
-        </div>
-
-        {hasActiveFilters ? (
-          <div className="toolbar-active-filters">
-            <div className="toolbar-chip-row">
-              {activeFilterLabels.map((label) => (
-                <span key={label} className="toolbar-chip">
-                  {label}
-                </span>
-              ))}
-            </div>
-            <button type="button" className="secondary-button toolbar-clear-button" onClick={onClearFilters}>
+          {hasActiveFilters ? (
+            <button type="button" className="secondary-button toolbar-clear-button toolbar-clear-button-inline" onClick={onClearFilters}>
               Limpar filtros
             </button>
-          </div>
-        ) : null}
+          ) : null}
+        </div>
       </div>
 
       <div className="list-content-shell">
