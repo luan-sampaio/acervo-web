@@ -19,6 +19,7 @@ function getStatusLabel(status) {
 export default function BookList() {
   const queryClient = useQueryClient()
   const [editingBookId, setEditingBookId] = useState(null)
+  const [actionErrorMessage, setActionErrorMessage] = useState('')
   const [editForm, setEditForm] = useState({
     titulo: '',
     autor: '',
@@ -38,19 +39,30 @@ export default function BookList() {
   const deleteBookMutation = useMutation({
     mutationFn: deleteBook,
     onSuccess: async () => {
+      setActionErrorMessage('')
       await queryClient.invalidateQueries({ queryKey: ['books'] })
+    },
+    onError: (error) => {
+      const detail = error.response?.data?.detail
+      setActionErrorMessage(typeof detail === 'string' ? detail : 'Nao foi possivel remover o livro.')
     },
   })
 
   const updateBookMutation = useMutation({
     mutationFn: ({ bookId, payload }) => updateBook(bookId, payload),
     onSuccess: async () => {
+      setActionErrorMessage('')
       setEditingBookId(null)
       await queryClient.invalidateQueries({ queryKey: ['books'] })
+    },
+    onError: (error) => {
+      const detail = error.response?.data?.detail
+      setActionErrorMessage(typeof detail === 'string' ? detail : 'Nao foi possivel atualizar o livro.')
     },
   })
 
   function startEditing(book) {
+    setActionErrorMessage('')
     setEditingBookId(book.id)
     setEditForm({
       titulo: book.titulo,
@@ -62,6 +74,7 @@ export default function BookList() {
 
   function handleEditChange(event) {
     const { name, type, value, checked } = event.target
+    setActionErrorMessage('')
     setEditForm((current) => ({
       ...current,
       [name]: type === 'checkbox' ? checked : value,
@@ -124,6 +137,12 @@ export default function BookList() {
             Adicionar Livro
           </Link>
         </div>
+
+        {actionErrorMessage ? (
+          <div className="mt-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {actionErrorMessage}
+          </div>
+        ) : null}
 
         {books.length === 0 ? (
           <div className="mt-8 rounded-xl border border-dashed border-slate-300 bg-slate-50 p-6 text-slate-600">
