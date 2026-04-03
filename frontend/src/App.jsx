@@ -27,7 +27,6 @@ export default function App() {
   const [totalBooks, setTotalBooks] = useState(0)
   const [latestCreatedAt, setLatestCreatedAt] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
-  const [authorFilter, setAuthorFilter] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formTouched, setFormTouched] = useState({ titulo: false, autor: false })
@@ -55,7 +54,6 @@ export default function App() {
         sort_by: params.sortBy,
         sort_order: params.sortOrder,
         search: params.search,
-        author: params.author,
       })
       setBooks(data.items)
       setTotalBooks(data.total)
@@ -66,10 +64,9 @@ export default function App() {
         sortBy: data.sort_by,
         sortOrder: data.sort_order,
         search: data.search,
-        author: data.author,
+        author: '',
       })
       setSearchTerm(data.search)
-      setAuthorFilter(data.author)
     } catch (err) {
       setError(err.message)
     } finally {
@@ -157,11 +154,8 @@ export default function App() {
 
   useEffect(() => {
     const normalizedSearch = searchTerm.trim()
-    const normalizedAuthor = authorFilter.trim()
-
     if (
       normalizedSearch === query.search
-      && normalizedAuthor === query.author
     ) {
       return undefined
     }
@@ -170,13 +164,13 @@ export default function App() {
       handleQueryUpdate({
         ...query,
         search: normalizedSearch,
-        author: normalizedAuthor,
+        author: '',
         offset: 0,
       })
     }, 300)
 
     return () => window.clearTimeout(timeoutId)
-  }, [authorFilter, query, searchTerm])
+  }, [query, searchTerm])
 
   const latestAdditionLabel = useMemo(() => {
     return formatLatestAddition(latestCreatedAt)
@@ -236,10 +230,6 @@ export default function App() {
 
   function handleSearchChange(event) {
     setSearchTerm(event.target.value)
-  }
-
-  function handleAuthorFilterChange(event) {
-    setAuthorFilter(event.target.value)
   }
 
   function handleFieldBlur(event) {
@@ -318,7 +308,6 @@ export default function App() {
 
   function handleClearFilters() {
     setSearchTerm('')
-    setAuthorFilter('')
   }
 
   function handleNavigate(view) {
@@ -529,7 +518,6 @@ export default function App() {
           filteredBooks={books}
           query={query}
           searchTerm={searchTerm}
-          authorFilter={authorFilter}
           isLoading={isLoading}
           editingBookId={editingBookId}
           activeMenuBookId={activeMenuBookId}
@@ -546,7 +534,6 @@ export default function App() {
           hasNextPage={hasNextPage}
           actionMenuRef={actionMenuRef}
           onSearchChange={handleSearchChange}
-          onAuthorFilterChange={handleAuthorFilterChange}
           onClearFilters={handleClearFilters}
           pageSizeOptions={pageSizeOptions}
           sortOptions={sortOptions}

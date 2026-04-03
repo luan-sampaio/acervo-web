@@ -153,7 +153,6 @@ export default function BookListPanel({
   filteredBooks,
   query,
   searchTerm,
-  authorFilter,
   isLoading,
   editingBookId,
   activeMenuBookId,
@@ -190,10 +189,9 @@ export default function BookListPanel({
   onOpenCreateModal,
   error,
 }) {
-  const hasActiveFilters = Boolean(searchTerm || authorFilter)
+  const hasActiveFilters = Boolean(searchTerm)
   const activeFilterLabels = [
     searchTerm ? `Busca: ${searchTerm}` : null,
-    authorFilter ? `Autor: ${authorFilter}` : null,
   ].filter(Boolean)
 
   return (
@@ -220,20 +218,11 @@ export default function BookListPanel({
         <div className="toolbar-surface">
           <div className="toolbar-grid toolbar-grid-search">
             <label className="search-field search-field-wide">
-              <span>Buscar por título ou autor</span>
+              <span>Buscar livros</span>
               <input
                 value={searchTerm}
                 onChange={onSearchChange}
                 placeholder="Ex.: Machado de Assis"
-              />
-            </label>
-
-            <label className="toolbar-input-field">
-              <span>Autor</span>
-              <input
-                value={authorFilter}
-                onChange={onAuthorFilterChange}
-                placeholder="Ex.: Ana Almeida"
               />
             </label>
           </div>
