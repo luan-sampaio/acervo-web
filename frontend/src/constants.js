@@ -21,8 +21,6 @@ export const defaultQuery = {
   author: '',
 }
 
-export const pageSizeOptions = [6, 12, 24]
-
 export const sortOptions = [
   { value: 'created_at', label: 'Data de cadastro' },
   { value: 'titulo', label: 'Título' },

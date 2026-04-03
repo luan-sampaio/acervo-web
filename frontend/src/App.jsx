@@ -10,7 +10,6 @@ import {
   defaultQuery,
   initialEditForm,
   initialForm,
-  pageSizeOptions,
   readingStatusOptions,
   sortOptions,
   sortOrderOptions,
@@ -297,15 +296,6 @@ export default function App() {
     loadBooks(nextQuery)
   }
 
-  function handlePageSizeChange(event) {
-    const nextLimit = Number(event.target.value)
-    handleQueryUpdate({
-      ...query,
-      limit: nextLimit,
-      offset: 0,
-    })
-  }
-
   function handleClearFilters() {
     setSearchTerm('')
   }
@@ -535,12 +525,10 @@ export default function App() {
           actionMenuRef={actionMenuRef}
           onSearchChange={handleSearchChange}
           onClearFilters={handleClearFilters}
-          pageSizeOptions={pageSizeOptions}
           sortOptions={sortOptions}
           sortOrderOptions={sortOrderOptions}
           onSortByChange={handleSortByChange}
           onSortOrderChange={handleSortOrderChange}
-          onPageSizeChange={handlePageSizeChange}
           onPreviousPage={handlePreviousPage}
           onNextPage={handleNextPage}
           onEditChange={handleEditChange}

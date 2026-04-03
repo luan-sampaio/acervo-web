@@ -899,8 +899,8 @@ button { cursor: pointer; }
 .toolbar-surface {
   display: flex;
   flex-direction: column;
-  gap: 0.9rem;
-  padding: 0.35rem;
+  gap: 0.7rem;
+  padding: 0.3rem;
   border: 1px solid rgba(209, 213, 219, 0.9);
   border-radius: calc(var(--r-xl) - 2px);
   background: rgba(255, 255, 255, 0.88);
@@ -916,24 +916,23 @@ button { cursor: pointer; }
   grid-template-columns: minmax(0, 1fr);
 }
 
-.toolbar-grid-controls { grid-template-columns: 1fr; }
-
-.toolbar-divider {
-  height: 1px;
-  background: linear-gradient(90deg, rgba(229, 231, 235, 0) 0%, rgba(209, 213, 219, 1) 18%, rgba(209, 213, 219, 1) 82%, rgba(229, 231, 235, 0) 100%);
-  margin: 0.1rem 0 0.05rem;
+.toolbar-grid-compact {
+  grid-template-columns: minmax(0, 1.6fr) repeat(2, minmax(10rem, 0.7fr));
+  align-items: end;
 }
+
+.toolbar-grid-controls { grid-template-columns: 1fr; }
 
 .search-field,
 .toolbar-input-field {
   display: flex;
   flex-direction: column;
-  gap: 0.42rem;
+  gap: 0.32rem;
 }
 
 .search-field span,
 .toolbar-input-field span {
-  font-size: 0.82rem;
+  font-size: 0.76rem;
   font-weight: 600;
   color: var(--muted);
   text-transform: uppercase;
@@ -943,12 +942,13 @@ button { cursor: pointer; }
 .search-field input,
 .toolbar-input-field input {
   width: 100%;
-  padding: 0.78rem 0.95rem;
+  min-height: 2.75rem;
+  padding: 0.68rem 0.82rem;
   border-radius: var(--r-md);
   border: 1.5px solid var(--border);
   background: #fff;
   color: var(--text);
-  font-size: 0.98rem;
+  font-size: 0.92rem;
   transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
 }
 
@@ -969,15 +969,13 @@ button { cursor: pointer; }
 .toolbar-select-field {
   display: flex;
   flex-direction: column;
-  gap: 0.42rem;
+  gap: 0.32rem;
   min-width: 0;
   flex: 1;
 }
 
-.toolbar-select-field-compact { flex: 0.65; }
-
 .toolbar-select-field span {
-  font-size: 0.82rem;
+  font-size: 0.76rem;
   font-weight: 600;
   color: var(--muted);
   text-transform: uppercase;
@@ -986,12 +984,13 @@ button { cursor: pointer; }
 
 .toolbar-select-field select {
   width: 100%;
-  padding: 0.78rem 0.95rem;
+  min-height: 2.75rem;
+  padding: 0.68rem 0.82rem;
   border-radius: var(--r-md);
   border: 1.5px solid var(--border);
   background: #fff;
   color: var(--text);
-  font-size: 0.98rem;
+  font-size: 0.92rem;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 
@@ -1005,6 +1004,10 @@ button { cursor: pointer; }
   gap: 0.55rem;
   flex-wrap: wrap;
   align-items: flex-end;
+}
+
+.list-control-group-compact {
+  display: contents;
 }
 
 .list-control-group > * {
@@ -1040,8 +1043,8 @@ button { cursor: pointer; }
 
 .toolbar-clear-button {
   white-space: nowrap;
-  font-size: 0.9rem;
-  padding: 0.55rem 0.9rem;
+  font-size: 0.82rem;
+  padding: 0.45rem 0.75rem;
 }
 
 .toolbar-badge {
@@ -1108,8 +1111,8 @@ button { cursor: pointer; }
 
 /* ── BOOK LIST ── */
 .book-list {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   padding: 1rem 1.5rem 1.25rem;
   gap: 0.9rem;
 }
@@ -1521,6 +1524,10 @@ button { cursor: pointer; }
     grid-template-columns: 1fr;
   }
 
+  .toolbar-grid-compact {
+    grid-template-columns: 1fr;
+  }
+
   .list-toolbar {
     gap: 0.75rem;
   }
@@ -1536,7 +1543,7 @@ button { cursor: pointer; }
   }
 
   .toolbar-select-field,
-  .toolbar-select-field-compact {
+  .toolbar-select-field {
     min-width: 0;
     flex: 1;
   }
@@ -1563,6 +1570,10 @@ button { cursor: pointer; }
   .book-card-top {
     flex-direction: column;
     gap: 0.85rem;
+  }
+
+  .book-list {
+    grid-template-columns: 1fr;
   }
 
   .book-meta {

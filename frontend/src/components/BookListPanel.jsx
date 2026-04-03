@@ -172,12 +172,10 @@ export default function BookListPanel({
   actionMenuRef,
   onSearchChange,
   onClearFilters,
-  pageSizeOptions,
   sortOptions,
   sortOrderOptions,
   onSortByChange,
   onSortOrderChange,
-  onPageSizeChange,
   onPreviousPage,
   onNextPage,
   onEditChange,
@@ -218,7 +216,7 @@ export default function BookListPanel({
 
       <div className="list-toolbar">
         <div className="toolbar-surface">
-          <div className="toolbar-grid toolbar-grid-search">
+          <div className="toolbar-grid toolbar-grid-compact">
             <label className="search-field search-field-wide">
               <span>Buscar livros</span>
               <input
@@ -244,10 +242,7 @@ export default function BookListPanel({
             </div>
           ) : null}
 
-          <div className="toolbar-divider" />
-
-          <div className="toolbar-grid toolbar-grid-controls">
-            <div className="list-control-group">
+            <div className="list-control-group list-control-group-compact">
               <label className="toolbar-select-field">
                 <span>Ordenar por</span>
                 <select value={query.sortBy} onChange={onSortByChange}>
@@ -269,89 +264,81 @@ export default function BookListPanel({
                   ))}
                 </select>
               </label>
-
-              <label className="toolbar-select-field toolbar-select-field-compact">
-                <span>Por página</span>
-                <select value={query.limit} onChange={onPageSizeChange}>
-                  {pageSizeOptions.map((value) => (
-                    <option key={value} value={value}>
-                      {value}
-                    </option>
-                  ))}
-                </select>
-              </label>
             </div>
           </div>
-        </div>
       </div>
 
-      {isLoading ? (
-        <div className="empty-state">
-          <div className="empty-state-card">
-            <span className="empty-state-kicker">Carregando</span>
-            <strong>Buscando livros da sua colecao</strong>
-            <p>Estamos atualizando os registros para mostrar a lista mais recente.</p>
-          </div>
+      <div className="list-content-shell">
+        <div className="list-scroll-area">
+          {isLoading ? (
+            <div className="empty-state">
+              <div className="empty-state-card">
+                <span className="empty-state-kicker">Carregando</span>
+                <strong>Buscando livros da sua colecao</strong>
+                <p>Estamos atualizando os registros para mostrar a lista mais recente.</p>
+              </div>
+            </div>
+          ) : books.length === 0 ? (
+            <div className="empty-state">
+              <div className="empty-state-card">
+                <span className="empty-state-kicker">Biblioteca vazia</span>
+                <strong>Nenhum livro cadastrado ate o momento</strong>
+                <p>Comece adicionando o primeiro livro para montar sua colecao.</p>
+              </div>
+            </div>
+          ) : filteredBooks.length === 0 ? (
+            <div className="empty-state">
+              <div className="empty-state-card">
+                <span className="empty-state-kicker">Sem resultados</span>
+                <strong>Nenhum livro encontrado para essa busca</strong>
+                <p>Tente outro termo ou limpe os filtros para ver toda a colecao novamente.</p>
+              </div>
+            </div>
+          ) : (
+            <div className="book-list">
+              {filteredBooks.map((book) => (
+                <BookCard
+                  key={book.id}
+                  book={book}
+                  isEditing={editingBookId === book.id}
+                  editForm={editForm}
+                  editErrors={editErrors}
+                  editTouched={editTouched}
+                  savingBookId={savingBookId}
+                  readingStatusOptions={readingStatusOptions}
+                  activeMenuBookId={activeMenuBookId}
+                  actionMenuRef={actionMenuRef}
+                  onEditChange={onEditChange}
+                  onEditBlur={onEditBlur}
+                  onToggleMenu={onToggleMenu}
+                  onStartEditing={onStartEditing}
+                  onRequestDelete={onRequestDelete}
+                  onSave={onSave}
+                  onCancelEditing={onCancelEditing}
+                />
+              ))}
+            </div>
+          )}
         </div>
-      ) : books.length === 0 ? (
-        <div className="empty-state">
-          <div className="empty-state-card">
-            <span className="empty-state-kicker">Biblioteca vazia</span>
-            <strong>Nenhum livro cadastrado ate o momento</strong>
-            <p>Comece adicionando o primeiro livro para montar sua colecao.</p>
-          </div>
-        </div>
-      ) : filteredBooks.length === 0 ? (
-        <div className="empty-state">
-          <div className="empty-state-card">
-            <span className="empty-state-kicker">Sem resultados</span>
-            <strong>Nenhum livro encontrado para essa busca</strong>
-            <p>Tente outro termo ou limpe os filtros para ver toda a colecao novamente.</p>
-          </div>
-        </div>
-      ) : (
-        <div className="book-list">
-          {filteredBooks.map((book) => (
-            <BookCard
-              key={book.id}
-              book={book}
-              isEditing={editingBookId === book.id}
-              editForm={editForm}
-              editErrors={editErrors}
-              editTouched={editTouched}
-              savingBookId={savingBookId}
-              readingStatusOptions={readingStatusOptions}
-              activeMenuBookId={activeMenuBookId}
-              actionMenuRef={actionMenuRef}
-              onEditChange={onEditChange}
-              onEditBlur={onEditBlur}
-              onToggleMenu={onToggleMenu}
-              onStartEditing={onStartEditing}
-              onRequestDelete={onRequestDelete}
-              onSave={onSave}
-              onCancelEditing={onCancelEditing}
-            />
-          ))}
-        </div>
-      )}
 
-      {totalBooks > 0 ? (
-        <div className="pagination-bar">
-          <div className="pagination-summary">
-            <strong>{`Página ${currentPage} de ${totalPages}`}</strong>
-            <span>{`Mostrando ${visibleRangeStart}-${visibleRangeEnd} de ${totalBooks} livros`}</span>
-          </div>
+        {totalBooks > 0 ? (
+          <div className="pagination-bar">
+            <div className="pagination-summary">
+              <strong>{`Página ${currentPage} de ${totalPages}`}</strong>
+              <span>{`Mostrando ${visibleRangeStart}-${visibleRangeEnd} de ${totalBooks} livros`}</span>
+            </div>
 
-          <div className="pagination-actions">
-            <button type="button" className="secondary-button pagination-button" disabled={!hasPreviousPage || isLoading} onClick={onPreviousPage}>
-              Anterior
-            </button>
-            <button type="button" className="secondary-button pagination-button" disabled={!hasNextPage || isLoading} onClick={onNextPage}>
-              Próxima
-            </button>
+            <div className="pagination-actions">
+              <button type="button" className="secondary-button pagination-button" disabled={!hasPreviousPage || isLoading} onClick={onPreviousPage}>
+                Anterior
+              </button>
+              <button type="button" className="secondary-button pagination-button" disabled={!hasNextPage || isLoading} onClick={onNextPage}>
+                Próxima
+              </button>
+            </div>
           </div>
-        </div>
-      ) : null}
+        ) : null}
+      </div>
     </div>
   )
 }
