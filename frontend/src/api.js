@@ -1,5 +1,14 @@
 const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
 
+class ApiError extends Error {
+  constructor(message, options = {}) {
+    super(message)
+    this.name = 'ApiError'
+    this.status = options.status
+    this.errors = options.errors ?? []
+  }
+}
+
 async function parseResponse(response) {
   if (response.status === 204) {
     return null
@@ -9,7 +18,10 @@ async function parseResponse(response) {
 
   if (!response.ok) {
     const message = data.message ?? 'Ocorreu um erro ao processar a requisição.'
-    throw new Error(message)
+    throw new ApiError(message, {
+      status: response.status,
+      errors: data.errors,
+    })
   }
 
   return data

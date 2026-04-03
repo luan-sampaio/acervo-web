@@ -30,6 +30,8 @@ export default function App() {
   const [activeMenuBookId, setActiveMenuBookId] = useState(null)
   const [editForm, setEditForm] = useState(initialEditForm)
   const [editTouched, setEditTouched] = useState({ titulo: false, autor: false })
+  const [serverFormErrors, setServerFormErrors] = useState({ titulo: '', autor: '' })
+  const [serverEditErrors, setServerEditErrors] = useState({ titulo: '', autor: '' })
   const [savingBookId, setSavingBookId] = useState(null)
   const [deletingBookId, setDeletingBookId] = useState(null)
   const [bookPendingDelete, setBookPendingDelete] = useState(null)
@@ -147,14 +149,14 @@ export default function App() {
   }, [latestCreatedAt])
 
   const formErrors = useMemo(() => ({
-    titulo: getTextFieldError('Título', form.titulo),
-    autor: getTextFieldError('Autor', form.autor),
-  }), [form.autor, form.titulo])
+    titulo: getTextFieldError('Título', form.titulo) || serverFormErrors.titulo,
+    autor: getTextFieldError('Autor', form.autor) || serverFormErrors.autor,
+  }), [form.autor, form.titulo, serverFormErrors.autor, serverFormErrors.titulo])
 
   const editErrors = useMemo(() => ({
-    titulo: getTextFieldError('Título', editForm.titulo),
-    autor: getTextFieldError('Autor', editForm.autor),
-  }), [editForm.autor, editForm.titulo])
+    titulo: getTextFieldError('Título', editForm.titulo) || serverEditErrors.titulo,
+    autor: getTextFieldError('Autor', editForm.autor) || serverEditErrors.autor,
+  }), [editForm.autor, editForm.titulo, serverEditErrors.autor, serverEditErrors.titulo])
 
   const isFormValid = !formErrors.titulo && !formErrors.autor
   const isEditFormValid = !editErrors.titulo && !editErrors.autor
@@ -167,6 +169,10 @@ export default function App() {
 
   function handleChange(event) {
     const { name, value } = event.target
+    setServerFormErrors((current) => ({
+      ...current,
+      [name]: '',
+    }))
     setForm((current) => ({
       ...current,
       [name]: value,
@@ -191,6 +197,10 @@ export default function App() {
 
   function handleEditChange(event) {
     const { name, value } = event.target
+    setServerEditErrors((current) => ({
+      ...current,
+      [name]: '',
+    }))
     setEditForm((current) => ({
       ...current,
       [name]: value,
@@ -213,6 +223,27 @@ export default function App() {
     setEditingBookId(null)
     setEditForm(initialEditForm)
     setEditTouched({ titulo: false, autor: false })
+    setServerEditErrors({ titulo: '', autor: '' })
+  }
+
+  function getFieldErrorsFromApi(err) {
+    const fieldErrors = { titulo: '', autor: '' }
+
+    if (!Array.isArray(err?.errors)) {
+      return fieldErrors
+    }
+
+    err.errors.forEach((item) => {
+      if (item.field === 'body.titulo') {
+        fieldErrors.titulo = item.message
+      }
+
+      if (item.field === 'body.autor') {
+        fieldErrors.autor = item.message
+      }
+    })
+
+    return fieldErrors
   }
 
   function handleQueryUpdate(nextQuery) {
@@ -275,6 +306,7 @@ export default function App() {
 
   function startEditing(book) {
     setError('')
+    setServerEditErrors({ titulo: '', autor: '' })
     setActiveMenuBookId(null)
     setEditingBookId(book.id)
     setEditForm({
@@ -300,6 +332,7 @@ export default function App() {
     try {
       setIsSubmitting(true)
       setError('')
+      setServerFormErrors({ titulo: '', autor: '' })
       setSuccessMessage('')
       await createBook(payload)
       await loadBooks({
@@ -308,9 +341,13 @@ export default function App() {
       })
       setForm(initialForm)
       setFormTouched({ titulo: false, autor: false })
+      setServerFormErrors({ titulo: '', autor: '' })
       setSuccessMessage('✓ Livro cadastrado com sucesso')
     } catch (err) {
-      setError(err.message)
+      const nextFieldErrors = getFieldErrorsFromApi(err)
+      const hasFieldErrors = Boolean(nextFieldErrors.titulo || nextFieldErrors.autor)
+      setServerFormErrors(nextFieldErrors)
+      setError(hasFieldErrors ? '' : err.message)
     } finally {
       setIsSubmitting(false)
     }
@@ -330,13 +367,17 @@ export default function App() {
     try {
       setSavingBookId(bookId)
       setError('')
+      setServerEditErrors({ titulo: '', autor: '' })
       setSuccessMessage('')
       await updateBook(bookId, payload)
       cancelEditing()
       await loadBooks(query)
       setSuccessMessage('✓ Livro atualizado com sucesso')
     } catch (err) {
-      setError(err.message)
+      const nextFieldErrors = getFieldErrorsFromApi(err)
+      const hasFieldErrors = Boolean(nextFieldErrors.titulo || nextFieldErrors.autor)
+      setServerEditErrors(nextFieldErrors)
+      setError(hasFieldErrors ? '' : err.message)
     } finally {
       setSavingBookId(null)
     }
