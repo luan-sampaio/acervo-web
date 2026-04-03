@@ -14,4 +14,8 @@ export async function createBook(payload) {
   return response.data
 }
 
+export async function deleteBook(bookId) {
+  await api.delete(`/books/${bookId}`)
+}
+
 export default api

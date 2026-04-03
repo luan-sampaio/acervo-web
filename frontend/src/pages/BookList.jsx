@@ -1,6 +1,6 @@
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
-import { getBooks } from '../services/api'
+import { deleteBook, getBooks } from '../services/api'
 
 function getStatusLabel(status) {
   if (status === 'lendo') {
@@ -15,6 +15,7 @@ function getStatusLabel(status) {
 }
 
 export default function BookList() {
+  const queryClient = useQueryClient()
   const {
     data: books = [],
     isLoading,
@@ -23,6 +24,13 @@ export default function BookList() {
   } = useQuery({
     queryKey: ['books'],
     queryFn: getBooks,
+  })
+
+  const deleteBookMutation = useMutation({
+    mutationFn: deleteBook,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['books'] })
+    },
   })
 
   if (isLoading) {
@@ -95,9 +103,20 @@ export default function BookList() {
                 </div>
 
                 <div className="mt-4">
-                  <span className="rounded-full bg-slate-200 px-3 py-1 text-xs font-medium text-slate-700">
-                    {getStatusLabel(book.status_leitura)}
-                  </span>
+                  <div className="flex items-center justify-between gap-4">
+                    <span className="rounded-full bg-slate-200 px-3 py-1 text-xs font-medium text-slate-700">
+                      {getStatusLabel(book.status_leitura)}
+                    </span>
+
+                    <button
+                      type="button"
+                      onClick={() => deleteBookMutation.mutate(book.id)}
+                      disabled={deleteBookMutation.isPending}
+                      className="rounded-lg border border-red-200 px-3 py-2 text-xs font-medium text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {deleteBookMutation.isPending ? 'Removendo...' : 'Remover'}
+                    </button>
+                  </div>
                 </div>
               </li>
             ))}
