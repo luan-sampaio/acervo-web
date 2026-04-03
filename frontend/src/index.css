@@ -436,6 +436,7 @@ button { cursor: pointer; }
   display: flex;
   flex-direction: column;
   gap: 0.22rem;
+  justify-content: flex-start;
   height: 100%;
   padding: 0.82rem 0.9rem;
   border-radius: var(--r-lg);
@@ -466,27 +467,45 @@ button { cursor: pointer; }
 }
 
 .dashboard-status-card-want {
-  border-color: rgba(217, 119, 6, 0.18);
+  border-color: rgba(217, 119, 6, 0.22);
+  background: linear-gradient(180deg, #FFFDF7 0%, #FFFBEB 100%);
+  box-shadow: 0 4px 14px rgba(217, 119, 6, 0.08);
 }
 
 .dashboard-status-card-want strong {
   color: #B45309;
 }
 
+.dashboard-status-card-want span {
+  color: #92400E;
+}
+
 .dashboard-status-card-reading {
-  border-color: rgba(37, 99, 235, 0.18);
+  border-color: rgba(37, 99, 235, 0.22);
+  background: linear-gradient(180deg, #F8FBFF 0%, #EFF6FF 100%);
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.08);
 }
 
 .dashboard-status-card-reading strong {
   color: #2563EB;
 }
 
+.dashboard-status-card-reading span {
+  color: #1D4ED8;
+}
+
 .dashboard-status-card-finished {
-  border-color: rgba(22, 163, 74, 0.18);
+  border-color: rgba(22, 163, 74, 0.22);
+  background: linear-gradient(180deg, #F7FFF9 0%, #F0FDF4 100%);
+  box-shadow: 0 4px 14px rgba(22, 163, 74, 0.08);
 }
 
 .dashboard-status-card-finished strong {
   color: #15803D;
+}
+
+.dashboard-status-card-finished span {
+  color: #166534;
 }
 
 .dashboard-panel-head {
