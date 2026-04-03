@@ -121,9 +121,10 @@ function BookCard({
                 aria-expanded={activeMenuBookId === book.id}
                 onClick={() => onToggleMenu(book.id)}
               >
-                <span className="menu-trigger-dot" />
-                <span className="menu-trigger-dot" />
-                <span className="menu-trigger-dot" />
+                <span className="menu-trigger-label">Ações</span>
+                <span className="menu-trigger-caret" aria-hidden="true">
+                  {activeMenuBookId === book.id ? '▴' : '▾'}
+                </span>
               </button>
 
               {activeMenuBookId === book.id ? (
