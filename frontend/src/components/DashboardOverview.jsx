@@ -12,17 +12,25 @@ export default function DashboardOverview({
       <section className="dashboard-hero">
         <div className="dashboard-hero-copy">
           <span className="eyebrow">Painel do acervo</span>
-          <h1>Uma visão rápida da sua coleção.</h1>
+          <h1>Seu painel de leitura, em um só lugar.</h1>
           <p>
-            Veja o ritmo do seu acervo, acompanhe os registros mais recentes e siga para a
-            coleção quando quiser cadastrar ou revisar livros.
+            Acompanhe o crescimento da sua biblioteca, veja o que merece atenção agora e
+            avance para a coleção sempre que quiser cadastrar ou revisar livros.
           </p>
         </div>
 
-        <div className="dashboard-actions">
-          <button type="button" className="home-primary-action" onClick={onOpenCollection}>
-            Ir para a coleção
-          </button>
+        <div className="dashboard-hero-side">
+          <div className="dashboard-hero-highlight">
+            <span className="dashboard-hero-highlight-label">Resumo do momento</span>
+            <strong>{totalBooks === 1 ? '1 livro no acervo' : `${totalBooks} livros no acervo`}</strong>
+            <p>{latestAdditionLabel}</p>
+          </div>
+
+          <div className="dashboard-actions">
+            <button type="button" className="home-primary-action" onClick={onOpenCollection}>
+              Ir para a coleção
+            </button>
+          </div>
         </div>
       </section>
 
