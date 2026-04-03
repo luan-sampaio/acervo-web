@@ -531,33 +531,73 @@ button { cursor: pointer; }
 .dashboard-status-card {
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
-  padding: 1rem 1.1rem;
+  gap: 0.3rem;
+  padding: 1.05rem 1.1rem;
   border-radius: var(--r-lg);
-  background: var(--surface-2);
+  background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
   border: 1px solid var(--border);
+  min-height: 9rem;
 }
 
 .dashboard-status-card strong {
-  font-size: 1.6rem;
+  font-size: 1.75rem;
   font-weight: 700;
   line-height: 1;
   color: var(--text);
 }
 
 .dashboard-status-card span {
+  color: var(--text-2);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.dashboard-status-card p {
+  margin: 0.2rem 0 0;
   color: var(--muted);
-  font-size: 0.875rem;
-  font-weight: 500;
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.dashboard-status-card-want {
+  border-color: rgba(217, 119, 6, 0.22);
+  background: linear-gradient(180deg, #FFFDF5 0%, #FFFBEB 100%);
+}
+
+.dashboard-status-card-want strong {
+  color: #B45309;
+}
+
+.dashboard-status-card-reading {
+  border-color: rgba(37, 99, 235, 0.2);
+  background: linear-gradient(180deg, #F8FBFF 0%, #EFF6FF 100%);
+}
+
+.dashboard-status-card-reading strong {
+  color: #2563EB;
+}
+
+.dashboard-status-card-finished {
+  border-color: rgba(22, 163, 74, 0.2);
+  background: linear-gradient(180deg, #F7FFF9 0%, #F0FDF4 100%);
+}
+
+.dashboard-status-card-finished strong {
+  color: #15803D;
 }
 
 .dashboard-status-card-highlight {
-  background: var(--primary-soft);
+  background: linear-gradient(180deg, #F5F3FF 0%, #EEF2FF 100%);
   border-color: rgba(79, 70, 229, 0.2);
 }
 
 .dashboard-status-card-highlight strong {
   color: var(--primary);
+}
+
+.dashboard-status-card-highlight span,
+.dashboard-status-card-highlight p {
+  color: var(--primary-strong);
 }
 
 .dashboard-panel-head {

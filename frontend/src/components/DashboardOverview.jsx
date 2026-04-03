@@ -85,21 +85,25 @@ export default function DashboardOverview({
         </div>
 
         <div className="dashboard-status-grid">
-          <article className="dashboard-status-card">
+          <article className="dashboard-status-card dashboard-status-card-want">
             <strong>{metrics.wantToReadCount}</strong>
             <span>Quero ler</span>
+            <p>Livros separados para a proxima leva de leitura.</p>
           </article>
-          <article className="dashboard-status-card">
+          <article className="dashboard-status-card dashboard-status-card-reading">
             <strong>{metrics.readingNowCount}</strong>
             <span>Lendo</span>
+            <p>Leituras em andamento pedindo continuidade.</p>
           </article>
-          <article className="dashboard-status-card">
+          <article className="dashboard-status-card dashboard-status-card-finished">
             <strong>{metrics.finishedCount}</strong>
             <span>Lidos</span>
+            <p>Titulos concluidos e ja absorvidos no acervo.</p>
           </article>
           <article className="dashboard-status-card dashboard-status-card-highlight">
             <strong>{metrics.favoriteCount}</strong>
             <span>Favoritos</span>
+            <p>Livros que seguem relevantes para revisitar sempre.</p>
           </article>
         </div>
       </section>
