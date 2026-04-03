@@ -4,6 +4,22 @@ function getReadingStatusLabel(value, readingStatusOptions) {
   return readingStatusOptions.find((option) => option.value === value)?.label ?? value
 }
 
+function getReadingStatusClassName(value) {
+  if (value === 'quero_ler') {
+    return 'book-status-badge-want'
+  }
+
+  if (value === 'lendo') {
+    return 'book-status-badge-reading'
+  }
+
+  if (value === 'lido') {
+    return 'book-status-badge-finished'
+  }
+
+  return ''
+}
+
 function BookCard({
   book,
   isEditing,
@@ -86,7 +102,7 @@ function BookCard({
             <h3>{book.titulo}</h3>
             <p className="book-author">{book.autor}</p>
             <div className="book-badges">
-              <span className="book-status-badge">
+              <span className={`book-status-badge ${getReadingStatusClassName(book.status_leitura)}`}>
                 {getReadingStatusLabel(book.status_leitura, readingStatusOptions)}
               </span>
               {book.favorito ? <span className="book-favorite-badge">Favorito</span> : null}
