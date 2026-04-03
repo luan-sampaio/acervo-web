@@ -444,73 +444,24 @@ button { cursor: pointer; }
   line-height: 1.5;
 }
 
+.dashboard-hero-favorite-pill {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  margin-top: 0.35rem;
+  padding: 0.24rem 0.58rem;
+  border-radius: var(--r-full);
+  background: var(--warn-bg);
+  color: #92400E;
+  border: 1px solid #FCD34D;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
 .dashboard-actions {
   display: flex;
   align-items: center;
   flex-shrink: 0;
-}
-
-.dashboard-stats {
-  display: grid;
-  grid-template-columns: 1.2fr 1.2fr 0.8fr 0.8fr;
-  gap: 0.75rem;
-}
-
-.dashboard-stat-card {
-  padding: 1.1rem 1.15rem;
-  border-radius: var(--r-lg);
-  background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
-  border: 1px solid var(--border);
-  min-height: 9.5rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.dashboard-stat-card strong {
-  display: block;
-  font-size: 1.85rem;
-  font-weight: 700;
-  line-height: 1.1;
-  color: var(--text);
-}
-
-.dashboard-stat-card > span {
-  display: block;
-  color: var(--muted);
-  font-size: 0.8rem;
-  margin-bottom: 0.35rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
-.dashboard-stat-card p {
-  margin: 0.45rem 0 0;
-  color: var(--muted-2);
-  font-size: 0.88rem;
-  line-height: 1.5;
-}
-
-.dashboard-stat-card-primary {
-  background: linear-gradient(145deg, #EEF2FF 0%, #E0E7FF 100%);
-  border-color: rgba(79, 70, 229, 0.18);
-  box-shadow: 0 12px 24px rgba(79, 70, 229, 0.08);
-}
-
-.dashboard-stat-card-primary > span,
-.dashboard-stat-card-primary p {
-  color: var(--primary-strong);
-}
-
-.dashboard-stat-card-primary strong {
-  font-size: 2.2rem;
-  color: var(--primary-strong);
-}
-
-.dashboard-stat-card-wide strong {
-  font-size: 1.45rem;
-  line-height: 1.25;
 }
 
 .dashboard-reading-panel {
@@ -523,7 +474,7 @@ button { cursor: pointer; }
 
 .dashboard-status-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 0.75rem;
   margin-top: 0.75rem;
 }
@@ -534,9 +485,10 @@ button { cursor: pointer; }
   gap: 0.3rem;
   padding: 1.05rem 1.1rem;
   border-radius: var(--r-lg);
-  background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
+  background: #FFFFFF;
   border: 1px solid var(--border);
   min-height: 9rem;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
 }
 
 .dashboard-status-card strong {
@@ -560,8 +512,7 @@ button { cursor: pointer; }
 }
 
 .dashboard-status-card-want {
-  border-color: rgba(217, 119, 6, 0.22);
-  background: linear-gradient(180deg, #FFFDF5 0%, #FFFBEB 100%);
+  border-color: rgba(217, 119, 6, 0.18);
 }
 
 .dashboard-status-card-want strong {
@@ -569,8 +520,7 @@ button { cursor: pointer; }
 }
 
 .dashboard-status-card-reading {
-  border-color: rgba(37, 99, 235, 0.2);
-  background: linear-gradient(180deg, #F8FBFF 0%, #EFF6FF 100%);
+  border-color: rgba(37, 99, 235, 0.18);
 }
 
 .dashboard-status-card-reading strong {
@@ -578,26 +528,11 @@ button { cursor: pointer; }
 }
 
 .dashboard-status-card-finished {
-  border-color: rgba(22, 163, 74, 0.2);
-  background: linear-gradient(180deg, #F7FFF9 0%, #F0FDF4 100%);
+  border-color: rgba(22, 163, 74, 0.18);
 }
 
 .dashboard-status-card-finished strong {
   color: #15803D;
-}
-
-.dashboard-status-card-highlight {
-  background: linear-gradient(180deg, #F5F3FF 0%, #EEF2FF 100%);
-  border-color: rgba(79, 70, 229, 0.2);
-}
-
-.dashboard-status-card-highlight strong {
-  color: var(--primary);
-}
-
-.dashboard-status-card-highlight span,
-.dashboard-status-card-highlight p {
-  color: var(--primary-strong);
 }
 
 .dashboard-panel-head {
@@ -617,6 +552,19 @@ button { cursor: pointer; }
 
 .dashboard-panel-head .secondary-button {
   min-height: 2.5rem;
+}
+
+.dashboard-panel-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  padding: 0.28rem 0.7rem;
+  border-radius: var(--r-full);
+  background: var(--warn-bg);
+  color: #92400E;
+  border: 1px solid #FCD34D;
+  font-size: 0.78rem;
+  font-weight: 700;
 }
 
 .dashboard-recent-list {

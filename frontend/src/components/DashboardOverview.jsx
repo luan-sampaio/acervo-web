@@ -40,6 +40,9 @@ export default function DashboardOverview({
             <span className="dashboard-hero-highlight-label">Resumo do momento</span>
             <strong>{totalBooks === 1 ? '1 livro no acervo' : `${totalBooks} livros no acervo`}</strong>
             <p>{latestAdditionLabel}</p>
+            <span className="dashboard-hero-favorite-pill">
+              {metrics.favoriteCount === 1 ? '1 favorito' : `${metrics.favoriteCount} favoritos`}
+            </span>
           </div>
 
           <div className="dashboard-actions">
@@ -50,38 +53,15 @@ export default function DashboardOverview({
         </div>
       </section>
 
-      <section className="dashboard-stats">
-        <article className="stat-card dashboard-stat-card dashboard-stat-card-primary">
-          <span>Total de livros</span>
-          <strong>{totalBooks}</strong>
-          <p>{totalBooks === 1 ? '1 livro registrado' : `${totalBooks} livros registrados`}</p>
-        </article>
-
-        <article className="stat-card dashboard-stat-card dashboard-stat-card-wide">
-          <span>Última adição</span>
-          <strong>{latestAdditionLabel}</strong>
-          <p>Seu acervo continua em movimento.</p>
-        </article>
-
-        <article className="stat-card dashboard-stat-card">
-          <span>Favoritos</span>
-          <strong>{metrics.favoriteCount}</strong>
-          <p>Livros marcados para voltar sempre.</p>
-        </article>
-
-        <article className="stat-card dashboard-stat-card">
-          <span>Lendo agora</span>
-          <strong>{metrics.readingNowCount}</strong>
-          <p>Leituras atualmente em andamento.</p>
-        </article>
-      </section>
-
       <section className="dashboard-reading-panel">
         <div className="dashboard-panel-head">
           <div>
             <span className="eyebrow">Panorama de leitura</span>
             <h2>Status da coleção</h2>
           </div>
+          <span className="dashboard-panel-pill">
+            {metrics.favoriteCount === 1 ? '1 favorito' : `${metrics.favoriteCount} favoritos`}
+          </span>
         </div>
 
         <div className="dashboard-status-grid">
@@ -99,11 +79,6 @@ export default function DashboardOverview({
             <strong>{metrics.finishedCount}</strong>
             <span>Lidos</span>
             <p>Titulos concluidos e ja absorvidos no acervo.</p>
-          </article>
-          <article className="dashboard-status-card dashboard-status-card-highlight">
-            <strong>{metrics.favoriteCount}</strong>
-            <span>Favoritos</span>
-            <p>Livros que seguem relevantes para revisitar sempre.</p>
           </article>
         </div>
       </section>
