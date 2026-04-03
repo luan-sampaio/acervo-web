@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 
+import AppHeader from './components/AppHeader'
 import BookFormPanel from './components/BookFormPanel'
 import BookListPanel from './components/BookListPanel'
 import DeleteBookModal from './components/DeleteBookModal'
 import HeroSection from './components/HeroSection'
+import HomeOverview from './components/HomeOverview'
 import {
   defaultQuery,
   initialEditForm,
@@ -16,6 +18,7 @@ import { createBook, deleteBook, fetchBooks, updateBook } from './api'
 import { formatLatestAddition, getTextFieldError } from './utils'
 
 export default function App() {
+  const [currentView, setCurrentView] = useState('home')
   const [form, setForm] = useState(initialForm)
   const [books, setBooks] = useState([])
   const [query, setQuery] = useState(defaultQuery)
@@ -166,6 +169,7 @@ export default function App() {
   const hasNextPage = query.offset + query.limit < totalBooks
   const visibleRangeStart = totalBooks === 0 ? 0 : query.offset + 1
   const visibleRangeEnd = query.offset + books.length
+  const recentBooks = books.slice(0, 6)
 
   function handleChange(event) {
     const { name, value } = event.target
@@ -264,6 +268,10 @@ export default function App() {
   function handleClearFilters() {
     setSearchTerm('')
     setAuthorFilter('')
+  }
+
+  function handleNavigate(view) {
+    setCurrentView(view)
   }
 
   function handleSortByChange(event) {
@@ -437,66 +445,79 @@ export default function App() {
       <div className="background-glow background-glow-right" />
 
       <main className="container">
-        <HeroSection
-          totalBooks={totalBooks}
-          totalBooksLabel={totalBooksLabel}
-          latestAdditionLabel={latestAdditionLabel}
-        />
+        <AppHeader currentView={currentView} onNavigate={handleNavigate} />
 
-        <section className="content-grid">
-          <BookFormPanel
-            form={form}
-            formErrors={formErrors}
-            formTouched={formTouched}
-            isFormValid={isFormValid}
-            isSubmitting={isSubmitting}
-            error={error}
-            onChange={handleChange}
-            onBlur={handleFieldBlur}
-            onSubmit={handleSubmit}
-          />
+        {currentView === 'home' ? (
+          <>
+            <HeroSection
+              totalBooks={totalBooks}
+              totalBooksLabel={totalBooksLabel}
+              latestAdditionLabel={latestAdditionLabel}
+            />
 
-          <BookListPanel
-            books={books}
-            totalBooks={totalBooks}
-            filteredBooks={books}
-            query={query}
-            searchTerm={searchTerm}
-            authorFilter={authorFilter}
-            isLoading={isLoading}
-            editingBookId={editingBookId}
-            activeMenuBookId={activeMenuBookId}
-            editForm={editForm}
-            editErrors={editErrors}
-            editTouched={editTouched}
-            savingBookId={savingBookId}
-            currentPage={currentPage}
-            totalPages={totalPages}
-            visibleRangeStart={visibleRangeStart}
-            visibleRangeEnd={visibleRangeEnd}
-            hasPreviousPage={hasPreviousPage}
-            hasNextPage={hasNextPage}
-            actionMenuRef={actionMenuRef}
-            onSearchChange={handleSearchChange}
-            onAuthorFilterChange={handleAuthorFilterChange}
-            onClearFilters={handleClearFilters}
-            pageSizeOptions={pageSizeOptions}
-            sortOptions={sortOptions}
-            sortOrderOptions={sortOrderOptions}
-            onSortByChange={handleSortByChange}
-            onSortOrderChange={handleSortOrderChange}
-            onPageSizeChange={handlePageSizeChange}
-            onPreviousPage={handlePreviousPage}
-            onNextPage={handleNextPage}
-            onEditChange={handleEditChange}
-            onEditBlur={handleEditBlur}
-            onToggleMenu={toggleActionMenu}
-            onStartEditing={startEditing}
-            onRequestDelete={requestDeleteBook}
-            onSave={handleUpdateBook}
-            onCancelEditing={cancelEditing}
-          />
-        </section>
+            <HomeOverview
+              totalBooks={totalBooks}
+              latestAdditionLabel={latestAdditionLabel}
+              recentBooks={recentBooks}
+              onOpenCollection={() => setCurrentView('collection')}
+            />
+          </>
+        ) : (
+          <section className="content-grid">
+            <BookFormPanel
+              form={form}
+              formErrors={formErrors}
+              formTouched={formTouched}
+              isFormValid={isFormValid}
+              isSubmitting={isSubmitting}
+              error={error}
+              onChange={handleChange}
+              onBlur={handleFieldBlur}
+              onSubmit={handleSubmit}
+            />
+
+            <BookListPanel
+              books={books}
+              totalBooks={totalBooks}
+              filteredBooks={books}
+              query={query}
+              searchTerm={searchTerm}
+              authorFilter={authorFilter}
+              isLoading={isLoading}
+              editingBookId={editingBookId}
+              activeMenuBookId={activeMenuBookId}
+              editForm={editForm}
+              editErrors={editErrors}
+              editTouched={editTouched}
+              savingBookId={savingBookId}
+              currentPage={currentPage}
+              totalPages={totalPages}
+              visibleRangeStart={visibleRangeStart}
+              visibleRangeEnd={visibleRangeEnd}
+              hasPreviousPage={hasPreviousPage}
+              hasNextPage={hasNextPage}
+              actionMenuRef={actionMenuRef}
+              onSearchChange={handleSearchChange}
+              onAuthorFilterChange={handleAuthorFilterChange}
+              onClearFilters={handleClearFilters}
+              pageSizeOptions={pageSizeOptions}
+              sortOptions={sortOptions}
+              sortOrderOptions={sortOrderOptions}
+              onSortByChange={handleSortByChange}
+              onSortOrderChange={handleSortOrderChange}
+              onPageSizeChange={handlePageSizeChange}
+              onPreviousPage={handlePreviousPage}
+              onNextPage={handleNextPage}
+              onEditChange={handleEditChange}
+              onEditBlur={handleEditBlur}
+              onToggleMenu={toggleActionMenu}
+              onStartEditing={startEditing}
+              onRequestDelete={requestDeleteBook}
+              onSave={handleUpdateBook}
+              onCancelEditing={cancelEditing}
+            />
+          </section>
+        )}
 
         {successMessage ? <div className="toast toast-success">{successMessage}</div> : null}
 
