@@ -10,7 +10,7 @@ from alembic import op
 import sqlalchemy as sa
 
 
-revision = "0004_add_reading_status_and_favorite"
+revision = "0004_book_extras"
 down_revision = "0003_enforce_book_constraints"
 branch_labels = None
 depends_on = None
