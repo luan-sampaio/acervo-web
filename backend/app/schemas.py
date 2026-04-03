@@ -43,4 +43,5 @@ class BookListResponse(BaseModel):
     offset: int = Field(ge=0)
     sort_by: Literal["created_at", "titulo", "autor"]
     sort_order: Literal["asc", "desc"]
+    search: str = ""
     latest_created_at: datetime | None = None

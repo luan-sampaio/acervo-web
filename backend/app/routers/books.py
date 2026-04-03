@@ -1,7 +1,7 @@
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
-from sqlalchemy import func
+from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
 
 from .. import database
@@ -37,21 +37,43 @@ def list_books(
     offset: int = Query(default=0, ge=0),
     sort_by: Literal["created_at", "titulo", "autor"] = Query(default="created_at"),
     sort_order: Literal["asc", "desc"] = Query(default="desc"),
+    search: str = Query(default="", min_length=0, max_length=255),
     db: Session = Depends(database.get_db),
 ):
     sort_column = getattr(models.Book, sort_by)
     order_by_clause = sort_column.asc() if sort_order == "asc" else sort_column.desc()
+    normalized_search = search.strip()
+    filters = []
+
+    if normalized_search:
+        like_pattern = f"%{normalized_search}%"
+        filters.append(
+            or_(
+                models.Book.titulo.ilike(like_pattern),
+                models.Book.autor.ilike(like_pattern),
+            )
+        )
+
+    base_query = db.query(models.Book)
+    aggregate_query = db.query(
+        func.count(models.Book.id).label("total"),
+        func.max(models.Book.created_at).label("latest_created_at"),
+    )
+
+    if filters:
+        base_query = base_query.filter(*filters)
+        aggregate_query = aggregate_query.filter(*filters)
 
     items = (
-        db.query(models.Book)
+        base_query
         .order_by(order_by_clause, models.Book.id.desc())
         .offset(offset)
         .limit(limit)
         .all()
     )
-
-    total = db.query(func.count(models.Book.id)).scalar() or 0
-    latest_created_at = db.query(func.max(models.Book.created_at)).scalar()
+    aggregates = aggregate_query.one()
+    total = aggregates.total or 0
+    latest_created_at = aggregates.latest_created_at
 
     return {
         "items": items,
@@ -60,6 +82,7 @@ def list_books(
         "offset": offset,
         "sort_by": sort_by,
         "sort_order": sort_order,
+        "search": normalized_search,
         "latest_created_at": latest_created_at,
     }
 
