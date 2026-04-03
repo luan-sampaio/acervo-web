@@ -1,4 +1,4 @@
-import { formatDate } from '../utils'
+import { formatShortDate } from '../utils'
 
 function getReadingStatusLabel(value, readingStatusOptions) {
   return readingStatusOptions.find((option) => option.value === value)?.label ?? value
@@ -79,6 +79,10 @@ function BookCard({
           </div>
         ) : (
           <div className="book-main">
+            <div className="book-card-kicker-row">
+              <span className="book-id">Livro #{book.id}</span>
+              <span className="book-date book-date-inline">{formatShortDate(book.created_at)}</span>
+            </div>
             <h3>{book.titulo}</h3>
             <p className="book-author">{book.autor}</p>
             <div className="book-badges">
@@ -118,8 +122,6 @@ function BookCard({
               ) : null}
             </div>
           )}
-          <span className="book-id">#{book.id}</span>
-          <span className="book-date">{formatDate(book.created_at)}</span>
         </div>
       </div>
 

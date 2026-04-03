@@ -23,6 +23,16 @@ export function formatDate(value) {
   }).format(new Date(value))
 }
 
+export function formatShortDate(value) {
+  if (!value) {
+    return '-'
+  }
+
+  return new Intl.DateTimeFormat('pt-BR', {
+    dateStyle: 'medium',
+  }).format(new Date(value))
+}
+
 export function formatLatestAddition(value) {
   if (!value) {
     return 'Sem registros recentes'
