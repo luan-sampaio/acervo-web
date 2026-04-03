@@ -171,7 +171,6 @@ export default function BookListPanel({
   hasNextPage,
   actionMenuRef,
   onSearchChange,
-  onAuthorFilterChange,
   onClearFilters,
   pageSizeOptions,
   sortOptions,
@@ -199,18 +198,19 @@ export default function BookListPanel({
   return (
     <div className="panel list-panel">
       <div className="panel-header panel-header-inline">
-        <div>
+        <div className="list-header-copy">
+          <span className="list-header-kicker">Colecao</span>
           <h2>Livros cadastrados</h2>
-          <p>Lista atualizada com os registros disponíveis na API.</p>
+          <p>Acompanhe, filtre e organize os livros registrados na sua biblioteca.</p>
         </div>
         <div className="list-header-actions">
-          <button type="button" className="action-button primary-button list-create-button" onClick={onOpenCreateModal}>
-            Novo livro
-          </button>
-          <div className="sync-status" aria-label="Sincronizado">
+          <div className="sync-status sync-status-subtle" aria-label="Sincronizado">
             <span className="sync-icon">✓</span>
             <span>Sincronizado</span>
           </div>
+          <button type="button" className="action-button primary-button list-create-button" onClick={onOpenCreateModal}>
+            Novo livro
+          </button>
         </div>
       </div>
 
