@@ -2,6 +2,18 @@ import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { getBooks } from '../services/api'
 
+function getStatusLabel(status) {
+  if (status === 'lendo') {
+    return 'Lendo'
+  }
+
+  if (status === 'lido') {
+    return 'Lido'
+  }
+
+  return 'Quero ler'
+}
+
 export default function BookList() {
   const {
     data: books = [],
@@ -69,8 +81,24 @@ export default function BookList() {
                 key={book.id}
                 className="rounded-xl border border-slate-200 bg-slate-50 p-4"
               >
-                <h2 className="text-lg font-semibold text-slate-900">{book.titulo}</h2>
-                <p className="mt-1 text-slate-600">{book.autor}</p>
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <h2 className="text-lg font-semibold text-slate-900">{book.titulo}</h2>
+                    <p className="mt-1 text-slate-600">{book.autor}</p>
+                  </div>
+
+                  {book.favorito ? (
+                    <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700">
+                      Favorito
+                    </span>
+                  ) : null}
+                </div>
+
+                <div className="mt-4">
+                  <span className="rounded-full bg-slate-200 px-3 py-1 text-xs font-medium text-slate-700">
+                    {getStatusLabel(book.status_leitura)}
+                  </span>
+                </div>
               </li>
             ))}
           </ul>
