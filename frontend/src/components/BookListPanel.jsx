@@ -162,6 +162,12 @@ export default function BookListPanel({
   onCancelEditing,
 }) {
   const hasActiveFilters = Boolean(searchTerm || authorFilter || createdFromFilter || createdToFilter)
+  const activeFilterLabels = [
+    searchTerm ? `Busca: ${searchTerm}` : null,
+    authorFilter ? `Autor: ${authorFilter}` : null,
+    createdFromFilter ? `De: ${createdFromFilter}` : null,
+    createdToFilter ? `Até: ${createdToFilter}` : null,
+  ].filter(Boolean)
 
   return (
     <div className="panel list-panel">
@@ -177,12 +183,25 @@ export default function BookListPanel({
       </div>
 
       <div className="list-toolbar">
-        <div className="toolbar-section toolbar-section-search">
-          <div className="toolbar-section-header">
+        <div className="toolbar-hero">
+          <div className="toolbar-hero-copy">
             <span className="toolbar-kicker">Explorar acervo</span>
-            {hasActiveFilters ? <span className="toolbar-badge">Filtros ativos</span> : null}
+            <h3>Encontre rapidamente o que importa na sua coleção</h3>
+            <p>
+              Use busca, autor e período de cadastro para refinar os resultados sem perder o contexto da listagem.
+            </p>
           </div>
 
+          <div className="toolbar-hero-meta">
+            <div className="toolbar-stat">
+              <strong>{totalBooks}</strong>
+              <span>resultados</span>
+            </div>
+            {hasActiveFilters ? <span className="toolbar-badge">Filtros ativos</span> : null}
+          </div>
+        </div>
+
+        <div className="toolbar-surface">
           <div className="toolbar-grid toolbar-grid-search">
             <label className="search-field search-field-wide">
               <span>Buscar por título ou autor</span>
@@ -220,9 +239,24 @@ export default function BookListPanel({
               />
             </label>
           </div>
-        </div>
 
-        <div className="toolbar-section toolbar-section-controls">
+          {hasActiveFilters ? (
+            <div className="toolbar-active-filters">
+              <div className="toolbar-chip-row">
+                {activeFilterLabels.map((label) => (
+                  <span key={label} className="toolbar-chip">
+                    {label}
+                  </span>
+                ))}
+              </div>
+              <button type="button" className="secondary-button toolbar-clear-button" onClick={onClearFilters}>
+                Limpar filtros
+              </button>
+            </div>
+          ) : null}
+
+          <div className="toolbar-divider" />
+
           <div className="toolbar-grid toolbar-grid-controls">
             <div className="list-control-group">
               <label className="toolbar-select-field">
@@ -258,12 +292,6 @@ export default function BookListPanel({
                 </select>
               </label>
             </div>
-
-            {hasActiveFilters ? (
-              <button type="button" className="secondary-button toolbar-clear-button" onClick={onClearFilters}>
-                Limpar filtros
-              </button>
-            ) : null}
           </div>
         </div>
       </div>
