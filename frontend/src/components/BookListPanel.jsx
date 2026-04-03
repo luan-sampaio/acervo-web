@@ -123,6 +123,9 @@ export default function BookListPanel({
   filteredBooks,
   query,
   searchTerm,
+  authorFilter,
+  createdFromFilter,
+  createdToFilter,
   isLoading,
   editingBookId,
   activeMenuBookId,
@@ -138,7 +141,10 @@ export default function BookListPanel({
   hasNextPage,
   actionMenuRef,
   onSearchChange,
-  onClearSearch,
+  onAuthorFilterChange,
+  onCreatedFromFilterChange,
+  onCreatedToFilterChange,
+  onClearFilters,
   pageSizeOptions,
   sortOptions,
   sortOrderOptions,
@@ -155,6 +161,8 @@ export default function BookListPanel({
   onSave,
   onCancelEditing,
 }) {
+  const hasActiveFilters = Boolean(searchTerm || authorFilter || createdFromFilter || createdToFilter)
+
   return (
     <div className="panel list-panel">
       <div className="panel-header panel-header-inline">
@@ -169,55 +177,95 @@ export default function BookListPanel({
       </div>
 
       <div className="list-toolbar">
-        <label className="search-field">
-          <span>Buscar por título ou autor</span>
-          <input
-            value={searchTerm}
-            onChange={onSearchChange}
-            placeholder="Ex.: Machado de Assis"
-          />
-        </label>
+        <div className="toolbar-section toolbar-section-search">
+          <div className="toolbar-section-header">
+            <span className="toolbar-kicker">Explorar acervo</span>
+            {hasActiveFilters ? <span className="toolbar-badge">Filtros ativos</span> : null}
+          </div>
 
-        <div className="list-control-group">
-          <label className="toolbar-select-field">
-            <span>Ordenar por</span>
-            <select value={query.sortBy} onChange={onSortByChange}>
-              {sortOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </label>
+          <div className="toolbar-grid toolbar-grid-search">
+            <label className="search-field search-field-wide">
+              <span>Buscar por título ou autor</span>
+              <input
+                value={searchTerm}
+                onChange={onSearchChange}
+                placeholder="Ex.: Machado de Assis"
+              />
+            </label>
 
-          <label className="toolbar-select-field">
-            <span>Direção</span>
-            <select value={query.sortOrder} onChange={onSortOrderChange}>
-              {sortOrderOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </label>
+            <label className="toolbar-input-field">
+              <span>Autor</span>
+              <input
+                value={authorFilter}
+                onChange={onAuthorFilterChange}
+                placeholder="Ex.: Ana Almeida"
+              />
+            </label>
 
-          <label className="toolbar-select-field toolbar-select-field-compact">
-            <span>Por página</span>
-            <select value={query.limit} onChange={onPageSizeChange}>
-              {pageSizeOptions.map((value) => (
-                <option key={value} value={value}>
-                  {value}
-                </option>
-              ))}
-            </select>
-          </label>
+            <label className="toolbar-input-field toolbar-date-field">
+              <span>De</span>
+              <input
+                type="date"
+                value={createdFromFilter}
+                onChange={onCreatedFromFilterChange}
+              />
+            </label>
+
+            <label className="toolbar-input-field toolbar-date-field">
+              <span>Até</span>
+              <input
+                type="date"
+                value={createdToFilter}
+                onChange={onCreatedToFilterChange}
+              />
+            </label>
+          </div>
         </div>
 
-        {searchTerm ? (
-          <button type="button" className="secondary-button" onClick={onClearSearch}>
-            Limpar
-          </button>
-        ) : null}
+        <div className="toolbar-section toolbar-section-controls">
+          <div className="toolbar-grid toolbar-grid-controls">
+            <div className="list-control-group">
+              <label className="toolbar-select-field">
+                <span>Ordenar por</span>
+                <select value={query.sortBy} onChange={onSortByChange}>
+                  {sortOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="toolbar-select-field">
+                <span>Direção</span>
+                <select value={query.sortOrder} onChange={onSortOrderChange}>
+                  {sortOrderOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="toolbar-select-field toolbar-select-field-compact">
+                <span>Por página</span>
+                <select value={query.limit} onChange={onPageSizeChange}>
+                  {pageSizeOptions.map((value) => (
+                    <option key={value} value={value}>
+                      {value}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+
+            {hasActiveFilters ? (
+              <button type="button" className="secondary-button toolbar-clear-button" onClick={onClearFilters}>
+                Limpar filtros
+              </button>
+            ) : null}
+          </div>
+        </div>
       </div>
 
       {isLoading ? (
