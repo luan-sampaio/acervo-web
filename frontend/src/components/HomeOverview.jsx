@@ -3,7 +3,6 @@ export default function HomeOverview({ onOpenCollection }) {
     <section className="home-grid">
       <div className="home-hero home-hero-centered">
         <div className="home-hero-copy-wrap home-hero-copy-compact">
-          <span className="eyebrow">Registrador pessoal</span>
           <h1>Organize seus livros.</h1>
         </div>
 

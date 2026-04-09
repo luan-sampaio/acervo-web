@@ -41,7 +41,6 @@ export default function DashboardOverview({
     <section className="dashboard-grid">
       <section className="dashboard-hero">
         <div className="dashboard-hero-copy">
-          <span className="eyebrow">Painel do acervo</span>
           <h1>Seu painel de leitura, em um só lugar.</h1>
           <p>
             Acompanhe o crescimento da sua biblioteca, veja o que merece atenção agora e
@@ -60,7 +59,6 @@ export default function DashboardOverview({
       <section className="dashboard-reading-panel">
         <div className="dashboard-panel-head">
           <div>
-            <span className="eyebrow">Panorama de leitura</span>
             <h2>Status da coleção</h2>
           </div>
           <span className="dashboard-panel-pill">
@@ -96,7 +94,6 @@ export default function DashboardOverview({
       <section className="dashboard-panel">
         <div className="dashboard-panel-head">
           <div>
-            <span className="eyebrow">Registros recentes</span>
             <h2>Últimos livros cadastrados</h2>
           </div>
           <button type="button" className="secondary-button" onClick={onOpenCollection}>

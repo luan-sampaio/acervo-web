@@ -5,18 +5,16 @@ function getReadingStatusLabel(value, readingStatusOptions) {
 }
 
 function getReadingStatusClassName(value) {
-  if (value === 'quero_ler') {
-    return 'book-status-badge-want'
-  }
+  if (value === 'quero_ler') return 'book-status-badge-want'
+  if (value === 'lendo') return 'book-status-badge-reading'
+  if (value === 'lido') return 'book-status-badge-finished'
+  return ''
+}
 
-  if (value === 'lendo') {
-    return 'book-status-badge-reading'
-  }
-
-  if (value === 'lido') {
-    return 'book-status-badge-finished'
-  }
-
+function getCardAccentClass(value) {
+  if (value === 'quero_ler') return 'book-card-want'
+  if (value === 'lendo') return 'book-card-reading'
+  if (value === 'lido') return 'book-card-finished'
   return ''
 }
 
@@ -35,7 +33,7 @@ function BookCard({
   onCancelEditing,
 }) {
   return (
-    <article key={book.id} className="book-card">
+    <article key={book.id} className={`book-card ${getCardAccentClass(book.status_leitura)}`}>
       <div className="book-card-top">
         {isEditing ? (
           <form id={`edit-book-${book.id}`} className="book-main book-main-editing" onSubmit={(event) => onSave(book.id, event)}>
@@ -206,15 +204,10 @@ export default function BookListPanel({
     <div className="panel list-panel">
       <div className="panel-header panel-header-inline">
         <div className="list-header-copy">
-          <span className="list-header-kicker">Colecao</span>
           <h2>Livros cadastrados</h2>
           <p>Acompanhe, filtre e organize os livros registrados na sua biblioteca.</p>
         </div>
         <div className="list-header-actions">
-          <div className="sync-status sync-status-subtle" aria-label="Sincronizado">
-            <span className="sync-icon">✓</span>
-            <span>Sincronizado</span>
-          </div>
           <button type="button" className="action-button primary-button list-create-button" onClick={onOpenCreateModal}>
             Novo livro
           </button>
