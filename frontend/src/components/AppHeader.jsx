@@ -9,7 +9,7 @@ export default function AppHeader() {
           <span className="app-brand-mark-page" />
         </span>
         <div className="app-brand-copy">
-          <strong>Meus Livros</strong>
+          <strong>Acervo</strong>
           <span>Registro pessoal de acervo</span>
         </div>
       </div>

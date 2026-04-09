@@ -2,8 +2,8 @@ export default function HeroSection({ totalBooks, totalBooksLabel, latestAdditio
   return (
     <section className="hero-card">
       <div className="hero-copy">
-        <span className="eyebrow">Meus Livros</span>
-        <h1>Meus Livros</h1>
+        <span className="eyebrow">Acervo</span>
+        <h1>Acervo</h1>
         <p>Gerencie seu acervo com rapidez e simplicidade.</p>
       </div>
 

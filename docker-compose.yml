@@ -3,7 +3,7 @@ version: '3.8'
 services:
   postgres:
     image: postgres:13
-    container_name: crud_book_db
+    container_name: acervo_web_db
     env_file:
       - ./.env
     healthcheck:
@@ -19,7 +19,7 @@ services:
   backend:
     build:
       context: ./backend
-    container_name: crud_book_backend
+    container_name: acervo_web_backend
     env_file:
       - ./.env
     environment:
@@ -37,7 +37,7 @@ services:
   frontend:
     build:
       context: ./frontend
-    container_name: crud_book_frontend
+    container_name: acervo_web_frontend
     environment:
       VITE_API_URL: http://localhost:8000
     command: npm run dev -- --host 0.0.0.0 --port 5173
