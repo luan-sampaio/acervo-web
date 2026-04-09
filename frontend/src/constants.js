@@ -5,13 +5,6 @@ export const initialForm = {
   favorito: false,
 }
 
-export const initialEditForm = {
-  titulo: '',
-  autor: '',
-  status_leitura: 'quero_ler',
-  favorito: false,
-}
-
 export const defaultQuery = {
   limit: 6,
   offset: 0,
