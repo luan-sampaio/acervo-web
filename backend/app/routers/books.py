@@ -11,6 +11,13 @@ from .. import schemas
 router = APIRouter(prefix="/books", tags=["Books"])
 
 
+def get_book_or_404(book_id: int, db: Session) -> models.Book:
+    db_book = db.get(models.Book, book_id)
+    if db_book is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Livro não encontrado")
+    return db_book
+
+
 @router.post("", response_model=schemas.BookResponse, status_code=status.HTTP_201_CREATED)
 def create_book(book: schemas.BookCreate, db: Session = Depends(database.get_db)):
     db_book = models.Book(**book.model_dump())
@@ -22,10 +29,7 @@ def create_book(book: schemas.BookCreate, db: Session = Depends(database.get_db)
 
 @router.delete("/{book_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_book(book_id: int, db: Session = Depends(database.get_db)):
-    db_book = db.get(models.Book, book_id)
-    if db_book is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Livro não encontrado")
-
+    db_book = get_book_or_404(book_id, db)
     db.delete(db_book)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
@@ -106,17 +110,12 @@ def list_books(
 
 @router.get("/{book_id}", response_model=schemas.BookResponse)
 def get_book(book_id: int, db: Session = Depends(database.get_db)):
-    db_book = db.get(models.Book, book_id)
-    if db_book is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Livro não encontrado")
-    return db_book
+    return get_book_or_404(book_id, db)
 
 
 @router.put("/{book_id}", response_model=schemas.BookResponse)
 def update_book(book_id: int, book: schemas.BookUpdate, db: Session = Depends(database.get_db)):
-    db_book = db.get(models.Book, book_id)
-    if db_book is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Livro não encontrado")
+    db_book = get_book_or_404(book_id, db)
 
     book_data = book.model_dump(exclude_unset=True)
     for field, value in book_data.items():
