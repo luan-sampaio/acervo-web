@@ -158,7 +158,6 @@ function BookCard({
 export default function BookListPanel({
   books,
   totalBooks,
-  filteredBooks,
   query,
   searchTerm,
   isLoading,
@@ -278,7 +277,7 @@ export default function BookListPanel({
                 <p>Estamos atualizando os registros para mostrar a lista mais recente.</p>
               </div>
             </div>
-          ) : books.length === 0 ? (
+          ) : books.length === 0 && !hasActiveFilters ? (
             <div className="empty-state">
               <div className="empty-state-card">
                 <span className="empty-state-kicker">Biblioteca vazia</span>
@@ -286,7 +285,7 @@ export default function BookListPanel({
                 <p>Comece adicionando o primeiro livro para montar sua colecao.</p>
               </div>
             </div>
-          ) : filteredBooks.length === 0 ? (
+          ) : books.length === 0 ? (
             <div className="empty-state">
               <div className="empty-state-card">
                 <span className="empty-state-kicker">Sem resultados</span>
@@ -296,7 +295,7 @@ export default function BookListPanel({
             </div>
           ) : (
             <div className="book-list">
-              {filteredBooks.map((book) => (
+              {books.map((book) => (
                 <BookCard
                   key={book.id}
                   book={book}

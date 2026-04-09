@@ -404,7 +404,6 @@ export default function CollectionPage() {
         <BookListPanel
           books={books}
           totalBooks={totalBooks}
-          filteredBooks={books}
           query={query}
           searchTerm={searchTerm}
           isLoading={booksQuery.isFetching && !booksQuery.isLoading}
