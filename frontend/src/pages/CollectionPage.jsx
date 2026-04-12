@@ -61,6 +61,7 @@ export default function CollectionPage() {
     queryKey: ['books', query],
     queryFn: () => fetchBooks(mapBooksQueryParams(query)),
     placeholderData: keepPreviousData,
+    staleTime: 30 * 1000,
   })
 
   const createBookMutation = useMutation({
@@ -375,7 +376,7 @@ export default function CollectionPage() {
     await deleteBookMutation.mutateAsync(bookPendingDelete.id)
   }
 
-  if (booksQuery.isLoading) {
+  if (booksQuery.isLoading && !booksQuery.isPlaceholderData) {
     return (
       <section className="skeleton-page">
         <div className="panel skeleton-panel">
@@ -406,7 +407,7 @@ export default function CollectionPage() {
           totalBooks={totalBooks}
           query={query}
           searchTerm={searchTerm}
-          isLoading={booksQuery.isFetching && !booksQuery.isLoading}
+          isLoading={booksQuery.isFetching && !booksQuery.isPending && !booksQuery.isPlaceholderData}
           editingBookId={editingBookId}
           activeMenuBookId={activeMenuBookId}
           editErrors={editErrors}
