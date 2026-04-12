@@ -12,6 +12,9 @@ class Settings(BaseSettings):
     POSTGRES_DB: str
     POSTGRES_HOST: str
     POSTGRES_PORT: int
+    JWT_SECRET_KEY: str
+    JWT_ALGORITHM: str = "HS256"
+    JWT_EXPIRE_MINUTES: int = 60 * 24 * 7
     BACKEND_CORS_ORIGINS: list[str] = [
         "http://localhost",
         "http://localhost:3000",

@@ -7,20 +7,28 @@ from sqlalchemy.orm import Session
 from .. import database
 from .. import models
 from .. import schemas
+from .auth import get_current_user
 
 router = APIRouter(prefix="/books", tags=["Books"])
 
 
-def get_book_or_404(book_id: int, db: Session) -> models.Book:
-    db_book = db.get(models.Book, book_id)
+def get_book_or_404(book_id: int, user_id: int, db: Session) -> models.Book:
+    db_book = db.query(models.Book).filter(
+        models.Book.id == book_id,
+        models.Book.user_id == user_id,
+    ).first()
     if db_book is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Livro não encontrado")
     return db_book
 
 
 @router.post("", response_model=schemas.BookResponse, status_code=status.HTTP_201_CREATED)
-def create_book(book: schemas.BookCreate, db: Session = Depends(database.get_db)):
-    db_book = models.Book(**book.model_dump())
+def create_book(
+    book: schemas.BookCreate,
+    db: Session = Depends(database.get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    db_book = models.Book(**book.model_dump(), user_id=current_user.id)
     db.add(db_book)
     db.commit()
     db.refresh(db_book)
@@ -28,8 +36,12 @@ def create_book(book: schemas.BookCreate, db: Session = Depends(database.get_db)
 
 
 @router.delete("/{book_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_book(book_id: int, db: Session = Depends(database.get_db)):
-    db_book = get_book_or_404(book_id, db)
+def delete_book(
+    book_id: int,
+    db: Session = Depends(database.get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    db_book = get_book_or_404(book_id, current_user.id, db)
     db.delete(db_book)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
@@ -46,12 +58,13 @@ def list_books(
     status_leitura: schemas.ReadingStatus | None = Query(default=None),
     favorito_only: bool = Query(default=False),
     db: Session = Depends(database.get_db),
+    current_user: models.User = Depends(get_current_user),
 ):
     sort_column = getattr(models.Book, sort_by)
     order_by_clause = sort_column.asc() if sort_order == "asc" else sort_column.desc()
     normalized_search = search.strip()
     normalized_author = author.strip()
-    filters = []
+    filters = [models.Book.user_id == current_user.id]
 
     if normalized_search:
         like_pattern = f"%{normalized_search}%"
@@ -72,15 +85,11 @@ def list_books(
     if favorito_only:
         filters.append(models.Book.favorito.is_(True))
 
-    base_query = db.query(models.Book)
+    base_query = db.query(models.Book).filter(*filters)
     aggregate_query = db.query(
         func.count(models.Book.id).label("total"),
         func.max(models.Book.created_at).label("latest_created_at"),
-    )
-
-    if filters:
-        base_query = base_query.filter(*filters)
-        aggregate_query = aggregate_query.filter(*filters)
+    ).filter(*filters)
 
     items = (
         base_query
@@ -109,13 +118,22 @@ def list_books(
 
 
 @router.get("/{book_id}", response_model=schemas.BookResponse)
-def get_book(book_id: int, db: Session = Depends(database.get_db)):
-    return get_book_or_404(book_id, db)
+def get_book(
+    book_id: int,
+    db: Session = Depends(database.get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    return get_book_or_404(book_id, current_user.id, db)
 
 
 @router.put("/{book_id}", response_model=schemas.BookResponse)
-def update_book(book_id: int, book: schemas.BookUpdate, db: Session = Depends(database.get_db)):
-    db_book = get_book_or_404(book_id, db)
+def update_book(
+    book_id: int,
+    book: schemas.BookUpdate,
+    db: Session = Depends(database.get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    db_book = get_book_or_404(book_id, current_user.id, db)
 
     book_data = book.model_dump(exclude_unset=True)
     for field, value in book_data.items():

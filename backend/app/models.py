@@ -1,7 +1,16 @@
-from sqlalchemy import Boolean, CheckConstraint, Column, DateTime, Integer, String
+from sqlalchemy import Boolean, CheckConstraint, Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.sql import func
 
 from .database import Base
+
+
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String(255), unique=True, nullable=False, index=True)
+    hashed_password = Column(String(255), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
 
 class Book(Base):
@@ -16,6 +25,7 @@ class Book(Base):
     )
 
     id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     titulo = Column(String(255), nullable=False)
     autor = Column(String(255), nullable=False)
     status_leitura = Column(String(20), nullable=False, server_default="quero_ler")

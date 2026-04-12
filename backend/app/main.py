@@ -7,11 +7,11 @@ from sqlalchemy.orm import Session
 
 from . import database
 from .config import settings
-from .routers import books
+from .routers import auth, books
 
 app = FastAPI(
-    title="Book Registry API",
-    description="API para gerenciar um registro de livros.",
+    title="Acervo Web API",
+    description="API para gerenciar um acervo pessoal de livros.",
     version="0.1.0"
 )
 
@@ -48,6 +48,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
         },
     )
 
+app.include_router(auth.router)
 app.include_router(books.router)
 
 @app.get("/health", tags=["Health Check"])

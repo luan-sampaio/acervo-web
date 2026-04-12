@@ -1,7 +1,28 @@
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, model_validator
+
+
+class UserCreate(BaseModel):
+    email: EmailStr
+    password: str = Field(min_length=6, max_length=128)
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+
+class UserResponse(BaseModel):
+    id: int
+    email: str
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    user: UserResponse
 
 
 ReadingStatus = Literal["quero_ler", "lendo", "lido"]
