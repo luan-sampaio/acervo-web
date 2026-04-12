@@ -1,22 +1,22 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
-import AppHeader from './components/AppHeader'
+import PrivateRoute from './components/PrivateRoute'
 import CollectionPage from './pages/CollectionPage'
 import DashboardPage from './pages/DashboardPage'
 import HomePage from './pages/HomePage'
+import LoginPage from './pages/LoginPage'
 
 export default function App() {
   return (
-    <div className="app-shell">
-      <AppHeader />
+    <Routes>
+      <Route path="/login" element={<LoginPage />} />
 
-      <main className="container">
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/collection" element={<CollectionPage />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </main>
-    </div>
+      <Route element={<PrivateRoute />}>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/collection" element={<CollectionPage />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
+      </Route>
+
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   )
 }

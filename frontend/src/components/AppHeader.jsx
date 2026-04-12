@@ -1,6 +1,15 @@
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 
 export default function AppHeader() {
+  const { user, logout } = useAuth()
+  const navigate = useNavigate()
+
+  function handleLogout() {
+    logout()
+    navigate('/login', { replace: true })
+  }
+
   return (
     <header className="app-header">
       <div className="app-brand">
@@ -35,6 +44,13 @@ export default function AppHeader() {
           Painel
         </NavLink>
       </nav>
+
+      <div className="app-header-user">
+        {user ? <span className="app-header-email">{user.email}</span> : null}
+        <button type="button" className="app-logout-button" onClick={handleLogout}>
+          Sair
+        </button>
+      </div>
     </header>
   )
 }
