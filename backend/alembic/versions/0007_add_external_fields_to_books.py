@@ -10,7 +10,7 @@ from alembic import op
 import sqlalchemy as sa
 
 
-revision = "0007_add_external_fields_to_books"
+revision = "0007_ext_fields_books"
 down_revision = "0006_add_user_id_to_books"
 branch_labels = None
 depends_on = None

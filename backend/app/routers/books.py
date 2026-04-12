@@ -142,3 +142,24 @@ def update_book(
     db.commit()
     db.refresh(db_book)
     return db_book
+
+
+@router.put("/{book_id}/tags", response_model=schemas.BookResponse)
+def update_book_tags(
+    book_id: int,
+    payload: schemas.BookTagsUpdate,
+    db: Session = Depends(database.get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    db_book = get_book_or_404(book_id, current_user.id, db)
+
+    tags = (
+        db.query(models.Tag)
+        .filter(models.Tag.id.in_(payload.tag_ids), models.Tag.user_id == current_user.id)
+        .all()
+    )
+    db_book.tags = tags
+
+    db.commit()
+    db.refresh(db_book)
+    return db_book

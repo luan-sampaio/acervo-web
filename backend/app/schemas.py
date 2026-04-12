@@ -53,11 +53,44 @@ class BookSearchResult(BaseModel):
     descricao: str | None = None
 
 
+class CategoryCreate(BaseModel):
+    nome: str = Field(min_length=1, max_length=100)
+    cor: str | None = Field(default=None, pattern=r"^#[0-9A-Fa-f]{6}$")
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+
+class CategoryResponse(BaseModel):
+    id: int
+    nome: str
+    cor: str | None = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class TagCreate(BaseModel):
+    nome: str = Field(min_length=1, max_length=50)
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+
+class TagResponse(BaseModel):
+    id: int
+    nome: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class BookTagsUpdate(BaseModel):
+    tag_ids: list[int]
+
+
 class BookUpdate(BaseModel):
     titulo: str | None = Field(default=None, min_length=2, max_length=255)
     autor: str | None = Field(default=None, min_length=2, max_length=255)
     status_leitura: ReadingStatus | None = None
     favorito: bool | None = None
+    category_id: int | None = None
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
@@ -68,6 +101,7 @@ class BookUpdate(BaseModel):
             and self.autor is None
             and self.status_leitura is None
             and self.favorito is None
+            and self.category_id is None
         ):
             raise ValueError("Informe ao menos um campo para atualização")
         return self
@@ -77,6 +111,9 @@ class BookResponse(BookBase):
     id: int
     created_at: datetime
     updated_at: datetime
+    category_id: int | None = None
+    category: CategoryResponse | None = None
+    tags: list[TagResponse] = []
 
     model_config = ConfigDict(from_attributes=True, extra="ignore")
 
