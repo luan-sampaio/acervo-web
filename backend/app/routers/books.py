@@ -57,6 +57,7 @@ def list_books(
     author: str = Query(default="", min_length=0, max_length=255),
     status_leitura: schemas.ReadingStatus | None = Query(default=None),
     favorito_only: bool = Query(default=False),
+    category_id: int | None = Query(default=None),
     db: Session = Depends(database.get_db),
     current_user: models.User = Depends(get_current_user),
 ):
@@ -84,6 +85,9 @@ def list_books(
 
     if favorito_only:
         filters.append(models.Book.favorito.is_(True))
+
+    if category_id is not None:
+        filters.append(models.Book.category_id == category_id)
 
     base_query = db.query(models.Book).filter(*filters)
     aggregate_query = db.query(

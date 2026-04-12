@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { formatShortDate } from '../utils'
 
 function getReadingStatusLabel(value, readingStatusOptions) {
@@ -24,6 +25,8 @@ function BookCard({
   editErrors,
   isSaving,
   readingStatusOptions,
+  categories,
+  tags,
   activeMenuBookId,
   actionMenuRef,
   onToggleMenu,
@@ -32,11 +35,19 @@ function BookCard({
   onSave,
   onCancelEditing,
 }) {
+  const [selectedTagIds, setSelectedTagIds] = useState(() => book.tags?.map((t) => t.id) ?? [])
+
+  function handleTagToggle(tagId) {
+    setSelectedTagIds((prev) =>
+      prev.includes(tagId) ? prev.filter((id) => id !== tagId) : [...prev, tagId]
+    )
+  }
+
   return (
     <article key={book.id} className={`book-card ${getCardAccentClass(book.status_leitura)}`}>
       <div className="book-card-top">
         {isEditing ? (
-          <form id={`edit-book-${book.id}`} className="book-main book-main-editing" onSubmit={(event) => onSave(book.id, event)}>
+          <form id={`edit-book-${book.id}`} className="book-main book-main-editing" onSubmit={(event) => onSave(book.id, event, selectedTagIds)}>
             <div className="inline-form">
               <label>
                 <span>Título</span>
@@ -72,6 +83,34 @@ function BookCard({
                   ))}
                 </select>
               </label>
+              {categories.length > 0 ? (
+                <label>
+                  <span>Categoria</span>
+                  <select name="category_id" defaultValue={book.category_id ?? ''}>
+                    <option value="">Sem categoria</option>
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.id}>{cat.nome}</option>
+                    ))}
+                  </select>
+                </label>
+              ) : null}
+              {tags.length > 0 ? (
+                <div className="edit-tags-group">
+                  <span className="edit-tags-label">Tags</span>
+                  <div className="edit-tags-chips">
+                    {tags.map((tag) => (
+                      <button
+                        key={tag.id}
+                        type="button"
+                        className={selectedTagIds.includes(tag.id) ? 'tag-chip tag-chip-active' : 'tag-chip'}
+                        onClick={() => handleTagToggle(tag.id)}
+                      >
+                        {tag.nome}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
               <label className="checkbox-field checkbox-field-inline">
                 <input
                   type="checkbox"
@@ -95,7 +134,22 @@ function BookCard({
                 {getReadingStatusLabel(book.status_leitura, readingStatusOptions)}
               </span>
               {book.favorito ? <span className="book-favorite-badge">Favorito</span> : null}
+              {book.category ? (
+                <span
+                  className="book-category-badge"
+                  style={book.category.cor ? { backgroundColor: book.category.cor + '22', color: book.category.cor, borderColor: book.category.cor + '55' } : undefined}
+                >
+                  {book.category.nome}
+                </span>
+              ) : null}
             </div>
+            {book.tags?.length > 0 ? (
+              <div className="book-tags-row">
+                {book.tags.map((tag) => (
+                  <span key={tag.id} className="tag-chip tag-chip-sm">{tag.nome}</span>
+                ))}
+              </div>
+            ) : null}
           </div>
         )}
 
@@ -187,6 +241,10 @@ export default function BookListPanel({
   onCancelEditing,
   onOpenCreateModal,
   onStatusFilterChange,
+  onCategoryFilterChange,
+  onOpenCategoryTagModal,
+  categories = [],
+  tags = [],
   error,
 }) {
   const quickFilters = [
@@ -197,7 +255,7 @@ export default function BookListPanel({
     })),
     { value: 'favorito', label: 'Favorito' },
   ]
-  const hasActiveFilters = Boolean(searchTerm) || query.statusFilter !== 'all'
+  const hasActiveFilters = Boolean(searchTerm) || query.statusFilter !== 'all' || query.categoryFilter !== null
 
   return (
     <div className="panel list-panel">
@@ -207,6 +265,9 @@ export default function BookListPanel({
           <p>Acompanhe, filtre e organize os livros registrados na sua biblioteca.</p>
         </div>
         <div className="list-header-actions">
+          <button type="button" className="action-button secondary-button" onClick={onOpenCategoryTagModal}>
+            Categorias e tags
+          </button>
           <button type="button" className="action-button primary-button list-create-button" onClick={onOpenCreateModal}>
             Novo livro
           </button>
@@ -265,6 +326,23 @@ export default function BookListPanel({
             </button>
           ) : null}
         </div>
+
+        {categories.length > 0 ? (
+          <div className="quick-filter-row category-filter-row" aria-label="Filtro por categoria">
+            <span className="category-filter-label">Categoria:</span>
+            {categories.map((cat) => (
+              <button
+                key={cat.id}
+                type="button"
+                className={query.categoryFilter === cat.id ? 'quick-filter-chip quick-filter-chip-active' : 'quick-filter-chip'}
+                style={cat.cor && query.categoryFilter !== cat.id ? { borderColor: cat.cor + '88', color: cat.cor } : undefined}
+                onClick={() => onCategoryFilterChange(cat.id)}
+              >
+                {cat.nome}
+              </button>
+            ))}
+          </div>
+        ) : null}
       </div>
 
       <div className="list-content-shell">
@@ -303,6 +381,8 @@ export default function BookListPanel({
                   editErrors={editErrors}
                   isSaving={savingBookId === book.id}
                   readingStatusOptions={readingStatusOptions}
+                  categories={categories}
+                  tags={tags}
                   activeMenuBookId={activeMenuBookId}
                   actionMenuRef={actionMenuRef}
                   onToggleMenu={onToggleMenu}

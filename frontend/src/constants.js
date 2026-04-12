@@ -3,6 +3,7 @@ export const initialForm = {
   autor: '',
   status_leitura: 'quero_ler',
   favorito: false,
+  category_id: '',
 }
 
 export const defaultQuery = {
@@ -13,6 +14,7 @@ export const defaultQuery = {
   search: '',
   author: '',
   statusFilter: 'all',
+  categoryFilter: null,
 }
 
 export const sortOptions = [
