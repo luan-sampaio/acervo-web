@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     JWT_SECRET_KEY: str
     JWT_ALGORITHM: str = "HS256"
     JWT_EXPIRE_MINUTES: int = 60 * 24 * 7
+    GOOGLE_BOOKS_API_KEY: str
     BACKEND_CORS_ORIGINS: list[str] = [
         "http://localhost",
         "http://localhost:3000",

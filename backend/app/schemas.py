@@ -33,12 +33,24 @@ class BookBase(BaseModel):
     autor: str = Field(min_length=2, max_length=255)
     status_leitura: ReadingStatus = "quero_ler"
     favorito: bool = False
+    isbn: str | None = Field(default=None, max_length=20)
+    cover_url: str | None = Field(default=None, max_length=512)
+    external_id: str | None = Field(default=None, max_length=100)
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
 
 class BookCreate(BookBase):
     pass
+
+
+class BookSearchResult(BaseModel):
+    external_id: str
+    titulo: str
+    autor: str
+    isbn: str | None = None
+    cover_url: str | None = None
+    descricao: str | None = None
 
 
 class BookUpdate(BaseModel):
@@ -66,7 +78,7 @@ class BookResponse(BookBase):
     created_at: datetime
     updated_at: datetime
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True, extra="ignore")
 
 
 class BookListResponse(BaseModel):

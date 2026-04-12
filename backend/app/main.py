@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from . import database
 from .config import settings
-from .routers import auth, books
+from .routers import auth, books, search
 
 app = FastAPI(
     title="Acervo Web API",
@@ -50,6 +50,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
 app.include_router(auth.router)
 app.include_router(books.router)
+app.include_router(search.router)
 
 @app.get("/health", tags=["Health Check"])
 def health_check(db: Session = Depends(database.get_db)):

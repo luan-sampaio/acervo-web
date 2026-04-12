@@ -30,5 +30,8 @@ class Book(Base):
     autor = Column(String(255), nullable=False)
     status_leitura = Column(String(20), nullable=False, server_default="quero_ler")
     favorito = Column(Boolean, nullable=False, server_default="false")
+    isbn = Column(String(20), nullable=True)
+    cover_url = Column(String(512), nullable=True)
+    external_id = Column(String(100), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
