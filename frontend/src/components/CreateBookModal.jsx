@@ -124,6 +124,10 @@ export default function CreateBookModal({ onClose, onCreated }) {
   }
 
   function handleSelectResult(result) {
+    if (result.already_in_library) {
+      return
+    }
+
     createBookMutation.reset()
     setSelectedStatus('quero_ler')
     setSelectedResult(result)
@@ -309,15 +313,18 @@ export default function CreateBookModal({ onClose, onCreated }) {
                       <div className="search-result-info">
                         <h3 className="search-result-title" title={result.titulo}>{result.titulo}</h3>
                         <p className="search-result-author">{result.autor}</p>
+                        {result.already_in_library ? (
+                          <span className="search-result-badge">Ja esta no acervo</span>
+                        ) : null}
                         {result.isbn ? <p className="search-result-isbn">ISBN {result.isbn}</p> : null}
                         {result.descricao ? <p className="search-result-description">{result.descricao}</p> : null}
                         <button
                           type="button"
-                          className="action-button primary-button search-add-button"
-                          disabled={isAdding || createBookMutation.isPending}
+                          className={`action-button ${result.already_in_library ? 'secondary-button' : 'primary-button'} search-add-button`}
+                          disabled={result.already_in_library || isAdding || createBookMutation.isPending}
                           onClick={() => handleSelectResult(result)}
                         >
-                          {isAdding ? 'Adicionando...' : 'Revisar e adicionar'}
+                          {result.already_in_library ? 'Ja adicionado' : isAdding ? 'Adicionando...' : 'Revisar e adicionar'}
                         </button>
                       </div>
                     </article>

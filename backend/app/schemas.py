@@ -51,6 +51,7 @@ class BookSearchResult(BaseModel):
     isbn: str | None = None
     cover_url: str | None = None
     descricao: str | None = None
+    already_in_library: bool = False
 
 
 class BookUpdate(BaseModel):

@@ -2292,6 +2292,20 @@ button { cursor: pointer; }
   text-overflow: ellipsis;
 }
 
+.search-result-badge {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 0.18rem 0.5rem;
+  border-radius: var(--r-full);
+  background: #F0FDF4;
+  color: #166534;
+  border: 1px solid rgba(22, 163, 74, 0.18);
+  font-size: 0.72rem;
+  font-weight: 700;
+  margin-top: 0.15rem;
+}
+
 .search-result-isbn {
   font-size: 0.75rem;
   color: var(--muted);

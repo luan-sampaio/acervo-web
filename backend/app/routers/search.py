@@ -1,6 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 import httpx
+from sqlalchemy import func
+from sqlalchemy.orm import Session
 
+from .. import database
 from .. import models, schemas
 from ..config import settings
 from ..routers.auth import get_current_user
@@ -10,7 +13,7 @@ router = APIRouter(prefix="/search", tags=["Search"])
 GOOGLE_BOOKS_URL = "https://www.googleapis.com/books/v1/volumes"
 
 
-def _parse_volume(item: dict) -> schemas.BookSearchResult | None:
+def _parse_volume(item: dict, already_in_library: bool = False) -> schemas.BookSearchResult | None:
     info = item.get("volumeInfo", {})
     titulo = info.get("title", "").strip()
     autores = info.get("authors", [])
@@ -41,13 +44,15 @@ def _parse_volume(item: dict) -> schemas.BookSearchResult | None:
         isbn=isbn,
         cover_url=cover_url,
         descricao=descricao or None,
+        already_in_library=already_in_library,
     )
 
 
 @router.get("", response_model=list[schemas.BookSearchResult])
 async def search_books(
     q: str = Query(min_length=2, max_length=255),
-    _: models.User = Depends(get_current_user),
+    db: Session = Depends(database.get_db),
+    current_user: models.User = Depends(get_current_user),
 ):
     params = {
         "q": q,
@@ -74,5 +79,63 @@ async def search_books(
 
     data = response.json()
     items = data.get("items", [])
-    results = [_parse_volume(item) for item in items]
+    external_ids = [item.get("id") for item in items if item.get("id")]
+    normalized_pairs = []
+
+    for item in items:
+        info = item.get("volumeInfo", {})
+        titulo = info.get("title", "").strip()
+        autores = info.get("authors", [])
+        if titulo and autores:
+            normalized_pairs.append((titulo.lower(), ", ".join(autores).strip().lower()))
+
+    existing_external_ids = set()
+    if external_ids:
+        existing_external_ids = {
+            external_id
+            for (external_id,) in (
+                db.query(models.Book.external_id)
+                .filter(
+                    models.Book.user_id == current_user.id,
+                    models.Book.external_id.in_(external_ids),
+                )
+                .all()
+            )
+            if external_id
+        }
+
+    existing_title_author_pairs = set()
+    if normalized_pairs:
+        existing_title_author_pairs = {
+            (titulo, autor)
+            for titulo, autor in (
+                db.query(
+                    func.lower(func.btrim(models.Book.titulo)),
+                    func.lower(func.btrim(models.Book.autor)),
+                )
+                .filter(models.Book.user_id == current_user.id)
+                .all()
+            )
+            if (titulo, autor) in normalized_pairs
+        }
+
+    results = []
+    for item in items:
+        info = item.get("volumeInfo", {})
+        titulo = info.get("title", "").strip()
+        autores = info.get("authors", [])
+        normalized_pair = None
+        if titulo and autores:
+            normalized_pair = (titulo.lower(), ", ".join(autores).strip().lower())
+
+        results.append(
+            _parse_volume(
+                item,
+                already_in_library=(
+                    item.get("id") in existing_external_ids
+                    or normalized_pair in existing_title_author_pairs
+                ),
+            )
+        )
+
     return [r for r in results if r is not None]
