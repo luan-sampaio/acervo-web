@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     JWT_SECRET_KEY: str
     JWT_ALGORITHM: str = "HS256"
     JWT_EXPIRE_MINUTES: int = 60 * 24 * 7
-    GOOGLE_BOOKS_API_KEY: str
+    GOOGLE_BOOKS_API_KEY: str | None = None
     BACKEND_CORS_ORIGINS: list[str] = [
         "http://localhost",
         "http://localhost:3000",
@@ -32,6 +32,20 @@ class Settings(BaseSettings):
     def split_cors_origins(cls, value):
         if isinstance(value, str):
             return [origin.strip() for origin in value.split(",") if origin.strip()]
+        return value
+
+    @field_validator("GOOGLE_BOOKS_API_KEY", mode="before")
+    @classmethod
+    def normalize_google_books_api_key(cls, value):
+        if value is None:
+            return None
+
+        if isinstance(value, str):
+            normalized = value.strip()
+            if not normalized or normalized == "sua_chave_aqui":
+                return None
+            return normalized
+
         return value
 
     @property

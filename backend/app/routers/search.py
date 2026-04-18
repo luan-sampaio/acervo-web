@@ -63,6 +63,12 @@ async def search_books(
     db: Session = Depends(database.get_db),
     current_user: models.User = Depends(get_current_user),
 ):
+    if not settings.GOOGLE_BOOKS_API_KEY:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Busca externa indisponivel: configure GOOGLE_BOOKS_API_KEY no backend",
+        )
+
     params = {
         "q": q,
         "maxResults": 12,
@@ -76,6 +82,16 @@ async def search_books(
             response = await client.get(GOOGLE_BOOKS_URL, params=params)
             response.raise_for_status()
         except httpx.HTTPStatusError as exc:
+            if exc.response.status_code in {400, 401, 403}:
+                raise HTTPException(
+                    status_code=status.HTTP_502_BAD_GATEWAY,
+                    detail="Google Books recusou a requisicao: verifique a chave da API",
+                )
+            if exc.response.status_code == 429:
+                raise HTTPException(
+                    status_code=status.HTTP_502_BAD_GATEWAY,
+                    detail="Google Books indisponivel no momento por limite de requisicoes",
+                )
             raise HTTPException(
                 status_code=status.HTTP_502_BAD_GATEWAY,
                 detail=f"Erro ao consultar Google Books: {exc.response.status_code}",
@@ -83,7 +99,7 @@ async def search_books(
         except httpx.RequestError:
             raise HTTPException(
                 status_code=status.HTTP_502_BAD_GATEWAY,
-                detail="Não foi possível conectar ao Google Books",
+                detail="Nao foi possivel conectar ao Google Books",
             )
 
     data = response.json()
