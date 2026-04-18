@@ -218,7 +218,7 @@ export default function BookListPanel({
       <div className="list-toolbar">
         <div className="toolbar-grid toolbar-grid-compact">
           <label className="search-field search-field-wide">
-            <span>Buscar livros</span>
+            <span>Filtrar livros</span>
             <input
               value={searchTerm}
               onChange={onSearchChange}

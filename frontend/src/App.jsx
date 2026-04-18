@@ -3,7 +3,6 @@ import PrivateRoute from './components/PrivateRoute'
 import CollectionPage from './pages/CollectionPage'
 import DashboardPage from './pages/DashboardPage'
 import LoginPage from './pages/LoginPage'
-import SearchPage from './pages/SearchPage'
 
 export default function App() {
   return (
@@ -13,7 +12,6 @@ export default function App() {
       <Route element={<PrivateRoute />}>
         <Route path="/" element={<Navigate to="/collection" replace />} />
         <Route path="/collection" element={<CollectionPage />} />
-        <Route path="/search" element={<SearchPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
       </Route>
 

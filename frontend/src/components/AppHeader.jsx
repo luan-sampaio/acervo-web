@@ -31,12 +31,6 @@ export default function AppHeader() {
           Coleção
         </NavLink>
         <NavLink
-          to="/search"
-          className={({ isActive }) => (isActive ? 'app-nav-link app-nav-link-active' : 'app-nav-link')}
-        >
-          Buscar
-        </NavLink>
-        <NavLink
           to="/dashboard"
           className={({ isActive }) => (isActive ? 'app-nav-link app-nav-link-active' : 'app-nav-link')}
         >

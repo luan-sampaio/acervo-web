@@ -1,15 +1,14 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import BookFormPanel from '../components/BookFormPanel'
 import BookListPanel from '../components/BookListPanel'
+import CreateBookModal from '../components/CreateBookModal'
 import DeleteBookModal from '../components/DeleteBookModal'
 import {
   defaultQuery,
-  initialForm,
   readingStatusOptions,
   sortOptions,
 } from '../constants'
-import { createBook, deleteBook, fetchBooks, updateBook } from '../services/api'
+import { deleteBook, fetchBooks, updateBook } from '../services/api'
 import { getTextFieldError } from '../utils'
 
 function mapBooksQueryParams(query) {
@@ -46,10 +45,8 @@ function getFieldErrorsFromApi(error) {
 
 export default function CollectionPage() {
   const queryClient = useQueryClient()
-  const [form, setForm] = useState(initialForm)
   const [query, setQuery] = useState(defaultQuery)
   const [searchTerm, setSearchTerm] = useState(defaultQuery.search)
-  const [formTouched, setFormTouched] = useState({ titulo: false, autor: false })
   const [editingBookId, setEditingBookId] = useState(null)
   const [activeMenuBookId, setActiveMenuBookId] = useState(null)
   const [bookPendingDelete, setBookPendingDelete] = useState(null)
@@ -62,21 +59,6 @@ export default function CollectionPage() {
     queryFn: () => fetchBooks(mapBooksQueryParams(query)),
     placeholderData: keepPreviousData,
     staleTime: 30 * 1000,
-  })
-
-  const createBookMutation = useMutation({
-    mutationFn: createBook,
-    onSuccess: async () => {
-      setForm(initialForm)
-      setFormTouched({ titulo: false, autor: false })
-      setIsCreateModalOpen(false)
-      setSuccessMessage('✓ Livro cadastrado com sucesso')
-      setQuery((current) => ({
-        ...current,
-        offset: 0,
-      }))
-      await queryClient.invalidateQueries({ queryKey: ['books'] })
-    },
   })
 
   const updateBookMutation = useMutation({
@@ -150,24 +132,6 @@ export default function CollectionPage() {
   }, [activeMenuBookId])
 
   useEffect(() => {
-    if (!isCreateModalOpen) {
-      return undefined
-    }
-
-    function handleKeyDown(event) {
-      if (event.key === 'Escape' && !createBookMutation.isPending) {
-        setIsCreateModalOpen(false)
-      }
-    }
-
-    document.addEventListener('keydown', handleKeyDown)
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown)
-    }
-  }, [createBookMutation.isPending, isCreateModalOpen])
-
-  useEffect(() => {
     const normalizedSearch = searchTerm.trim()
 
     if (normalizedSearch === query.search) {
@@ -190,14 +154,8 @@ export default function CollectionPage() {
 
   const books = booksQuery.data?.items ?? []
   const totalBooks = booksQuery.data?.total ?? 0
-  const formServerErrors = getFieldErrorsFromApi(createBookMutation.error)
   const editServerErrors = getFieldErrorsFromApi(updateBookMutation.error)
-  const formErrors = useMemo(() => ({
-    titulo: getTextFieldError('Título', form.titulo) || formServerErrors.titulo,
-    autor: getTextFieldError('Autor', form.autor) || formServerErrors.autor,
-  }), [form.autor, form.titulo, formServerErrors.autor, formServerErrors.titulo])
   const editErrors = editingBookId === null ? { titulo: '', autor: '' } : editServerErrors
-  const isFormValid = !formErrors.titulo && !formErrors.autor
   const totalPages = Math.max(1, Math.ceil(totalBooks / query.limit))
   const currentPage = Math.min(totalPages, Math.floor(query.offset / query.limit) + 1)
   const hasPreviousPage = query.offset > 0
@@ -206,25 +164,8 @@ export default function CollectionPage() {
   const visibleRangeEnd = query.offset + books.length
   const listError = booksQuery.error?.message ?? updateBookMutation.error?.message ?? deleteBookMutation.error?.message ?? ''
 
-  function handleChange(event) {
-    const { name, type, checked, value } = event.target
-    createBookMutation.reset()
-    setForm((current) => ({
-      ...current,
-      [name]: type === 'checkbox' ? checked : value,
-    }))
-  }
-
   function handleSearchChange(event) {
     setSearchTerm(event.target.value)
-  }
-
-  function handleFieldBlur(event) {
-    const { name } = event.target
-    setFormTouched((current) => ({
-      ...current,
-      [name]: true,
-    }))
   }
 
   function toggleActionMenu(bookId) {
@@ -255,19 +196,11 @@ export default function CollectionPage() {
   function openCreateModal() {
     setActiveMenuBookId(null)
     cancelEditing()
-    createBookMutation.reset()
     setIsCreateModalOpen(true)
   }
 
   function closeCreateModal() {
-    if (createBookMutation.isPending) {
-      return
-    }
-
-    createBookMutation.reset()
     setIsCreateModalOpen(false)
-    setForm(initialForm)
-    setFormTouched({ titulo: false, autor: false })
   }
 
   function handleSortByChange(event) {
@@ -320,22 +253,6 @@ export default function CollectionPage() {
     updateBookMutation.reset()
     setActiveMenuBookId(null)
     setEditingBookId(book.id)
-  }
-
-  async function handleSubmit(event) {
-    event.preventDefault()
-
-    if (!isFormValid) {
-      setFormTouched({ titulo: true, autor: true })
-      return
-    }
-
-    await createBookMutation.mutateAsync({
-      titulo: form.titulo.trim(),
-      autor: form.autor.trim(),
-      status_leitura: form.status_leitura,
-      favorito: form.favorito,
-    })
   }
 
   async function handleUpdateBook(bookId, event) {
@@ -434,33 +351,24 @@ export default function CollectionPage() {
           onCancelEditing={cancelEditing}
           onOpenCreateModal={openCreateModal}
           onStatusFilterChange={handleStatusFilterChange}
-          error={!isCreateModalOpen ? listError : ''}
+          error={listError}
         />
       </section>
 
       {successMessage ? <div className="toast toast-success">{successMessage}</div> : null}
 
       {isCreateModalOpen ? (
-        <div className="modal-overlay" role="presentation" onClick={(event) => {
-          if (event.target === event.currentTarget) {
-            closeCreateModal()
-          }
-        }}>
-          <BookFormPanel
-            form={form}
-            formErrors={formErrors}
-            formTouched={formTouched}
-            isFormValid={isFormValid}
-            isSubmitting={createBookMutation.isPending}
-            error={createBookMutation.error?.message ?? ''}
-            readingStatusOptions={readingStatusOptions}
-            onChange={handleChange}
-            onBlur={handleFieldBlur}
-            onSubmit={handleSubmit}
-            variant="modal"
-            onCancel={closeCreateModal}
-          />
-        </div>
+        <CreateBookModal
+          onClose={closeCreateModal}
+          onCreated={(message) => {
+            setIsCreateModalOpen(false)
+            setSuccessMessage(message)
+            setQuery((current) => ({
+              ...current,
+              offset: 0,
+            }))
+          }}
+        />
       ) : null}
 
       <DeleteBookModal

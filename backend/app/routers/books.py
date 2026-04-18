@@ -22,12 +22,58 @@ def get_book_or_404(book_id: int, user_id: int, db: Session) -> models.Book:
     return db_book
 
 
+def get_duplicate_book_by_title_author(
+    titulo: str,
+    autor: str,
+    user_id: int,
+    db: Session,
+    exclude_book_id: int | None = None,
+) -> models.Book | None:
+    query = db.query(models.Book).filter(
+        models.Book.user_id == user_id,
+        func.lower(func.btrim(models.Book.titulo)) == titulo.strip().lower(),
+        func.lower(func.btrim(models.Book.autor)) == autor.strip().lower(),
+    )
+
+    if exclude_book_id is not None:
+        query = query.filter(models.Book.id != exclude_book_id)
+
+    return query.first()
+
+
 @router.post("", response_model=schemas.BookResponse, status_code=status.HTTP_201_CREATED)
 def create_book(
     book: schemas.BookCreate,
     db: Session = Depends(database.get_db),
     current_user: models.User = Depends(get_current_user),
 ):
+    duplicate_book = get_duplicate_book_by_title_author(
+        titulo=book.titulo,
+        autor=book.autor,
+        user_id=current_user.id,
+        db=db,
+    )
+    if duplicate_book is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Ja existe um livro com esse titulo e autor no seu acervo",
+        )
+
+    if book.external_id:
+        existing_book = (
+            db.query(models.Book)
+            .filter(
+                models.Book.user_id == current_user.id,
+                models.Book.external_id == book.external_id,
+            )
+            .first()
+        )
+        if existing_book is not None:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Esse livro ja foi adicionado ao seu acervo",
+            )
+
     db_book = models.Book(**book.model_dump(), user_id=current_user.id)
     db.add(db_book)
     db.commit()
@@ -134,6 +180,21 @@ def update_book(
     current_user: models.User = Depends(get_current_user),
 ):
     db_book = get_book_or_404(book_id, current_user.id, db)
+    next_titulo = book.titulo if book.titulo is not None else db_book.titulo
+    next_autor = book.autor if book.autor is not None else db_book.autor
+
+    duplicate_book = get_duplicate_book_by_title_author(
+        titulo=next_titulo,
+        autor=next_autor,
+        user_id=current_user.id,
+        db=db,
+        exclude_book_id=book_id,
+    )
+    if duplicate_book is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Ja existe um livro com esse titulo e autor no seu acervo",
+        )
 
     book_data = book.model_dump(exclude_unset=True)
     for field, value in book_data.items():

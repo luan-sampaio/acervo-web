@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, CheckConstraint, Column, DateTime, ForeignKey, Integer, String
+from sqlalchemy import Boolean, CheckConstraint, Column, DateTime, ForeignKey, Index, Integer, String, text
 from sqlalchemy.sql import func
 
 from .database import Base
@@ -21,6 +21,13 @@ class Book(Base):
         CheckConstraint(
             "status_leitura IN ('quero_ler', 'lendo', 'lido')",
             name="ck_books_status_leitura_valid",
+        ),
+        Index(
+            "ix_books_user_external_id_unique",
+            "user_id",
+            "external_id",
+            unique=True,
+            postgresql_where=text("external_id IS NOT NULL"),
         ),
     )
 
