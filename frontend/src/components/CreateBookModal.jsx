@@ -72,6 +72,8 @@ export default function CreateBookModal({ onClose, onCreated }) {
   const results = searchQuery.data ?? []
   const hasQuery = query.trim().length > 0
   const isSearching = searchQuery.isFetching
+  const searchErrorMessage = searchQuery.error?.message ?? 'Erro ao buscar livros.'
+  const addErrorMessage = createBookMutation.error?.message ?? 'Erro ao adicionar livro.'
 
   useEffect(() => {
     inputRef.current?.focus()
@@ -93,6 +95,16 @@ export default function CreateBookModal({ onClose, onCreated }) {
 
     setQuery(nextQuery)
     setSelectedResult(null)
+  }
+
+  function handleRetrySearch() {
+    if (!query.trim()) {
+      return
+    }
+
+    createBookMutation.reset()
+    setSelectedResult(null)
+    searchQuery.refetch()
   }
 
   function handleChange(event) {
@@ -214,12 +226,47 @@ export default function CreateBookModal({ onClose, onCreated }) {
               </button>
             </form>
 
+            {isSearching ? (
+              <div className="search-status-banner search-status-banner-loading" role="status" aria-live="polite">
+                <strong>Buscando resultados no Google Books...</strong>
+                <span>Isso pode levar alguns segundos. Se nada aparecer, tente ISBN, titulo ou autor.</span>
+              </div>
+            ) : null}
+
             {searchQuery.isError ? (
-              <div className="feedback error search-feedback">{searchQuery.error?.message ?? 'Erro ao buscar livros.'}</div>
+              <div className="search-state-card search-state-card-error" role="alert">
+                <strong>Nao foi possivel concluir a busca agora.</strong>
+                <p>{searchErrorMessage}</p>
+                <div className="search-state-actions">
+                  <button type="button" className="action-button primary-button" onClick={handleRetrySearch}>
+                    Tentar novamente
+                  </button>
+                  <button type="button" className="action-button secondary-button" onClick={() => setMode('manual')}>
+                    Cadastrar manualmente
+                  </button>
+                </div>
+              </div>
             ) : null}
 
             {createBookMutation.isError && mode === 'search' ? (
-              <div className="feedback error search-feedback">{createBookMutation.error?.message ?? 'Erro ao adicionar livro.'}</div>
+              <div className="search-state-card search-state-card-error" role="alert">
+                <strong>O livro nao foi adicionado ao acervo.</strong>
+                <p>{addErrorMessage}</p>
+                <div className="search-state-actions">
+                  {selectedResult ? (
+                    <button type="button" className="action-button primary-button" onClick={() => handleAddBook(selectedResult)}>
+                      Tentar adicionar novamente
+                    </button>
+                  ) : (
+                    <button type="button" className="action-button primary-button" onClick={handleRetrySearch}>
+                      Voltar para a busca
+                    </button>
+                  )}
+                  <button type="button" className="action-button secondary-button" onClick={() => setMode('manual')}>
+                    Cadastrar manualmente
+                  </button>
+                </div>
+              </div>
             ) : null}
 
             {selectedResult ? (
@@ -280,8 +327,14 @@ export default function CreateBookModal({ onClose, onCreated }) {
                 </div>
               </div>
             ) : !hasQuery ? (
-              <div className="search-empty-state search-empty-state-compact">
-                <p>Digite um termo para começar e adicionar direto ao acervo.</p>
+              <div className="search-state-card search-state-card-neutral">
+                <strong>Pesquise para importar um livro.</strong>
+                <p>Voce pode tentar por titulo, autor ou ISBN. Se preferir, use o cadastro manual.</p>
+                <div className="search-state-actions">
+                  <button type="button" className="action-button secondary-button" onClick={() => setMode('manual')}>
+                    Cadastrar manualmente
+                  </button>
+                </div>
               </div>
             ) : isSearching ? (
               <div className="search-results-grid">
@@ -296,11 +349,17 @@ export default function CreateBookModal({ onClose, onCreated }) {
                 ))}
               </div>
             ) : results.length === 0 ? (
-              <div className="search-empty-state search-empty-state-compact">
-                <p>Nenhum resultado para "<strong>{query}</strong>".</p>
-                <button type="button" className="action-button secondary-button" onClick={() => setMode('manual')}>
-                  Cadastrar manualmente
-                </button>
+              <div className="search-state-card search-state-card-empty">
+                <strong>Nenhum resultado encontrado para "{query}".</strong>
+                <p>Tente outro termo, busque pelo ISBN ou siga com o cadastro manual.</p>
+                <div className="search-state-actions">
+                  <button type="button" className="action-button secondary-button" onClick={handleRetrySearch}>
+                    Pesquisar novamente
+                  </button>
+                  <button type="button" className="action-button secondary-button" onClick={() => setMode('manual')}>
+                    Cadastrar manualmente
+                  </button>
+                </div>
               </div>
             ) : (
               <div className="search-results-grid">
