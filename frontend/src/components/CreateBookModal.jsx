@@ -119,10 +119,6 @@ export default function CreateBookModal({ onClose, onCreated }) {
       isbn: result.isbn ?? undefined,
       cover_url: result.cover_url ?? undefined,
       external_id: result.external_id,
-      published_date: result.published_date ?? undefined,
-      publisher: result.publisher ?? undefined,
-      page_count: result.page_count ?? undefined,
-      language: result.language ?? undefined,
       status_leitura: selectedStatus,
     })
   }
@@ -251,10 +247,6 @@ export default function CreateBookModal({ onClose, onCreated }) {
 
                   <div className="search-review-meta">
                     {selectedResult.isbn ? <p><strong>ISBN:</strong> {selectedResult.isbn}</p> : null}
-                    {selectedResult.publisher ? <p><strong>Editora:</strong> {selectedResult.publisher}</p> : null}
-                    {selectedResult.published_date ? <p><strong>Publicacao:</strong> {selectedResult.published_date}</p> : null}
-                    {selectedResult.page_count ? <p><strong>Paginas:</strong> {selectedResult.page_count}</p> : null}
-                    {selectedResult.language ? <p><strong>Idioma:</strong> {selectedResult.language}</p> : null}
                     {selectedResult.descricao ? <p>{selectedResult.descricao}</p> : null}
                   </div>
 
