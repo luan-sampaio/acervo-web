@@ -45,6 +45,8 @@ export default function CreateBookModal({ onClose, onCreated }) {
   const [query, setQuery] = useState('')
   const [form, setForm] = useState(initialForm)
   const [formTouched, setFormTouched] = useState({ titulo: false, autor: false })
+  const [selectedResult, setSelectedResult] = useState(null)
+  const [selectedStatus, setSelectedStatus] = useState('quero_ler')
 
   const searchQuery = useQuery({
     queryKey: ['external-search', query],
@@ -90,6 +92,7 @@ export default function CreateBookModal({ onClose, onCreated }) {
     }
 
     setQuery(nextQuery)
+    setSelectedResult(null)
   }
 
   function handleChange(event) {
@@ -116,7 +119,24 @@ export default function CreateBookModal({ onClose, onCreated }) {
       isbn: result.isbn ?? undefined,
       cover_url: result.cover_url ?? undefined,
       external_id: result.external_id,
+      status_leitura: selectedStatus,
     })
+  }
+
+  function handleSelectResult(result) {
+    createBookMutation.reset()
+    setSelectedStatus('quero_ler')
+    setSelectedResult(result)
+  }
+
+  function handleCloseReview() {
+    if (createBookMutation.isPending) {
+      return
+    }
+
+    createBookMutation.reset()
+    setSelectedResult(null)
+    setSelectedStatus('quero_ler')
   }
 
   async function handleManualSubmit(event) {
@@ -198,7 +218,64 @@ export default function CreateBookModal({ onClose, onCreated }) {
               <div className="feedback error search-feedback">{createBookMutation.error?.message ?? 'Erro ao adicionar livro.'}</div>
             ) : null}
 
-            {!hasQuery ? (
+            {selectedResult ? (
+              <div className="search-review-card">
+                <div className="search-review-media">
+                  <BookCover coverUrl={selectedResult.cover_url} titulo={selectedResult.titulo} />
+                </div>
+
+                <div className="search-review-content">
+                  <div className="search-review-header">
+                    <div>
+                      <span className="search-review-kicker">Revisar antes de adicionar</span>
+                      <h3>{selectedResult.titulo}</h3>
+                      <p>{selectedResult.autor}</p>
+                    </div>
+                    <button
+                      type="button"
+                      className="action-button secondary-button"
+                      onClick={handleCloseReview}
+                      disabled={createBookMutation.isPending}
+                    >
+                      Voltar aos resultados
+                    </button>
+                  </div>
+
+                  <div className="search-review-meta">
+                    {selectedResult.isbn ? <p><strong>ISBN:</strong> {selectedResult.isbn}</p> : null}
+                    {selectedResult.descricao ? <p>{selectedResult.descricao}</p> : null}
+                  </div>
+
+                  <div className="search-review-controls">
+                    <label className="toolbar-select-field search-review-select">
+                      <span>Status inicial</span>
+                      <select
+                        value={selectedStatus}
+                        onChange={(event) => setSelectedStatus(event.target.value)}
+                        disabled={createBookMutation.isPending}
+                      >
+                        {readingStatusOptions.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  </div>
+
+                  <div className="search-review-actions">
+                    <button
+                      type="button"
+                      className="action-button primary-button"
+                      disabled={createBookMutation.isPending}
+                      onClick={() => handleAddBook(selectedResult)}
+                    >
+                      {createBookMutation.isPending ? 'Adicionando...' : 'Confirmar e adicionar'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : !hasQuery ? (
               <div className="search-empty-state search-empty-state-compact">
                 <p>Digite um termo para começar e adicionar direto ao acervo.</p>
               </div>
@@ -238,9 +315,9 @@ export default function CreateBookModal({ onClose, onCreated }) {
                           type="button"
                           className="action-button primary-button search-add-button"
                           disabled={isAdding || createBookMutation.isPending}
-                          onClick={() => handleAddBook(result)}
+                          onClick={() => handleSelectResult(result)}
                         >
-                          {isAdding ? 'Adicionando...' : 'Adicionar ao acervo'}
+                          {isAdding ? 'Adicionando...' : 'Revisar e adicionar'}
                         </button>
                       </div>
                     </article>
