@@ -37,6 +37,11 @@ def _parse_volume(item: dict, already_in_library: bool = False) -> schemas.BookS
     if descricao and len(descricao) > 500:
         descricao = descricao[:497] + "..."
 
+    published_date = info.get("publishedDate")
+    publisher = info.get("publisher")
+    page_count = info.get("pageCount")
+    language = info.get("language")
+
     return schemas.BookSearchResult(
         external_id=item["id"],
         titulo=titulo,
@@ -44,6 +49,10 @@ def _parse_volume(item: dict, already_in_library: bool = False) -> schemas.BookS
         isbn=isbn,
         cover_url=cover_url,
         descricao=descricao or None,
+        published_date=published_date or None,
+        publisher=publisher or None,
+        page_count=page_count if isinstance(page_count, int) and page_count > 0 else None,
+        language=language or None,
         already_in_library=already_in_library,
     )
 

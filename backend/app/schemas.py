@@ -36,6 +36,10 @@ class BookBase(BaseModel):
     isbn: str | None = Field(default=None, max_length=20)
     cover_url: str | None = Field(default=None, max_length=512)
     external_id: str | None = Field(default=None, max_length=100)
+    published_date: str | None = Field(default=None, max_length=32)
+    publisher: str | None = Field(default=None, max_length=255)
+    page_count: int | None = Field(default=None, ge=1)
+    language: str | None = Field(default=None, max_length=10)
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
@@ -51,6 +55,10 @@ class BookSearchResult(BaseModel):
     isbn: str | None = None
     cover_url: str | None = None
     descricao: str | None = None
+    published_date: str | None = None
+    publisher: str | None = None
+    page_count: int | None = None
+    language: str | None = None
     already_in_library: bool = False
 
 
