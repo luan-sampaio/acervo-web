@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import BookFormPanel from '../components/BookFormPanel'
 import BookListPanel from '../components/BookListPanel'
-import CategoryTagModal from '../components/CategoryTagModal'
 import DeleteBookModal from '../components/DeleteBookModal'
 import {
   defaultQuery,
@@ -10,7 +9,7 @@ import {
   readingStatusOptions,
   sortOptions,
 } from '../constants'
-import { createBook, deleteBook, fetchBooks, fetchCategories, fetchTags, updateBook, updateBookTags } from '../services/api'
+import { createBook, deleteBook, fetchBooks, updateBook } from '../services/api'
 import { getTextFieldError } from '../utils'
 
 function mapBooksQueryParams(query) {
@@ -22,7 +21,6 @@ function mapBooksQueryParams(query) {
     search: query.search,
     status_leitura: ['quero_ler', 'lendo', 'lido'].includes(query.statusFilter) ? query.statusFilter : undefined,
     favorito_only: query.statusFilter === 'favorito' ? true : undefined,
-    category_id: query.categoryFilter ?? undefined,
   }
 }
 
@@ -56,7 +54,6 @@ export default function CollectionPage() {
   const [activeMenuBookId, setActiveMenuBookId] = useState(null)
   const [bookPendingDelete, setBookPendingDelete] = useState(null)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
-  const [isCategoryTagModalOpen, setIsCategoryTagModalOpen] = useState(false)
   const [successMessage, setSuccessMessage] = useState('')
   const actionMenuRef = useRef(null)
 
@@ -65,18 +62,6 @@ export default function CollectionPage() {
     queryFn: () => fetchBooks(mapBooksQueryParams(query)),
     placeholderData: keepPreviousData,
     staleTime: 30 * 1000,
-  })
-
-  const categoriesQuery = useQuery({
-    queryKey: ['categories'],
-    queryFn: fetchCategories,
-    staleTime: 60 * 1000,
-  })
-
-  const tagsQuery = useQuery({
-    queryKey: ['tags'],
-    queryFn: fetchTags,
-    staleTime: 60 * 1000,
   })
 
   const createBookMutation = useMutation({
@@ -99,13 +84,6 @@ export default function CollectionPage() {
     onSuccess: async () => {
       setEditingBookId(null)
       setSuccessMessage('✓ Livro atualizado com sucesso')
-      await queryClient.invalidateQueries({ queryKey: ['books'] })
-    },
-  })
-
-  const updateTagsMutation = useMutation({
-    mutationFn: ({ bookId, tagIds }) => updateBookTags(bookId, tagIds),
-    onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['books'] })
     },
   })
@@ -270,15 +248,6 @@ export default function CollectionPage() {
       ...query,
       search: '',
       statusFilter: 'all',
-      categoryFilter: null,
-      offset: 0,
-    })
-  }
-
-  function handleCategoryFilterChange(categoryId) {
-    handleQueryUpdate({
-      ...query,
-      categoryFilter: query.categoryFilter === categoryId ? null : categoryId,
       offset: 0,
     })
   }
@@ -366,20 +335,17 @@ export default function CollectionPage() {
       autor: form.autor.trim(),
       status_leitura: form.status_leitura,
       favorito: form.favorito,
-      category_id: form.category_id ? Number(form.category_id) : undefined,
     })
   }
 
-  async function handleUpdateBook(bookId, event, tagIds) {
+  async function handleUpdateBook(bookId, event) {
     event.preventDefault()
     const formData = new FormData(event.currentTarget)
-    const rawCategoryId = formData.get('category_id')
     const payload = {
       titulo: String(formData.get('titulo') ?? '').trim(),
       autor: String(formData.get('autor') ?? '').trim(),
       status_leitura: String(formData.get('status_leitura') ?? 'quero_ler'),
       favorito: formData.get('favorito') === 'on',
-      category_id: rawCategoryId ? Number(rawCategoryId) : null,
     }
 
     if (getTextFieldError('Título', payload.titulo) || getTextFieldError('Autor', payload.autor)) {
@@ -387,9 +353,6 @@ export default function CollectionPage() {
     }
 
     await updateBookMutation.mutateAsync({ bookId, payload })
-    if (tagIds !== undefined) {
-      await updateTagsMutation.mutateAsync({ bookId, tagIds })
-    }
   }
 
   function requestDeleteBook(book) {
@@ -471,10 +434,6 @@ export default function CollectionPage() {
           onCancelEditing={cancelEditing}
           onOpenCreateModal={openCreateModal}
           onStatusFilterChange={handleStatusFilterChange}
-          onCategoryFilterChange={handleCategoryFilterChange}
-          onOpenCategoryTagModal={() => setIsCategoryTagModalOpen(true)}
-          categories={categoriesQuery.data ?? []}
-          tags={tagsQuery.data ?? []}
           error={!isCreateModalOpen ? listError : ''}
         />
       </section>
@@ -495,7 +454,6 @@ export default function CollectionPage() {
             isSubmitting={createBookMutation.isPending}
             error={createBookMutation.error?.message ?? ''}
             readingStatusOptions={readingStatusOptions}
-            categories={categoriesQuery.data ?? []}
             onChange={handleChange}
             onBlur={handleFieldBlur}
             onSubmit={handleSubmit}
@@ -503,14 +461,6 @@ export default function CollectionPage() {
             onCancel={closeCreateModal}
           />
         </div>
-      ) : null}
-
-      {isCategoryTagModalOpen ? (
-        <CategoryTagModal
-          categories={categoriesQuery.data ?? []}
-          tags={tagsQuery.data ?? []}
-          onClose={() => setIsCategoryTagModalOpen(false)}
-        />
       ) : null}
 
       <DeleteBookModal

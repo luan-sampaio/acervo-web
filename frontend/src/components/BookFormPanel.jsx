@@ -6,7 +6,6 @@ export default function BookFormPanel({
   isSubmitting,
   error,
   readingStatusOptions,
-  categories = [],
   onChange,
   onBlur,
   onSubmit,
@@ -65,18 +64,6 @@ export default function BookFormPanel({
             ))}
           </select>
         </label>
-
-        {categories.length > 0 ? (
-          <label>
-            <span>Categoria</span>
-            <select name="category_id" value={form.category_id} onChange={onChange}>
-              <option value="">Sem categoria</option>
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>{cat.nome}</option>
-              ))}
-            </select>
-          </label>
-        ) : null}
 
         <label className="checkbox-field">
           <input
