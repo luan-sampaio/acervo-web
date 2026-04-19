@@ -17,8 +17,17 @@ class DuplicateBookError(Exception):
         self.detail = detail
 
 
+class InvalidBookStateError(Exception):
+    def __init__(self, detail: str):
+        super().__init__(detail)
+        self.detail = detail
+
+
 TITLE_AUTHOR_DUPLICATE_MESSAGE = "Ja existe um livro com esse titulo e autor no seu acervo"
 EXTERNAL_ID_DUPLICATE_MESSAGE = "Esse livro ja foi adicionado ao seu acervo"
+BOOK_WITH_ANNOTATION_NOT_READ_MESSAGE = (
+    "Remova a anotação de leitura antes de alterar o status para nao lido"
+)
 TITLE_AUTHOR_UNIQUE_INDEX = "ix_books_user_title_author_unique"
 EXTERNAL_ID_UNIQUE_INDEX = "ix_books_user_external_id_unique"
 
@@ -224,6 +233,13 @@ def update_book(
     )
     if duplicate_book is not None:
         raise DuplicateBookError(TITLE_AUTHOR_DUPLICATE_MESSAGE)
+
+    if (
+        book.status_leitura is not None
+        and book.status_leitura != "lido"
+        and db_book.annotation is not None
+    ):
+        raise InvalidBookStateError(BOOK_WITH_ANNOTATION_NOT_READ_MESSAGE)
 
     book_data = book.model_dump(exclude_unset=True)
     for field, value in book_data.items():

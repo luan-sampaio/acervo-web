@@ -10,6 +10,14 @@ from .books import get_book_or_404
 router = APIRouter(prefix="/books/{book_id}/annotation", tags=["Reading annotations"])
 
 
+def ensure_book_can_be_annotated(book: models.Book) -> None:
+    if book.status_leitura != "lido":
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Para registrar nota, resenha ou período de leitura, marque o livro como lido",
+        )
+
+
 def get_annotation_or_404(
     book_id: int,
     user_id: int,
@@ -42,7 +50,8 @@ def create_annotation(
     db: Session = Depends(database.get_db),
     current_user: models.User = Depends(get_current_user),
 ):
-    get_book_or_404(book_id, current_user.id, db)
+    db_book = get_book_or_404(book_id, current_user.id, db)
+    ensure_book_can_be_annotated(db_book)
     existing_annotation = (
         db.query(models.ReadingAnnotation)
         .filter(
@@ -85,7 +94,8 @@ def update_annotation(
     db: Session = Depends(database.get_db),
     current_user: models.User = Depends(get_current_user),
 ):
-    get_book_or_404(book_id, current_user.id, db)
+    db_book = get_book_or_404(book_id, current_user.id, db)
+    ensure_book_can_be_annotated(db_book)
     db_annotation = get_annotation_or_404(book_id, current_user.id, db)
 
     annotation_data = annotation.model_dump(exclude_unset=True)

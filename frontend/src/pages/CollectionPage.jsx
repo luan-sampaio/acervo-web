@@ -165,7 +165,11 @@ export default function CollectionPage() {
     cancelEditing()
     saveAnnotationMutation.reset()
     deleteAnnotationMutation.reset()
-    setAnnotationError('')
+    setAnnotationError(
+      book.status_leitura === 'lido'
+        ? ''
+        : 'Marque o livro como lido para registrar nota, resenha ou período de leitura.',
+    )
     setActiveMenuBookId(null)
     setAnnotationBookId((current) => (current === book.id ? null : book.id))
   }
@@ -194,6 +198,12 @@ export default function CollectionPage() {
 
   async function handleSaveAnnotation(book, event) {
     event.preventDefault()
+
+    if (book.status_leitura !== 'lido') {
+      setAnnotationError('Marque o livro como lido para registrar nota, resenha ou período de leitura.')
+      return
+    }
+
     const formData = new FormData(event.currentTarget)
     const rawRating = String(formData.get('rating') ?? '')
     const review = String(formData.get('review') ?? '').trim()

@@ -45,7 +45,8 @@ function BookCard({
   const ratingLabel = formatRatingLabel(annotation?.rating)
   const readingPeriod = formatReadingPeriod(annotation)
   const reviewPreview = annotation?.review?.trim() ?? ''
-  const hasReadingSummary = Boolean(ratingLabel || readingPeriod || reviewPreview)
+  const canAnnotate = book.status_leitura === 'lido'
+  const hasReadingSummary = canAnnotate && Boolean(ratingLabel || readingPeriod || reviewPreview)
 
   return (
     <article key={book.id} className={`book-card ${getCardAccentClass(book.status_leitura)}`}>
@@ -178,7 +179,30 @@ function BookCard({
         </div>
       ) : null}
 
-      {!isEditing && isAnnotationOpen ? (
+      {!isEditing && isAnnotationOpen && !canAnnotate ? (
+        <div className="annotation-panel annotation-panel-locked">
+          <div className="annotation-panel-header">
+            <div>
+              <span className="annotation-kicker">Anotações de leitura</span>
+              <strong>Marque como lido para avaliar</strong>
+            </div>
+            <button
+              type="button"
+              className="annotation-close-button"
+              onClick={onCloseAnnotation}
+              aria-label="Fechar anotações"
+            >
+              ×
+            </button>
+          </div>
+
+          <p className="annotation-locked-message">
+            Notas, resenhas e período de leitura ficam disponíveis apenas para livros com status Lido.
+          </p>
+        </div>
+      ) : null}
+
+      {!isEditing && isAnnotationOpen && canAnnotate ? (
         <form
           key={`${book.id}-${annotation?.updated_at ?? 'new'}`}
           className="annotation-panel"

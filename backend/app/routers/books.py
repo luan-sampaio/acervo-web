@@ -99,3 +99,5 @@ def update_book(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Livro não encontrado")
     except book_service.DuplicateBookError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=exc.detail) from exc
+    except book_service.InvalidBookStateError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=exc.detail) from exc
