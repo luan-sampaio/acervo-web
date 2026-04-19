@@ -129,16 +129,14 @@ function BookCard({
             <div className="book-menu" ref={activeMenuBookId === book.id ? actionMenuRef : null}>
               <button
                 type="button"
-                className="menu-trigger"
+                className="menu-trigger menu-trigger-icon"
                 aria-label={`Ações do livro ${book.titulo}`}
+                title="Ações"
                 aria-haspopup="menu"
                 aria-expanded={activeMenuBookId === book.id}
                 onClick={() => onToggleMenu(book.id)}
               >
-                <span className="menu-trigger-label">Ações</span>
-                <span className="menu-trigger-caret" aria-hidden="true">
-                  {activeMenuBookId === book.id ? '▴' : '▾'}
-                </span>
+                <span aria-hidden="true">⋮</span>
               </button>
 
               {activeMenuBookId === book.id ? (

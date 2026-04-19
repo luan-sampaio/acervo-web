@@ -1640,13 +1640,16 @@ button { cursor: pointer; }
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.35rem;
-  min-height: 1.9rem;
-  padding: 0 0.65rem;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
   border: 1px solid var(--border);
   border-radius: var(--r-full);
   background: #fff;
   color: var(--text-2);
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1;
   transition: border-color 0.15s, color 0.15s, background 0.15s, box-shadow 0.15s;
 }
 
@@ -1658,18 +1661,6 @@ button { cursor: pointer; }
 .menu-trigger:focus-visible {
   border-color: rgba(79, 70, 229, 0.3);
   box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
-}
-
-.menu-trigger-label {
-  font-size: 0.78rem;
-  font-weight: 600;
-  line-height: 1;
-}
-
-.menu-trigger-caret {
-  font-size: 0.7rem;
-  line-height: 1;
-  color: var(--muted);
 }
 
 .card-menu {
