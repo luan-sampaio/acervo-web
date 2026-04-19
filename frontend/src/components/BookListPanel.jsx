@@ -100,10 +100,6 @@ function BookCard({
           </form>
         ) : (
           <div className="book-main">
-            <div className="book-card-kicker-row">
-              <span className="book-id">Livro #{book.id}</span>
-              <span className="book-date book-date-inline">{formatShortDate(book.created_at)}</span>
-            </div>
             <h3>{book.titulo}</h3>
             <p className="book-author">{book.autor}</p>
             <div className="book-badges">
@@ -122,6 +118,11 @@ function BookCard({
                 {reviewPreview ? <p>{reviewPreview}</p> : null}
               </div>
             ) : null}
+
+            <div className="book-card-footer">
+              <span className="book-id">Livro #{book.id}</span>
+              <span className="book-date">{formatShortDate(book.created_at)}</span>
+            </div>
           </div>
         )}
 

@@ -1473,31 +1473,33 @@ button { cursor: pointer; }
   min-width: 0;
 }
 
-.book-card-kicker-row {
+.book-card-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
-  margin-bottom: 0.38rem;
+  margin-top: 0.72rem;
+  padding-top: 0.55rem;
+  border-top: 1px solid var(--border);
   flex-wrap: wrap;
 }
 
 .book-card h3 {
   margin: 0;
-  font-size: 1.04rem;
-  font-weight: 700;
+  font-size: 1.08rem;
+  font-weight: 800;
   color: var(--text);
   white-space: normal;
   overflow: visible;
   text-overflow: unset;
-  line-height: 1.3;
+  line-height: 1.22;
   max-width: 34rem;
   text-wrap: balance;
 }
 
 .book-author {
-  margin: 0.18rem 0 0;
-  font-size: 0.88rem;
+  margin: 0.22rem 0 0;
+  font-size: 0.9rem;
   color: var(--text-2);
   white-space: normal;
   overflow: visible;
@@ -1509,9 +1511,9 @@ button { cursor: pointer; }
 .book-badges {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.35rem;
   flex-wrap: wrap;
-  margin-top: 0.52rem;
+  margin-top: 0.62rem;
 }
 
 .book-status-badge {
@@ -1615,27 +1617,22 @@ button { cursor: pointer; }
 .book-id {
   display: inline-flex;
   align-items: center;
-  height: 1.5rem;
-  padding: 0 0.5rem;
-  border-radius: var(--r-full);
-  background: var(--surface-2);
+  padding: 0;
+  background: transparent;
   color: var(--muted);
-  font-size: 0.76rem;
+  font-size: 0.72rem;
   font-weight: 600;
-  border: 1px solid var(--border);
+  border: 0;
+  line-height: 1.3;
 }
 
 .book-date {
-  color: var(--text-2);
-  font-size: 0.84rem;
+  color: var(--muted);
+  font-size: 0.72rem;
   white-space: nowrap;
-  line-height: 1.4;
+  line-height: 1.3;
   text-align: right;
-  opacity: 0.82;
-}
-
-.book-date-inline {
-  text-align: left;
+  opacity: 1;
 }
 
 /* ── CARD MENU ── */
@@ -2400,9 +2397,9 @@ button { cursor: pointer; }
     padding: 1rem;
   }
 
-  .book-card-kicker-row {
+  .book-card-footer {
     gap: 0.5rem;
-    margin-bottom: 0.45rem;
+    margin-top: 0.65rem;
   }
 
   .book-card h3 {
