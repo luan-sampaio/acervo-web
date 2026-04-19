@@ -71,21 +71,3 @@ export function formatRatingLabel(rating) {
 
   return `Nota ${rating}/5`
 }
-
-export function formatLatestAddition(value) {
-  if (!value) {
-    return 'Sem registros recentes'
-  }
-
-  const date = new Date(value)
-  const now = new Date()
-
-  if (date.toDateString() === now.toDateString()) {
-    return `Hoje, ${new Intl.DateTimeFormat('pt-BR', { timeStyle: 'short' }).format(date)}`
-  }
-
-  return new Intl.DateTimeFormat('pt-BR', {
-    dateStyle: 'short',
-    timeStyle: 'short',
-  }).format(date)
-}
