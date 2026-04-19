@@ -43,6 +43,13 @@ class Book(Base):
             unique=True,
             postgresql_where=text("external_id IS NOT NULL"),
         ),
+        Index(
+            "ix_books_user_title_author_unique",
+            "user_id",
+            text("lower(btrim(titulo))"),
+            text("lower(btrim(autor))"),
+            unique=True,
+        ),
     )
 
     id = Column(Integer, primary_key=True, index=True)

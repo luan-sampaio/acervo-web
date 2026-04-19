@@ -1,6 +1,7 @@
 from typing import Literal
 
 from sqlalchemy import and_, func, or_
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
 
 from .. import models, schemas
@@ -14,6 +15,12 @@ class DuplicateBookError(Exception):
     def __init__(self, detail: str):
         super().__init__(detail)
         self.detail = detail
+
+
+TITLE_AUTHOR_DUPLICATE_MESSAGE = "Ja existe um livro com esse titulo e autor no seu acervo"
+EXTERNAL_ID_DUPLICATE_MESSAGE = "Esse livro ja foi adicionado ao seu acervo"
+TITLE_AUTHOR_UNIQUE_INDEX = "ix_books_user_title_author_unique"
+EXTERNAL_ID_UNIQUE_INDEX = "ix_books_user_external_id_unique"
 
 
 def get_book_or_raise(book_id: int, user_id: int, db: Session) -> models.Book:
@@ -43,7 +50,7 @@ def create_book(
         db=db,
     )
     if duplicate_book is not None:
-        raise DuplicateBookError("Ja existe um livro com esse titulo e autor no seu acervo")
+        raise DuplicateBookError(TITLE_AUTHOR_DUPLICATE_MESSAGE)
 
     if book.external_id:
         existing_book = (
@@ -55,11 +62,14 @@ def create_book(
             .first()
         )
         if existing_book is not None:
-            raise DuplicateBookError("Esse livro ja foi adicionado ao seu acervo")
+            raise DuplicateBookError(EXTERNAL_ID_DUPLICATE_MESSAGE)
 
     db_book = models.Book(**book.model_dump(), user_id=user_id)
     db.add(db_book)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        _raise_duplicate_from_integrity_error(exc, db)
     db.refresh(db_book)
     return db_book
 
@@ -213,15 +223,31 @@ def update_book(
         exclude_book_id=book_id,
     )
     if duplicate_book is not None:
-        raise DuplicateBookError("Ja existe um livro com esse titulo e autor no seu acervo")
+        raise DuplicateBookError(TITLE_AUTHOR_DUPLICATE_MESSAGE)
 
     book_data = book.model_dump(exclude_unset=True)
     for field, value in book_data.items():
         setattr(db_book, field, value)
 
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        _raise_duplicate_from_integrity_error(exc, db)
     db.refresh(db_book)
     return db_book
+
+
+def _raise_duplicate_from_integrity_error(exc: IntegrityError, db: Session) -> None:
+    db.rollback()
+    error_text = str(getattr(exc, "orig", exc))
+
+    if EXTERNAL_ID_UNIQUE_INDEX in error_text:
+        raise DuplicateBookError(EXTERNAL_ID_DUPLICATE_MESSAGE) from exc
+
+    if TITLE_AUTHOR_UNIQUE_INDEX in error_text:
+        raise DuplicateBookError(TITLE_AUTHOR_DUPLICATE_MESSAGE) from exc
+
+    raise exc
 
 
 def get_duplicate_book_by_title_author(
