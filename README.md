@@ -5,7 +5,7 @@
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-13-blue?style=for-the-badge&logo=postgresql&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 
-Uma aplicação web full-stack para registro e acompanhamento de leitura pessoal. O sistema permite cadastrar livros, acompanhar o status de leitura (quero ler, lendo, lido), marcar favoritos e visualizar métricas do acervo em um painel dedicado. O frontend foi construído com React e TanStack Query, oferecendo uma experiência fluida com paginação server-side, filtros dinâmicos e feedback visual em tempo real.
+Uma aplicação web full-stack para registro e acompanhamento de leitura pessoal. O sistema permite cadastrar livros, acompanhar o status de leitura (quero ler, lendo, lido), marcar favoritos, registrar notas, resenhas e datas de leitura, além de visualizar métricas do acervo em um painel dedicado. O frontend foi construído com React e TanStack Query, oferecendo uma experiência fluida com paginação server-side, filtros dinâmicos e feedback visual em tempo real.
 
 ## ✨ Funcionalidades
 
@@ -13,11 +13,14 @@ Uma aplicação web full-stack para registro e acompanhamento de leitura pessoal
 - **CRUD completo de livros:** cadastro, edição inline e remoção com modal de confirmação
 - **Status de leitura:** controle por livro entre "Quero ler", "Lendo" e "Lido", com badges coloridos por status
 - **Favoritos:** marcação e filtragem de livros favoritos
+- **Anotações de leitura:** notas, resenhas e datas de início/término vinculadas ao livro
+- **Feedback imediato:** atualização otimista das anotações com TanStack Query
 - **Busca e filtros:** busca por título/autor e filtros rápidos por status, com debounce
 - **Paginação e ordenação server-side:** por data de cadastro, título ou autor, com controle de itens por página
 
 ### 📊 Painel
 - Métricas agregadas do acervo (total de livros, distribuição por status, favoritos)
+- Resumo de leitura com livros anotados, média de nota, histórico e resenhas
 - Listagem dos registros mais recentes
 - Navegação direta para a coleção
 
@@ -35,7 +38,10 @@ acervo-web/
 │   │   ├── database.py          # Conexão com o banco
 │   │   ├── config.py            # Variáveis de ambiente
 │   │   └── routers/
-│   │       └── books.py         # Endpoints de livros
+│   │       ├── annotations.py   # Endpoints de anotações de leitura
+│   │       ├── auth.py          # Endpoints de autenticação
+│   │       ├── books.py         # Endpoints de livros
+│   │       └── search.py        # Busca externa de livros
 │   ├── alembic/                 # Migrations do banco
 │   ├── requirements.txt
 │   └── Dockerfile
