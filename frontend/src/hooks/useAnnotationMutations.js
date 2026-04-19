@@ -54,7 +54,7 @@ function createOptimisticAnnotation(bookId, payload, currentAnnotation) {
 export function useAnnotationMutations({
   setAnnotationBookId,
   setAnnotationError,
-  setSuccessMessage,
+  showSnackbar,
 }) {
   const queryClient = useQueryClient()
 
@@ -85,7 +85,10 @@ export function useAnnotationMutations({
       setAnnotationError('')
       setAnnotationBookId(null)
       updateBookAnnotationInCache(queryClient, bookId, savedAnnotation)
-      setSuccessMessage('✓ Anotação salva com sucesso')
+      showSnackbar({
+        message: 'Anotação salva',
+        detail: 'Sua avaliação foi vinculada ao livro.',
+      })
       await queryClient.invalidateQueries({ queryKey: ['books'] })
     },
   })
@@ -108,7 +111,10 @@ export function useAnnotationMutations({
       setAnnotationError('')
       setAnnotationBookId(null)
       updateBookAnnotationInCache(queryClient, bookId, null)
-      setSuccessMessage('✓ Anotação removida com sucesso')
+      showSnackbar({
+        message: 'Anotação removida',
+        detail: 'Nota, resenha e datas foram apagadas.',
+      })
       await queryClient.invalidateQueries({ queryKey: ['books'] })
     },
   })

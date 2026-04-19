@@ -40,7 +40,10 @@ export default function CreateBookModal({ onClose, onCreated }) {
     mutationFn: createBook,
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['books'] })
-      onCreated('✓ Livro cadastrado com sucesso')
+      onCreated({
+        message: 'Livro cadastrado',
+        detail: 'Ele já está disponível na sua coleção.',
+      })
     },
   })
 

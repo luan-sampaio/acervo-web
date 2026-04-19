@@ -8,8 +8,7 @@ export function useBookMutations({
   setAnnotationError,
   setBookPendingDelete,
   setEditingBookId,
-  setQuery,
-  setSuccessMessage,
+  showSnackbar,
 }) {
   const queryClient = useQueryClient()
 
@@ -17,14 +16,17 @@ export function useBookMutations({
     mutationFn: ({ bookId, payload }) => updateBook(bookId, payload),
     onSuccess: async () => {
       setEditingBookId(null)
-      setSuccessMessage('✓ Livro atualizado com sucesso')
+      showSnackbar({
+        message: 'Livro atualizado',
+        detail: 'As alterações foram salvas na sua coleção.',
+      })
       await queryClient.invalidateQueries({ queryKey: ['books'] })
     },
   })
 
   const deleteBookMutation = useMutation({
     mutationFn: ({ bookId }) => deleteBook(bookId),
-    onSuccess: async (_, { bookId, query, totalBooks }) => {
+    onSuccess: async (_, { bookId, query, setQuery, totalBooks }) => {
       const nextTotal = Math.max(totalBooks - 1, 0)
       const nextOffset = nextTotal === 0
         ? 0
@@ -44,7 +46,10 @@ export function useBookMutations({
         ...current,
         offset: nextOffset,
       }))
-      setSuccessMessage('✓ Livro removido com sucesso')
+      showSnackbar({
+        message: 'Livro removido',
+        detail: 'O item saiu da sua coleção.',
+      })
       await queryClient.invalidateQueries({ queryKey: ['books'] })
     },
   })

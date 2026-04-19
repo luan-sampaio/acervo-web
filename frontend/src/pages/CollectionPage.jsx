@@ -19,8 +19,15 @@ export default function CollectionPage() {
   const [activeMenuBookId, setActiveMenuBookId] = useState(null)
   const [bookPendingDelete, setBookPendingDelete] = useState(null)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
-  const [successMessage, setSuccessMessage] = useState('')
+  const [snackbar, setSnackbar] = useState(null)
   const actionMenuRef = useRef(null)
+
+  const showSnackbar = useCallback((nextSnackbar) => {
+    setSnackbar({
+      tone: 'success',
+      ...nextSnackbar,
+    })
+  }, [])
 
   const {
     deleteAnnotationMutation,
@@ -28,7 +35,7 @@ export default function CollectionPage() {
   } = useAnnotationMutations({
     setAnnotationBookId,
     setAnnotationError,
-    setSuccessMessage,
+    showSnackbar,
   })
 
   const {
@@ -41,7 +48,7 @@ export default function CollectionPage() {
     setAnnotationError,
     setBookPendingDelete,
     setEditingBookId,
-    setSuccessMessage,
+    showSnackbar,
   })
 
   const cancelEditing = useCallback(() => {
@@ -93,16 +100,16 @@ export default function CollectionPage() {
   })
 
   useEffect(() => {
-    if (!successMessage) {
+    if (!snackbar) {
       return undefined
     }
 
     const timeoutId = window.setTimeout(() => {
-      setSuccessMessage('')
+      setSnackbar(null)
     }, 3200)
 
     return () => window.clearTimeout(timeoutId)
-  }, [successMessage])
+  }, [snackbar])
 
   useEffect(() => {
     if (activeMenuBookId === null) {
@@ -260,6 +267,7 @@ export default function CollectionPage() {
     await deleteBookMutation.mutateAsync({
       bookId: bookPendingDelete.id,
       query,
+      setQuery,
       totalBooks,
     })
   }
@@ -338,14 +346,22 @@ export default function CollectionPage() {
         />
       </section>
 
-      {successMessage ? <div className="toast toast-success">{successMessage}</div> : null}
+      {snackbar ? (
+        <div className={`toast toast-${snackbar.tone}`} role="status" aria-live="polite">
+          <span className="toast-icon" aria-hidden="true">✓</span>
+          <span className="toast-copy">
+            <strong>{snackbar.message}</strong>
+            {snackbar.detail ? <span>{snackbar.detail}</span> : null}
+          </span>
+        </div>
+      ) : null}
 
       {isCreateModalOpen ? (
         <CreateBookModal
           onClose={closeCreateModal}
           onCreated={(message) => {
             setIsCreateModalOpen(false)
-            setSuccessMessage(message)
+            showSnackbar(message)
             setQuery((current) => ({
               ...current,
               offset: 0,
