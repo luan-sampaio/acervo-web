@@ -23,12 +23,25 @@ export default function DashboardPage() {
     const readingNowCount = books.filter((book) => book.status_leitura === 'lendo').length
     const finishedCount = books.filter((book) => book.status_leitura === 'lido').length
     const wantToReadCount = books.filter((book) => book.status_leitura === 'quero_ler').length
+    const annotatedBooks = books.filter((book) => book.annotation)
+    const ratedBooks = annotatedBooks.filter((book) => book.annotation.rating)
+    const datedReadings = annotatedBooks.filter((book) => (
+      book.annotation.started_at || book.annotation.finished_at
+    ))
+    const reviewCount = annotatedBooks.filter((book) => book.annotation.review).length
+    const averageRating = ratedBooks.length
+      ? ratedBooks.reduce((total, book) => total + book.annotation.rating, 0) / ratedBooks.length
+      : null
 
     return {
       favoriteCount,
       readingNowCount,
       finishedCount,
       wantToReadCount,
+      annotationCount: annotatedBooks.length,
+      averageRating,
+      datedReadingCount: datedReadings.length,
+      reviewCount,
     }
   }, [books])
 

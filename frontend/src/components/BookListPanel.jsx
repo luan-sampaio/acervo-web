@@ -1,4 +1,4 @@
-import { formatShortDate } from '../utils'
+import { formatRatingLabel, formatReadingPeriod, formatShortDate } from '../utils'
 
 function getReadingStatusLabel(value, readingStatusOptions) {
   return readingStatusOptions.find((option) => option.value === value)?.label ?? value
@@ -42,6 +42,10 @@ function BookCard({
 }) {
   const annotation = book.annotation
   const ratingValue = annotation?.rating ? String(annotation.rating) : ''
+  const ratingLabel = formatRatingLabel(annotation?.rating)
+  const readingPeriod = formatReadingPeriod(annotation)
+  const reviewPreview = annotation?.review?.trim() ?? ''
+  const hasReadingSummary = Boolean(ratingLabel || readingPeriod || reviewPreview)
 
   return (
     <article key={book.id} className={`book-card ${getCardAccentClass(book.status_leitura)}`}>
@@ -107,6 +111,16 @@ function BookCard({
               </span>
               {book.favorito ? <span className="book-favorite-badge">Favorito</span> : null}
             </div>
+
+            {hasReadingSummary ? (
+              <div className="book-reading-summary">
+                <div className="book-reading-summary-tags">
+                  {ratingLabel ? <span>{ratingLabel}</span> : null}
+                  {readingPeriod ? <span>{readingPeriod}</span> : null}
+                </div>
+                {reviewPreview ? <p>{reviewPreview}</p> : null}
+              </div>
+            ) : null}
           </div>
         )}
 

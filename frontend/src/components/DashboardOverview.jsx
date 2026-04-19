@@ -1,4 +1,4 @@
-import { formatDate } from '../utils'
+import { formatDate, formatRatingLabel, formatReadingPeriod } from '../utils'
 
 function getReadingStatusLabel(value) {
   if (value === 'quero_ler') {
@@ -30,6 +30,36 @@ function getReadingStatusClassName(value) {
   }
 
   return ''
+}
+
+function formatAverageRating(value) {
+  if (!value) {
+    return '-'
+  }
+
+  return value.toFixed(1).replace('.', ',')
+}
+
+function DashboardReadingMeta({ annotation }) {
+  if (!annotation) {
+    return null
+  }
+
+  const ratingLabel = formatRatingLabel(annotation.rating)
+  const readingPeriod = formatReadingPeriod(annotation)
+  const hasReview = Boolean(annotation.review)
+
+  if (!ratingLabel && !readingPeriod && !hasReview) {
+    return null
+  }
+
+  return (
+    <div className="dashboard-reading-meta">
+      {ratingLabel ? <span>{ratingLabel}</span> : null}
+      {readingPeriod ? <span>{readingPeriod}</span> : null}
+      {hasReview ? <span>Resenha</span> : null}
+    </div>
+  )
 }
 
 export default function DashboardOverview({
@@ -89,6 +119,29 @@ export default function DashboardOverview({
             </div>
           </article>
         </div>
+
+        <div className="dashboard-reading-summary-grid">
+          <article className="dashboard-reading-summary-card">
+            <strong>{metrics.annotationCount}</strong>
+            <span>Anotados</span>
+            <p>Livros com nota, resenha ou datas de leitura.</p>
+          </article>
+          <article className="dashboard-reading-summary-card">
+            <strong>{formatAverageRating(metrics.averageRating)}</strong>
+            <span>Média de nota</span>
+            <p>Calculada sobre os livros avaliados.</p>
+          </article>
+          <article className="dashboard-reading-summary-card">
+            <strong>{metrics.datedReadingCount}</strong>
+            <span>Com histórico</span>
+            <p>Leituras com início ou término registrado.</p>
+          </article>
+          <article className="dashboard-reading-summary-card">
+            <strong>{metrics.reviewCount}</strong>
+            <span>Resenhados</span>
+            <p>Livros que já receberam comentário pessoal.</p>
+          </article>
+        </div>
       </section>
 
       <section className="dashboard-panel">
@@ -114,6 +167,7 @@ export default function DashboardOverview({
                   </div>
                   <h3>{book.titulo}</h3>
                   <p>{book.autor}</p>
+                  <DashboardReadingMeta annotation={book.annotation} />
                 </div>
                 <span className="dashboard-recent-date">{formatDate(book.created_at)}</span>
               </article>
