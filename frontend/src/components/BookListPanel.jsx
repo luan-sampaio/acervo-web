@@ -46,7 +46,7 @@ function BookCard({
   const readingPeriod = formatReadingPeriod(annotation)
   const reviewPreview = annotation?.review?.trim() ?? ''
   const canAnnotate = book.status_leitura === 'lido'
-  const hasReadingSummary = canAnnotate && Boolean(ratingLabel || readingPeriod || reviewPreview)
+  const hasReadingSummaryDetails = Boolean(ratingLabel || readingPeriod || reviewPreview)
 
   return (
     <article key={book.id} className={`book-card ${getCardAccentClass(book.status_leitura)}`}>
@@ -109,13 +109,21 @@ function BookCard({
               {book.favorito ? <span className="book-favorite-badge">Favorito</span> : null}
             </div>
 
-            {hasReadingSummary ? (
+            {canAnnotate ? (
               <div className="book-reading-summary">
                 <div className="book-reading-summary-tags">
-                  {ratingLabel ? <span>{ratingLabel}</span> : null}
-                  {readingPeriod ? <span>{readingPeriod}</span> : null}
+                  {hasReadingSummaryDetails ? (
+                    <>
+                      {ratingLabel ? <span>{ratingLabel}</span> : null}
+                      {readingPeriod ? <span>{readingPeriod}</span> : null}
+                    </>
+                  ) : (
+                    <span className="book-reading-summary-placeholder">Sem avaliação</span>
+                  )}
                 </div>
-                {reviewPreview ? <p>{reviewPreview}</p> : null}
+                <p className={reviewPreview ? '' : 'book-reading-summary-empty'}>
+                  {reviewPreview || 'Nenhuma resenha registrada'}
+                </p>
               </div>
             ) : null}
 
