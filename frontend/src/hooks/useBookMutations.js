@@ -1,26 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { deleteBook, updateBook } from '../services/api'
 
-export function getFieldErrorsFromApi(error) {
-  const fieldErrors = { titulo: '', autor: '' }
-
-  if (!Array.isArray(error?.errors)) {
-    return fieldErrors
-  }
-
-  error.errors.forEach((item) => {
-    if (item.field === 'body.titulo') {
-      fieldErrors.titulo = item.message
-    }
-
-    if (item.field === 'body.autor') {
-      fieldErrors.autor = item.message
-    }
-  })
-
-  return fieldErrors
-}
-
 export function useBookMutations({
   annotationBookId,
   editingBookId,

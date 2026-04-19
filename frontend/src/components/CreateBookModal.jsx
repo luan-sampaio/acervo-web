@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import BookFormPanel from './BookFormPanel'
 import { initialForm, readingStatusOptions } from '../constants'
 import { createBook, searchExternalBooks } from '../services/api'
+import { getBookFieldErrorsFromApi } from '../services/apiErrors'
 import { getTextFieldError } from '../utils'
 
 function BookCover({ coverUrl, titulo }) {
@@ -15,26 +16,6 @@ function BookCover({ coverUrl, titulo }) {
       <span>📖</span>
     </div>
   )
-}
-
-function getFieldErrorsFromApi(error) {
-  const fieldErrors = { titulo: '', autor: '' }
-
-  if (!Array.isArray(error?.errors)) {
-    return fieldErrors
-  }
-
-  error.errors.forEach((item) => {
-    if (item.field === 'body.titulo') {
-      fieldErrors.titulo = item.message
-    }
-
-    if (item.field === 'body.autor') {
-      fieldErrors.autor = item.message
-    }
-  })
-
-  return fieldErrors
 }
 
 export default function CreateBookModal({ onClose, onCreated }) {
@@ -63,7 +44,7 @@ export default function CreateBookModal({ onClose, onCreated }) {
     },
   })
 
-  const formServerErrors = getFieldErrorsFromApi(createBookMutation.error)
+  const formServerErrors = getBookFieldErrorsFromApi(createBookMutation.error)
   const formErrors = useMemo(() => ({
     titulo: getTextFieldError('Título', form.titulo) || formServerErrors.titulo,
     autor: getTextFieldError('Autor', form.autor) || formServerErrors.autor,

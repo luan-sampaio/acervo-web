@@ -7,8 +7,9 @@ import {
   sortOptions,
 } from '../constants'
 import { useAnnotationMutations } from '../hooks/useAnnotationMutations'
-import { useBookMutations, getFieldErrorsFromApi } from '../hooks/useBookMutations'
+import { useBookMutations } from '../hooks/useBookMutations'
 import { useBooksQueryState } from '../hooks/useBooksQueryState'
+import { getBookFieldErrorsFromApi } from '../services/apiErrors'
 import { getTextFieldError } from '../utils'
 
 export default function CollectionPage() {
@@ -129,7 +130,7 @@ export default function CollectionPage() {
     }
   }, [activeMenuBookId])
 
-  const editServerErrors = getFieldErrorsFromApi(updateBookMutation.error)
+  const editServerErrors = getBookFieldErrorsFromApi(updateBookMutation.error)
   const editErrors = editingBookId === null ? { titulo: '', autor: '' } : editServerErrors
   const listError = booksQuery.error?.message
     ?? updateBookMutation.error?.message
