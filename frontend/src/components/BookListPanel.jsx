@@ -143,13 +143,16 @@ function BookCard({
               {activeMenuBookId === book.id ? (
                 <div className="card-menu" role="menu">
                   <button type="button" role="menuitem" onClick={() => onOpenAnnotation(book)}>
-                    Anotações
+                    <span className="card-menu-icon" aria-hidden="true">✎</span>
+                    <span>Anotações</span>
                   </button>
                   <button type="button" role="menuitem" onClick={() => onStartEditing(book)}>
-                    Editar
+                    <span className="card-menu-icon" aria-hidden="true">✐</span>
+                    <span>Editar</span>
                   </button>
                   <button type="button" role="menuitem" className="card-menu-danger" onClick={() => onRequestDelete(book)}>
-                    Excluir
+                    <span className="card-menu-icon" aria-hidden="true">×</span>
+                    <span>Excluir</span>
                   </button>
                 </div>
               ) : null}
