@@ -1,59 +1,40 @@
-import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import DashboardOverview from '../components/DashboardOverview'
-import { fetchBooks } from '../services/api'
+import { fetchBooks, fetchBookStats } from '../services/api'
 
 export default function DashboardPage() {
   const navigate = useNavigate()
-  const booksQuery = useQuery({
-    queryKey: ['dashboard-books'],
+
+  const statsQuery = useQuery({
+    queryKey: ['book-stats'],
+    queryFn: fetchBookStats,
+  })
+
+  const recentBooksQuery = useQuery({
+    queryKey: ['dashboard-recent-books'],
     queryFn: () => fetchBooks({
-      limit: 100,
+      limit: 4,
       offset: 0,
       sort_by: 'created_at',
       sort_order: 'desc',
     }),
   })
 
-  const books = booksQuery.data?.items ?? []
+  const stats = statsQuery.data
+  const recentBooks = recentBooksQuery.data?.items ?? []
+  const metrics = {
+    favoriteCount: stats?.favorite_count ?? 0,
+    readingNowCount: stats?.reading_now_count ?? 0,
+    finishedCount: stats?.finished_count ?? 0,
+    wantToReadCount: stats?.want_to_read_count ?? 0,
+    annotationCount: stats?.annotation_count ?? 0,
+    averageRating: stats?.average_rating ?? null,
+    datedReadingCount: stats?.dated_reading_count ?? 0,
+    reviewCount: stats?.review_count ?? 0,
+  }
 
-  const metrics = useMemo(() => {
-    const favoriteCount = books.filter((book) => book.favorito).length
-    const readingNowCount = books.filter((book) => book.status_leitura === 'lendo').length
-    const finishedCount = books.filter((book) => book.status_leitura === 'lido').length
-    const wantToReadCount = books.filter((book) => book.status_leitura === 'quero_ler').length
-    const annotatedBooks = books.filter((book) => book.annotation)
-    const ratedBooks = annotatedBooks.filter((book) => book.annotation.rating)
-    const datedReadings = annotatedBooks.filter((book) => (
-      book.annotation.started_at || book.annotation.finished_at
-    ))
-    const reviewCount = annotatedBooks.filter((book) => book.annotation.review).length
-    const averageRating = ratedBooks.length
-      ? ratedBooks.reduce((total, book) => total + book.annotation.rating, 0) / ratedBooks.length
-      : null
-
-    return {
-      favoriteCount,
-      readingNowCount,
-      finishedCount,
-      wantToReadCount,
-      annotationCount: annotatedBooks.length,
-      averageRating,
-      datedReadingCount: datedReadings.length,
-      reviewCount,
-    }
-  }, [books])
-
-  const recentBooks = useMemo(() => {
-    return [...books]
-      .sort((firstBook, secondBook) => {
-        return new Date(secondBook.created_at).getTime() - new Date(firstBook.created_at).getTime()
-      })
-      .slice(0, 4)
-  }, [books])
-
-  if (booksQuery.isLoading) {
+  if (statsQuery.isLoading || recentBooksQuery.isLoading) {
     return (
       <section className="space-y-6">
         <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -97,11 +78,11 @@ export default function DashboardPage() {
     )
   }
 
-  if (booksQuery.isError) {
+  if (statsQuery.isError || recentBooksQuery.isError) {
     return (
       <section className="dashboard-panel">
         <div className="feedback error">
-          {booksQuery.error.message}
+          {statsQuery.error?.message ?? recentBooksQuery.error?.message}
         </div>
       </section>
     )

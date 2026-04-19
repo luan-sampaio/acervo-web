@@ -1,7 +1,7 @@
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
-from sqlalchemy import func, or_
+from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import Session, joinedload
 
 from .. import database
@@ -169,6 +169,71 @@ def list_books(
         "status_leitura": status_leitura,
         "favorito_only": favorito_only,
         "latest_created_at": latest_created_at,
+    }
+
+
+@router.get("/stats", response_model=schemas.BookStatsResponse)
+def get_book_stats(
+    db: Session = Depends(database.get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    stats = (
+        db.query(
+            func.count(models.Book.id).label("total_books"),
+            func.count(models.Book.id)
+            .filter(models.Book.favorito.is_(True))
+            .label("favorite_count"),
+            func.count(models.Book.id)
+            .filter(models.Book.status_leitura == "lendo")
+            .label("reading_now_count"),
+            func.count(models.Book.id)
+            .filter(models.Book.status_leitura == "lido")
+            .label("finished_count"),
+            func.count(models.Book.id)
+            .filter(models.Book.status_leitura == "quero_ler")
+            .label("want_to_read_count"),
+            func.count(models.ReadingAnnotation.id).label("annotation_count"),
+            func.avg(models.ReadingAnnotation.rating)
+            .filter(models.ReadingAnnotation.rating.is_not(None))
+            .label("average_rating"),
+            func.count(models.ReadingAnnotation.id)
+            .filter(
+                or_(
+                    models.ReadingAnnotation.started_at.is_not(None),
+                    models.ReadingAnnotation.finished_at.is_not(None),
+                )
+            )
+            .label("dated_reading_count"),
+            func.count(models.ReadingAnnotation.id)
+            .filter(
+                and_(
+                    models.ReadingAnnotation.review.is_not(None),
+                    func.length(func.btrim(models.ReadingAnnotation.review)) > 0,
+                )
+            )
+            .label("review_count"),
+        )
+        .outerjoin(
+            models.ReadingAnnotation,
+            and_(
+                models.ReadingAnnotation.book_id == models.Book.id,
+                models.ReadingAnnotation.user_id == current_user.id,
+            ),
+        )
+        .filter(models.Book.user_id == current_user.id)
+        .one()
+    )
+
+    return {
+        "total_books": stats.total_books or 0,
+        "favorite_count": stats.favorite_count or 0,
+        "reading_now_count": stats.reading_now_count or 0,
+        "finished_count": stats.finished_count or 0,
+        "want_to_read_count": stats.want_to_read_count or 0,
+        "annotation_count": stats.annotation_count or 0,
+        "average_rating": float(stats.average_rating) if stats.average_rating is not None else None,
+        "dated_reading_count": stats.dated_reading_count or 0,
+        "review_count": stats.review_count or 0,
     }
 
 

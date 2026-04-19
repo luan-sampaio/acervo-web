@@ -155,3 +155,15 @@ class BookListResponse(BaseModel):
     status_leitura: ReadingStatus | None = None
     favorito_only: bool = False
     latest_created_at: datetime | None = None
+
+
+class BookStatsResponse(BaseModel):
+    total_books: int = Field(ge=0)
+    favorite_count: int = Field(ge=0)
+    reading_now_count: int = Field(ge=0)
+    finished_count: int = Field(ge=0)
+    want_to_read_count: int = Field(ge=0)
+    annotation_count: int = Field(ge=0)
+    average_rating: float | None = None
+    dated_reading_count: int = Field(ge=0)
+    review_count: int = Field(ge=0)
