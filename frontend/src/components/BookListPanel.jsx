@@ -120,8 +120,7 @@ function BookCard({
             ) : null}
 
             <div className="book-card-footer">
-              <span className="book-id">Livro #{book.id}</span>
-              <span className="book-date">{formatShortDate(book.created_at)}</span>
+              <span className="book-date">Adicionado em {formatShortDate(book.created_at)}</span>
             </div>
           </div>
         )}
