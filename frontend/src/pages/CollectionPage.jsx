@@ -150,6 +150,7 @@ export default function CollectionPage() {
     },
     onSuccess: async (savedAnnotation, { bookId }) => {
       setAnnotationError('')
+      setAnnotationBookId(null)
       updateBookAnnotationInCache(queryClient, bookId, savedAnnotation)
       setSuccessMessage('✓ Anotação salva com sucesso')
       await queryClient.invalidateQueries({ queryKey: ['books'] })
