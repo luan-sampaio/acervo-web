@@ -1,6 +1,5 @@
 import axios from 'axios'
-
-const TOKEN_KEY = 'acervo_token'
+import { TOKEN_KEY, clearStoredAuth, dispatchUnauthorizedEvent } from './authStorage'
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL ?? 'http://localhost:8000',
@@ -18,13 +17,19 @@ api.interceptors.response.use(
   (response) => response.data,
   (error) => {
     const detail = error.response?.data?.detail
+    const status = error.response?.status
+
+    if (status === 401) {
+      clearStoredAuth()
+      dispatchUnauthorizedEvent()
+    }
 
     return Promise.reject({
       message:
         typeof detail === 'string'
           ? detail
           : error.response?.data?.message ?? 'Ocorreu um erro ao processar a requisição.',
-      status: error.response?.status,
+      status,
       errors: Array.isArray(detail) ? detail : [],
       originalError: error,
     })

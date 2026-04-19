@@ -1,7 +1,5 @@
-import { createContext, useCallback, useContext, useState } from 'react'
-
-const TOKEN_KEY = 'acervo_token'
-const USER_KEY = 'acervo_user'
+import { createContext, useCallback, useContext, useEffect, useState } from 'react'
+import { AUTH_UNAUTHORIZED_EVENT, TOKEN_KEY, USER_KEY, clearStoredAuth } from '../services/authStorage'
 
 const AuthContext = createContext(null)
 
@@ -24,10 +22,22 @@ export function AuthProvider({ children }) {
   }, [])
 
   const logout = useCallback(() => {
-    localStorage.removeItem(TOKEN_KEY)
-    localStorage.removeItem(USER_KEY)
+    clearStoredAuth()
     setToken(null)
     setUser(null)
+  }, [])
+
+  useEffect(() => {
+    function handleUnauthorized() {
+      setToken(null)
+      setUser(null)
+    }
+
+    window.addEventListener(AUTH_UNAUTHORIZED_EVENT, handleUnauthorized)
+
+    return () => {
+      window.removeEventListener(AUTH_UNAUTHORIZED_EVENT, handleUnauthorized)
+    }
   }, [])
 
   return (
