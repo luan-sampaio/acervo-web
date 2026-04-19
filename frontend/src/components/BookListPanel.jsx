@@ -21,17 +21,28 @@ function getCardAccentClass(value) {
 function BookCard({
   book,
   isEditing,
+  isAnnotationOpen,
   editErrors,
   isSaving,
+  isSavingAnnotation,
+  isDeletingAnnotation,
+  annotationError,
   readingStatusOptions,
   activeMenuBookId,
   actionMenuRef,
   onToggleMenu,
   onStartEditing,
+  onOpenAnnotation,
   onRequestDelete,
   onSave,
   onCancelEditing,
+  onSaveAnnotation,
+  onDeleteAnnotation,
+  onCloseAnnotation,
 }) {
+  const annotation = book.annotation
+  const ratingValue = annotation?.rating ? String(annotation.rating) : ''
+
   return (
     <article key={book.id} className={`book-card ${getCardAccentClass(book.status_leitura)}`}>
       <div className="book-card-top">
@@ -118,6 +129,9 @@ function BookCard({
 
               {activeMenuBookId === book.id ? (
                 <div className="card-menu" role="menu">
+                  <button type="button" role="menuitem" onClick={() => onOpenAnnotation(book)}>
+                    Anotações
+                  </button>
                   <button type="button" role="menuitem" onClick={() => onStartEditing(book)}>
                     Editar
                   </button>
@@ -151,6 +165,87 @@ function BookCard({
           </button>
         </div>
       ) : null}
+
+      {!isEditing && isAnnotationOpen ? (
+        <form
+          key={`${book.id}-${annotation?.updated_at ?? 'new'}`}
+          className="annotation-panel"
+          onSubmit={(event) => onSaveAnnotation(book, event)}
+        >
+          <div className="annotation-panel-header">
+            <div>
+              <span className="annotation-kicker">Anotações de leitura</span>
+              <strong>{annotation ? 'Atualize sua leitura' : 'Registre sua leitura'}</strong>
+            </div>
+            <button
+              type="button"
+              className="annotation-close-button"
+              onClick={onCloseAnnotation}
+              aria-label="Fechar anotações"
+              disabled={isSavingAnnotation || isDeletingAnnotation}
+            >
+              ×
+            </button>
+          </div>
+
+          <div className="annotation-grid">
+            <label>
+              <span>Nota</span>
+              <select name="rating" defaultValue={ratingValue}>
+                <option value="">Sem nota</option>
+                <option value="1">1 estrela</option>
+                <option value="2">2 estrelas</option>
+                <option value="3">3 estrelas</option>
+                <option value="4">4 estrelas</option>
+                <option value="5">5 estrelas</option>
+              </select>
+            </label>
+
+            <label>
+              <span>Início</span>
+              <input type="date" name="started_at" defaultValue={annotation?.started_at ?? ''} />
+            </label>
+
+            <label>
+              <span>Término</span>
+              <input type="date" name="finished_at" defaultValue={annotation?.finished_at ?? ''} />
+            </label>
+          </div>
+
+          <label className="annotation-review-field">
+            <span>Resenha</span>
+            <textarea
+              name="review"
+              defaultValue={annotation?.review ?? ''}
+              maxLength={5000}
+              rows={4}
+              placeholder="Escreva uma impressão, resumo ou comentário sobre a leitura."
+            />
+          </label>
+
+          {annotationError ? <span className="field-error">{annotationError}</span> : null}
+
+          <div className="annotation-actions">
+            {annotation ? (
+              <button
+                type="button"
+                className="action-button danger-button"
+                disabled={isSavingAnnotation || isDeletingAnnotation}
+                onClick={() => onDeleteAnnotation(book)}
+              >
+                {isDeletingAnnotation ? 'Removendo...' : 'Remover'}
+              </button>
+            ) : null}
+            <button
+              type="submit"
+              className="action-button primary-button"
+              disabled={isSavingAnnotation || isDeletingAnnotation}
+            >
+              {isSavingAnnotation ? 'Salvando...' : 'Salvar anotação'}
+            </button>
+          </div>
+        </form>
+      ) : null}
     </article>
   )
 }
@@ -162,9 +257,13 @@ export default function BookListPanel({
   searchTerm,
   isLoading,
   editingBookId,
+  annotationBookId,
   activeMenuBookId,
   editErrors,
   savingBookId,
+  savingAnnotationBookId,
+  deletingAnnotationBookId,
+  annotationError,
   readingStatusOptions,
   currentPage,
   totalPages,
@@ -182,9 +281,13 @@ export default function BookListPanel({
   onNextPage,
   onToggleMenu,
   onStartEditing,
+  onOpenAnnotation,
   onRequestDelete,
   onSave,
   onCancelEditing,
+  onSaveAnnotation,
+  onDeleteAnnotation,
+  onCloseAnnotation,
   onOpenCreateModal,
   onStatusFilterChange,
   error,
@@ -300,16 +403,24 @@ export default function BookListPanel({
                   key={book.id}
                   book={book}
                   isEditing={editingBookId === book.id}
+                  isAnnotationOpen={annotationBookId === book.id}
                   editErrors={editErrors}
                   isSaving={savingBookId === book.id}
+                  isSavingAnnotation={savingAnnotationBookId === book.id}
+                  isDeletingAnnotation={deletingAnnotationBookId === book.id}
+                  annotationError={annotationBookId === book.id ? annotationError : ''}
                   readingStatusOptions={readingStatusOptions}
                   activeMenuBookId={activeMenuBookId}
                   actionMenuRef={actionMenuRef}
                   onToggleMenu={onToggleMenu}
                   onStartEditing={onStartEditing}
+                  onOpenAnnotation={onOpenAnnotation}
                   onRequestDelete={onRequestDelete}
                   onSave={onSave}
                   onCancelEditing={onCancelEditing}
+                  onSaveAnnotation={onSaveAnnotation}
+                  onDeleteAnnotation={onDeleteAnnotation}
+                  onCloseAnnotation={onCloseAnnotation}
                 />
               ))}
             </div>
