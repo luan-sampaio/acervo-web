@@ -151,7 +151,6 @@ class BookListResponse(BaseModel):
     sort_by: Literal["created_at", "titulo", "autor"]
     sort_order: Literal["asc", "desc"]
     search: str = ""
-    author: str = ""
     status_leitura: ReadingStatus | None = None
     favorito_only: bool = False
     latest_created_at: datetime | None = None

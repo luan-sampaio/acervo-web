@@ -11,7 +11,6 @@ export const defaultQuery = {
   sortBy: 'created_at',
   sortOrder: 'desc',
   search: '',
-  author: '',
   statusFilter: 'all',
 }
 

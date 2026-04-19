@@ -259,7 +259,6 @@ export default function CollectionPage() {
       setQuery((current) => ({
         ...current,
         search: normalizedSearch,
-        author: '',
         offset: 0,
       }))
     }, 300)
