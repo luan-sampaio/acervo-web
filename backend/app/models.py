@@ -1,4 +1,17 @@
-from sqlalchemy import Boolean, CheckConstraint, Column, DateTime, ForeignKey, Index, Integer, String, text
+from sqlalchemy import (
+    Boolean,
+    CheckConstraint,
+    Column,
+    Date,
+    DateTime,
+    ForeignKey,
+    Index,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+    text,
+)
 from sqlalchemy.sql import func
 
 from .database import Base
@@ -40,5 +53,26 @@ class Book(Base):
     isbn = Column(String(20), nullable=True)
     cover_url = Column(String(512), nullable=True)
     external_id = Column(String(100), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+
+
+class ReadingAnnotation(Base):
+    __tablename__ = "reading_annotations"
+    __table_args__ = (
+        CheckConstraint(
+            "rating IS NULL OR rating BETWEEN 1 AND 5",
+            name="ck_reading_annotations_rating_range",
+        ),
+        UniqueConstraint("user_id", "book_id", name="uq_reading_annotations_user_book"),
+    )
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    book_id = Column(Integer, ForeignKey("books.id", ondelete="CASCADE"), nullable=False, index=True)
+    rating = Column(Integer, nullable=True)
+    review = Column(Text, nullable=True)
+    started_at = Column(Date, nullable=True)
+    finished_at = Column(Date, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
