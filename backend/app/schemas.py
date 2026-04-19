@@ -1,7 +1,7 @@
-from datetime import datetime
+from datetime import date, datetime
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, model_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator, model_validator
 
 
 class UserCreate(BaseModel):
@@ -94,3 +94,63 @@ class BookListResponse(BaseModel):
     status_leitura: ReadingStatus | None = None
     favorito_only: bool = False
     latest_created_at: datetime | None = None
+
+
+class ReadingAnnotationBase(BaseModel):
+    rating: int | None = Field(default=None, ge=1, le=5)
+    review: str | None = Field(default=None, max_length=5000)
+    started_at: date | None = None
+    finished_at: date | None = None
+
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    @field_validator("review")
+    @classmethod
+    def normalize_review(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+
+        normalized_value = value.strip()
+        return normalized_value or None
+
+    @model_validator(mode="after")
+    def validate_date_range(self):
+        if (
+            self.started_at is not None
+            and self.finished_at is not None
+            and self.finished_at < self.started_at
+        ):
+            raise ValueError("A data de término não pode ser anterior à data de início")
+        return self
+
+
+class ReadingAnnotationCreate(ReadingAnnotationBase):
+    @model_validator(mode="after")
+    def validate_at_least_one_field(self):
+        if (
+            self.rating is None
+            and self.review is None
+            and self.started_at is None
+            and self.finished_at is None
+        ):
+            raise ValueError("Informe ao menos um campo para criar a anotação")
+        return self
+
+
+class ReadingAnnotationUpdate(ReadingAnnotationBase):
+    @model_validator(mode="after")
+    def validate_at_least_one_field(self):
+        fields_set = self.model_fields_set
+        if not fields_set:
+            raise ValueError("Informe ao menos um campo para atualização")
+        return self
+
+
+class ReadingAnnotationResponse(ReadingAnnotationBase):
+    id: int
+    user_id: int
+    book_id: int
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = ConfigDict(from_attributes=True, extra="ignore")
