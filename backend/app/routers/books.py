@@ -2,7 +2,7 @@ from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy import func, or_
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from .. import database
 from .. import models
@@ -13,10 +13,15 @@ router = APIRouter(prefix="/books", tags=["Books"])
 
 
 def get_book_or_404(book_id: int, user_id: int, db: Session) -> models.Book:
-    db_book = db.query(models.Book).filter(
-        models.Book.id == book_id,
-        models.Book.user_id == user_id,
-    ).first()
+    db_book = (
+        db.query(models.Book)
+        .options(joinedload(models.Book.annotation))
+        .filter(
+            models.Book.id == book_id,
+            models.Book.user_id == user_id,
+        )
+        .first()
+    )
     if db_book is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Livro não encontrado")
     return db_book
@@ -131,7 +136,11 @@ def list_books(
     if favorito_only:
         filters.append(models.Book.favorito.is_(True))
 
-    base_query = db.query(models.Book).filter(*filters)
+    base_query = (
+        db.query(models.Book)
+        .options(joinedload(models.Book.annotation))
+        .filter(*filters)
+    )
     aggregate_query = db.query(
         func.count(models.Book.id).label("total"),
         func.max(models.Book.created_at).label("latest_created_at"),

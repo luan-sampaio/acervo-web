@@ -12,6 +12,7 @@ from sqlalchemy import (
     UniqueConstraint,
     text,
 )
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 from .database import Base
@@ -55,6 +56,12 @@ class Book(Base):
     external_id = Column(String(100), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+    annotation = relationship(
+        "ReadingAnnotation",
+        back_populates="book",
+        cascade="all, delete-orphan",
+        uselist=False,
+    )
 
 
 class ReadingAnnotation(Base):
@@ -76,3 +83,4 @@ class ReadingAnnotation(Base):
     finished_at = Column(Date, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+    book = relationship("Book", back_populates="annotation")

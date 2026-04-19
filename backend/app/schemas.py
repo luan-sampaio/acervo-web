@@ -74,28 +74,6 @@ class BookUpdate(BaseModel):
         return self
 
 
-class BookResponse(BookBase):
-    id: int
-    created_at: datetime
-    updated_at: datetime
-
-    model_config = ConfigDict(from_attributes=True, extra="ignore")
-
-
-class BookListResponse(BaseModel):
-    items: list[BookResponse]
-    total: int = Field(ge=0)
-    limit: int = Field(ge=1)
-    offset: int = Field(ge=0)
-    sort_by: Literal["created_at", "titulo", "autor"]
-    sort_order: Literal["asc", "desc"]
-    search: str = ""
-    author: str = ""
-    status_leitura: ReadingStatus | None = None
-    favorito_only: bool = False
-    latest_created_at: datetime | None = None
-
-
 class ReadingAnnotationBase(BaseModel):
     rating: int | None = Field(default=None, ge=1, le=5)
     review: str | None = Field(default=None, max_length=5000)
@@ -154,3 +132,26 @@ class ReadingAnnotationResponse(ReadingAnnotationBase):
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True, extra="ignore")
+
+
+class BookResponse(BookBase):
+    id: int
+    created_at: datetime
+    updated_at: datetime
+    annotation: ReadingAnnotationResponse | None = None
+
+    model_config = ConfigDict(from_attributes=True, extra="ignore")
+
+
+class BookListResponse(BaseModel):
+    items: list[BookResponse]
+    total: int = Field(ge=0)
+    limit: int = Field(ge=1)
+    offset: int = Field(ge=0)
+    sort_by: Literal["created_at", "titulo", "autor"]
+    sort_order: Literal["asc", "desc"]
+    search: str = ""
+    author: str = ""
+    status_leitura: ReadingStatus | None = None
+    favorito_only: bool = False
+    latest_created_at: datetime | None = None
