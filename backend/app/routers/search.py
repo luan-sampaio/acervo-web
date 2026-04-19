@@ -11,6 +11,7 @@ from ..routers.auth import get_current_user
 router = APIRouter(prefix="/search", tags=["Search"])
 
 GOOGLE_BOOKS_URL = "https://www.googleapis.com/books/v1/volumes"
+OPEN_LIBRARY_SEARCH_URL = "https://openlibrary.org/search.json"
 
 
 def _parse_volume(item: dict, already_in_library: bool = False) -> schemas.BookSearchResult | None:
@@ -48,62 +49,144 @@ def _parse_volume(item: dict, already_in_library: bool = False) -> schemas.BookS
     )
 
 
+def _parse_open_library_doc(
+    doc: dict,
+    already_in_library: bool = False,
+) -> schemas.BookSearchResult | None:
+    titulo = (doc.get("title") or "").strip()
+    autores = [autor.strip() for autor in doc.get("author_name", []) if autor and autor.strip()]
+    external_id = (doc.get("key") or "").strip()
+    if not titulo or not autores or not external_id:
+        return None
+
+    isbn = next((value for value in doc.get("isbn", []) if value), None)
+    cover_id = doc.get("cover_i")
+    cover_url = None
+    if cover_id:
+        cover_url = f"https://covers.openlibrary.org/b/id/{cover_id}-M.jpg"
+
+    return schemas.BookSearchResult(
+        external_id=external_id.removeprefix("/works/"),
+        titulo=titulo,
+        autor=", ".join(autores),
+        isbn=isbn,
+        cover_url=cover_url,
+        descricao=None,
+        already_in_library=already_in_library,
+    )
+
+
+async def _request_google_books(
+    client: httpx.AsyncClient,
+    params: dict,
+) -> httpx.Response:
+    response = await client.get(GOOGLE_BOOKS_URL, params=params)
+    response.raise_for_status()
+    return response
+
+
+async def _request_open_library(
+    client: httpx.AsyncClient,
+    q: str,
+) -> list[schemas.BookSearchResult]:
+    response = await client.get(
+        OPEN_LIBRARY_SEARCH_URL,
+        params={
+            "title": q,
+            "language": "por",
+            "limit": 12,
+        },
+    )
+    response.raise_for_status()
+    data = response.json()
+    return [
+        result
+        for result in (_parse_open_library_doc(doc) for doc in data.get("docs", []))
+        if result is not None
+    ]
+
+
 @router.get("", response_model=list[schemas.BookSearchResult])
 async def search_books(
     q: str = Query(min_length=2, max_length=255),
     db: Session = Depends(database.get_db),
     current_user: models.User = Depends(get_current_user),
 ):
-    if not settings.GOOGLE_BOOKS_API_KEY:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Busca externa indisponivel: configure GOOGLE_BOOKS_API_KEY no backend",
-        )
-
     params = {
         "q": q,
         "maxResults": 12,
         "langRestrict": "pt",
         "printType": "books",
-        "key": settings.GOOGLE_BOOKS_API_KEY,
     }
+    if settings.GOOGLE_BOOKS_API_KEY:
+        params["key"] = settings.GOOGLE_BOOKS_API_KEY
 
     async with httpx.AsyncClient(timeout=10.0) as client:
         try:
-            response = await client.get(GOOGLE_BOOKS_URL, params=params)
-            response.raise_for_status()
+            response = await _request_google_books(client, params)
         except httpx.HTTPStatusError as exc:
-            if exc.response.status_code in {400, 401, 403}:
-                raise HTTPException(
-                    status_code=status.HTTP_502_BAD_GATEWAY,
-                    detail="Google Books recusou a requisicao: verifique a chave da API",
-                )
-            if exc.response.status_code == 429:
-                raise HTTPException(
-                    status_code=status.HTTP_502_BAD_GATEWAY,
-                    detail="Google Books indisponivel no momento por limite de requisicoes",
-                )
-            raise HTTPException(
-                status_code=status.HTTP_502_BAD_GATEWAY,
-                detail=f"Erro ao consultar Google Books: {exc.response.status_code}",
-            )
+            if exc.response.status_code in {400, 401, 403} and "key" in params:
+                fallback_params = {k: v for k, v in params.items() if k != "key"}
+                try:
+                    response = await _request_google_books(client, fallback_params)
+                except httpx.HTTPStatusError as fallback_exc:
+                    google_status = fallback_exc.response.status_code
+                    try:
+                        parsed_results = await _request_open_library(client, q)
+                    except (httpx.HTTPStatusError, httpx.RequestError):
+                        if google_status == 429:
+                            raise HTTPException(
+                                status_code=status.HTTP_502_BAD_GATEWAY,
+                                detail="Google Books indisponivel no momento por limite de requisicoes",
+                            )
+                        raise HTTPException(
+                            status_code=status.HTTP_502_BAD_GATEWAY,
+                            detail=f"Erro ao consultar Google Books: {google_status}",
+                        )
+                except httpx.RequestError:
+                    try:
+                        parsed_results = await _request_open_library(client, q)
+                    except (httpx.HTTPStatusError, httpx.RequestError):
+                        raise HTTPException(
+                            status_code=status.HTTP_502_BAD_GATEWAY,
+                            detail="Nao foi possivel conectar ao Google Books",
+                        )
+            else:
+                google_status = exc.response.status_code
+                try:
+                    parsed_results = await _request_open_library(client, q)
+                except (httpx.HTTPStatusError, httpx.RequestError):
+                    if google_status == 429:
+                        raise HTTPException(
+                            status_code=status.HTTP_502_BAD_GATEWAY,
+                            detail="Google Books indisponivel no momento por limite de requisicoes",
+                        )
+                    raise HTTPException(
+                        status_code=status.HTTP_502_BAD_GATEWAY,
+                        detail=f"Erro ao consultar Google Books: {google_status}",
+                    )
         except httpx.RequestError:
-            raise HTTPException(
-                status_code=status.HTTP_502_BAD_GATEWAY,
-                detail="Nao foi possivel conectar ao Google Books",
-            )
+            try:
+                parsed_results = await _request_open_library(client, q)
+            except (httpx.HTTPStatusError, httpx.RequestError):
+                raise HTTPException(
+                    status_code=status.HTTP_502_BAD_GATEWAY,
+                    detail="Nao foi possivel consultar os provedores de busca externa",
+                )
+        else:
+            data = response.json()
+            parsed_results = [
+                result
+                for result in (_parse_volume(item) for item in data.get("items", []))
+                if result is not None
+            ]
 
-    data = response.json()
-    items = data.get("items", [])
-    external_ids = [item.get("id") for item in items if item.get("id")]
-    normalized_pairs = []
-
-    for item in items:
-        info = item.get("volumeInfo", {})
-        titulo = info.get("title", "").strip()
-        autores = info.get("authors", [])
-        if titulo and autores:
-            normalized_pairs.append((titulo.lower(), ", ".join(autores).strip().lower()))
+    external_ids = [result.external_id for result in parsed_results if result.external_id]
+    normalized_pairs = [
+        (result.titulo.strip().lower(), result.autor.strip().lower())
+        for result in parsed_results
+        if result.titulo and result.autor
+    ]
 
     existing_external_ids = set()
     if external_ids:
@@ -136,22 +219,17 @@ async def search_books(
         }
 
     results = []
-    for item in items:
-        info = item.get("volumeInfo", {})
-        titulo = info.get("title", "").strip()
-        autores = info.get("authors", [])
-        normalized_pair = None
-        if titulo and autores:
-            normalized_pair = (titulo.lower(), ", ".join(autores).strip().lower())
-
+    for result in parsed_results:
+        normalized_pair = (result.titulo.strip().lower(), result.autor.strip().lower())
         results.append(
-            _parse_volume(
-                item,
-                already_in_library=(
-                    item.get("id") in existing_external_ids
-                    or normalized_pair in existing_title_author_pairs
-                ),
+            result.model_copy(
+                update={
+                    "already_in_library": (
+                        result.external_id in existing_external_ids
+                        or normalized_pair in existing_title_author_pairs
+                    )
+                }
             )
         )
 
-    return [r for r in results if r is not None]
+    return results
