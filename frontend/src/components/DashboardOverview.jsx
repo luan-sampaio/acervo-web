@@ -48,6 +48,7 @@ function DashboardProgressCard({
   label,
   value,
   rate,
+  emptyText,
 }) {
   const normalizedRate = Math.max(0, Math.min(rate, 100))
 
@@ -60,7 +61,7 @@ function DashboardProgressCard({
       <div className="dashboard-progress-track" aria-hidden="true">
         <span style={{ width: `${normalizedRate}%` }} />
       </div>
-      <p>{formatRate(rate)}</p>
+      <p>{value === 0 && emptyText ? emptyText : formatRate(rate)}</p>
     </article>
   )
 }
@@ -127,21 +128,33 @@ export default function DashboardOverview({
 }) {
   const achievements = getAchievements(metrics)
   const unlockedAchievements = achievements.filter((achievement) => achievement.unlocked).length
+  const hasBooks = metrics.totalBooks > 0
+  const hasFinishedBooks = metrics.finishedCount > 0
 
   return (
     <section className="dashboard-grid">
       <section className="dashboard-hero">
         <div className="dashboard-hero-copy">
           <h1>Dashboard</h1>
-          <p>Resumo rápido da sua biblioteca.</p>
+          <p>{hasBooks ? 'Resumo rápido da sua biblioteca.' : 'Adicione livros para começar a acompanhar seu progresso.'}</p>
         </div>
 
         <div className="dashboard-actions">
           <button type="button" className="home-primary-action" onClick={onOpenCollection}>
-            Abrir coleção
+            {hasBooks ? 'Abrir coleção' : '+ Novo livro'}
           </button>
         </div>
       </section>
+
+      {!hasBooks ? (
+        <section className="dashboard-start-card">
+          <strong>Sua biblioteca ainda está vazia</strong>
+          <p>Cadastre o primeiro livro para liberar métricas, conquistas e histórico recente.</p>
+          <button type="button" className="action-button primary-button" onClick={onOpenCollection}>
+            + Novo livro
+          </button>
+        </section>
+      ) : null}
 
       <section className="dashboard-progress-grid" aria-label="Progresso de leitura">
         <article className="dashboard-progress-card dashboard-progress-card-total">
@@ -155,16 +168,19 @@ export default function DashboardOverview({
           label="Concluídos"
           value={metrics.finishedCount}
           rate={metrics.completionRate}
+          emptyText="Nenhum lido ainda"
         />
         <DashboardProgressCard
           label="Com anotação"
           value={metrics.annotationCount}
           rate={metrics.annotationRate}
+          emptyText={hasFinishedBooks ? 'Sem anotações' : 'Leia para anotar'}
         />
         <DashboardProgressCard
           label="Com resenha"
           value={metrics.reviewCount}
           rate={metrics.reviewRate}
+          emptyText={hasFinishedBooks ? 'Sem resenhas' : 'Leia para resenhar'}
         />
       </section>
 
@@ -203,12 +219,12 @@ export default function DashboardOverview({
           <article className="dashboard-reading-summary-card">
             <strong>{metrics.annotationCount}</strong>
             <span>Anotados</span>
-            <p>{formatRate(metrics.annotationRate)} dos lidos têm registro.</p>
+            <p>{hasFinishedBooks ? `${formatRate(metrics.annotationRate)} dos lidos têm registro.` : 'Conclua uma leitura para registrar notas.'}</p>
           </article>
           <article className="dashboard-reading-summary-card">
             <strong>{formatAverageRating(metrics.averageRating)}</strong>
             <span>Média de nota</span>
-            <p>{metrics.ratedCount} avaliados, {metrics.unratedFinishedCount} lidos sem nota.</p>
+            <p>{metrics.ratedCount > 0 ? `${metrics.ratedCount} avaliados, ${metrics.unratedFinishedCount} lidos sem nota.` : 'Nenhuma nota registrada ainda.'}</p>
           </article>
           <article className="dashboard-reading-summary-card">
             <strong>{metrics.datedReadingCount}</strong>
@@ -218,7 +234,7 @@ export default function DashboardOverview({
           <article className="dashboard-reading-summary-card">
             <strong>{metrics.reviewCount}</strong>
             <span>Resenhados</span>
-            <p>{formatRate(metrics.reviewRate)} dos lidos já têm comentário.</p>
+            <p>{hasFinishedBooks ? `${formatRate(metrics.reviewRate)} dos lidos já têm comentário.` : 'Resenhas aparecem após leituras concluídas.'}</p>
           </article>
         </div>
       </section>
