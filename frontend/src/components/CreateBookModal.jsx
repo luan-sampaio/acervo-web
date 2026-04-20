@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { AlertCircle, CheckCircle2 } from 'lucide-react'
 import BookFormPanel from './BookFormPanel'
 import { initialForm, readingStatusOptions } from '../constants'
 import { createBook, searchExternalBooks } from '../services/api'
@@ -14,6 +15,25 @@ function BookCover({ coverUrl, titulo }) {
   return (
     <div className="search-result-cover search-result-cover-placeholder" aria-hidden="true">
       <span>📖</span>
+    </div>
+  )
+}
+
+function SearchErrorState({
+  title,
+  message,
+  children,
+}) {
+  return (
+    <div className="search-state-card search-state-card-error" role="alert">
+      <AlertCircle className="search-state-icon" aria-hidden="true" size={20} strokeWidth={2} />
+      <div className="search-state-copy">
+        <strong>{title}</strong>
+        <p>{message}</p>
+      </div>
+      <div className="search-state-actions">
+        {children}
+      </div>
     </div>
   )
 }
@@ -217,39 +237,31 @@ export default function CreateBookModal({ onClose, onCreated }) {
             ) : null}
 
             {searchQuery.isError ? (
-              <div className="search-state-card search-state-card-error" role="alert">
-                <strong>Nao foi possivel concluir a busca agora.</strong>
-                <p>{searchErrorMessage}</p>
-                <div className="search-state-actions">
-                  <button type="button" className="action-button primary-button" onClick={handleRetrySearch}>
-                    Tentar novamente
-                  </button>
-                  <button type="button" className="action-button secondary-button" onClick={() => setMode('manual')}>
-                    Cadastrar manualmente
-                  </button>
-                </div>
-              </div>
+              <SearchErrorState title="Nao foi possivel concluir a busca agora." message={searchErrorMessage}>
+                <button type="button" className="action-button primary-button" onClick={handleRetrySearch}>
+                  Tentar novamente
+                </button>
+                <button type="button" className="action-button secondary-button" onClick={() => setMode('manual')}>
+                  Cadastrar manualmente
+                </button>
+              </SearchErrorState>
             ) : null}
 
             {createBookMutation.isError && mode === 'search' ? (
-              <div className="search-state-card search-state-card-error" role="alert">
-                <strong>O livro nao foi adicionado ao acervo.</strong>
-                <p>{addErrorMessage}</p>
-                <div className="search-state-actions">
-                  {selectedResult ? (
-                    <button type="button" className="action-button primary-button" onClick={() => handleAddBook(selectedResult)}>
-                      Tentar adicionar novamente
-                    </button>
-                  ) : (
-                    <button type="button" className="action-button primary-button" onClick={handleRetrySearch}>
-                      Voltar para a busca
-                    </button>
-                  )}
-                  <button type="button" className="action-button secondary-button" onClick={() => setMode('manual')}>
-                    Cadastrar manualmente
+              <SearchErrorState title="O livro nao foi adicionado ao acervo." message={addErrorMessage}>
+                {selectedResult ? (
+                  <button type="button" className="action-button primary-button" onClick={() => handleAddBook(selectedResult)}>
+                    Tentar adicionar novamente
                   </button>
-                </div>
-              </div>
+                ) : (
+                  <button type="button" className="action-button primary-button" onClick={handleRetrySearch}>
+                    Voltar para a busca
+                  </button>
+                )}
+                <button type="button" className="action-button secondary-button" onClick={() => setMode('manual')}>
+                  Cadastrar manualmente
+                </button>
+              </SearchErrorState>
             ) : null}
 
             {selectedResult ? (
@@ -340,13 +352,19 @@ export default function CreateBookModal({ onClose, onCreated }) {
                   const isAdding = createBookMutation.isPending && createBookMutation.variables?.external_id === result.external_id
 
                   return (
-                    <article key={result.external_id} className="search-result-card">
+                    <article
+                      key={result.external_id}
+                      className={`search-result-card ${result.already_in_library ? 'search-result-card-added' : ''}`}
+                    >
                       <BookCover coverUrl={result.cover_url} titulo={result.titulo} />
                       <div className="search-result-info">
                         <h3 className="search-result-title" title={result.titulo}>{result.titulo}</h3>
                         <p className="search-result-author">{result.autor}</p>
                         {result.already_in_library ? (
-                          <span className="search-result-badge">Ja esta no acervo</span>
+                          <span className="search-result-badge">
+                            <CheckCircle2 aria-hidden="true" size={13} strokeWidth={2.2} />
+                            Ja esta no acervo
+                          </span>
                         ) : null}
                         {result.isbn ? <p className="search-result-isbn">ISBN {result.isbn}</p> : null}
                         {result.descricao ? <p className="search-result-description">{result.descricao}</p> : null}
@@ -356,7 +374,7 @@ export default function CreateBookModal({ onClose, onCreated }) {
                           disabled={result.already_in_library || isAdding || createBookMutation.isPending}
                           onClick={() => handleSelectResult(result)}
                         >
-                          {result.already_in_library ? 'Ja adicionado' : isAdding ? 'Adicionando...' : 'Revisar e adicionar'}
+                          {result.already_in_library ? 'No acervo' : isAdding ? 'Adicionando...' : 'Revisar'}
                         </button>
                       </div>
                     </article>

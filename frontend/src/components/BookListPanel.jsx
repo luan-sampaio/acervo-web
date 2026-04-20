@@ -1,3 +1,4 @@
+import { Pencil, StickyNote, Trash2 } from 'lucide-react'
 import { formatReadingPeriod, formatShortDate } from '../utils'
 
 function getReadingStatusLabel(value, readingStatusOptions) {
@@ -185,16 +186,16 @@ function BookCard({
                 <div className="card-menu" role="menu">
                   {canAnnotate ? (
                     <button type="button" role="menuitem" onClick={() => onOpenAnnotation(book)}>
-                      <span className="card-menu-icon" aria-hidden="true">✎</span>
+                      <StickyNote className="card-menu-icon" aria-hidden="true" size={15} strokeWidth={2} />
                       <span>Anotações</span>
                     </button>
                   ) : null}
                   <button type="button" role="menuitem" onClick={() => onStartEditing(book)}>
-                    <span className="card-menu-icon" aria-hidden="true">✐</span>
+                    <Pencil className="card-menu-icon" aria-hidden="true" size={15} strokeWidth={2} />
                     <span>Editar</span>
                   </button>
                   <button type="button" role="menuitem" className="card-menu-danger" onClick={() => onRequestDelete(book)}>
-                    <span className="card-menu-icon" aria-hidden="true">×</span>
+                    <Trash2 className="card-menu-icon" aria-hidden="true" size={15} strokeWidth={2} />
                     <span>Excluir</span>
                   </button>
                 </div>
