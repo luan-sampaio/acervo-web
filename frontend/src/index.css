@@ -555,8 +555,72 @@ button { cursor: pointer; }
   font-size: 0.82rem;
 }
 
+.dashboard-progress-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.dashboard-progress-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.48rem;
+  min-height: 6.1rem;
+  padding: 0.85rem 0.9rem;
+  border-radius: var(--r-xl);
+  background: #FFFFFF;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+.dashboard-progress-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.7rem;
+}
+
+.dashboard-progress-card-head span {
+  color: var(--text-2);
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.dashboard-progress-card-head strong {
+  color: var(--text);
+  font-size: 1.42rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.dashboard-progress-card p {
+  margin: auto 0 0;
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.dashboard-progress-track {
+  height: 0.42rem;
+  overflow: hidden;
+  border-radius: var(--r-full);
+  background: var(--surface-2);
+}
+
+.dashboard-progress-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #4F46E5 0%, #16A34A 100%);
+}
+
+.dashboard-progress-card-total {
+  background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
+}
+
 .dashboard-reading-panel {
-  padding: 1.05rem 1.1rem;
+  padding: 0.95rem 1rem;
   border-radius: var(--r-xl);
   background: var(--surface);
   border: 1px solid var(--border);
@@ -577,11 +641,11 @@ button { cursor: pointer; }
   gap: 0.22rem;
   justify-content: stretch;
   height: 100%;
-  padding: 0.82rem 0.9rem;
+  padding: 0.74rem 0.82rem;
   border-radius: var(--r-lg);
   background: #FFFFFF;
   border: 1px solid var(--border);
-  min-height: 7.5rem;
+  min-height: 6.35rem;
   box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
 }
 
@@ -666,8 +730,8 @@ button { cursor: pointer; }
   display: flex;
   flex-direction: column;
   gap: 0.18rem;
-  min-height: 6.4rem;
-  padding: 0.78rem 0.82rem;
+  min-height: 5.8rem;
+  padding: 0.72rem 0.78rem;
   border-radius: var(--r-lg);
   background: #FFFFFF;
   border: 1px solid var(--border);
@@ -2445,6 +2509,7 @@ button { cursor: pointer; }
   }
 
   .dashboard-stats,
+  .dashboard-progress-grid,
   .dashboard-status-grid,
   .dashboard-reading-summary-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -2568,12 +2633,14 @@ button { cursor: pointer; }
   }
 
   .dashboard-stats,
+  .dashboard-progress-grid,
   .dashboard-status-grid {
     grid-template-columns: 1fr 1fr;
   }
 
   .dashboard-recent-list,
   .dashboard-stats,
+  .dashboard-progress-grid,
   .dashboard-status-grid,
   .dashboard-reading-summary-grid {
     grid-template-columns: 1fr;

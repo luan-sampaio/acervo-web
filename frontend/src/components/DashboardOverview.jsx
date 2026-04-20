@@ -44,6 +44,27 @@ function formatRate(value) {
   return `${value.toFixed(value % 1 === 0 ? 0 : 1).replace('.', ',')}%`
 }
 
+function DashboardProgressCard({
+  label,
+  value,
+  rate,
+}) {
+  const normalizedRate = Math.max(0, Math.min(rate, 100))
+
+  return (
+    <article className="dashboard-progress-card">
+      <div className="dashboard-progress-card-head">
+        <span>{label}</span>
+        <strong>{value}</strong>
+      </div>
+      <div className="dashboard-progress-track" aria-hidden="true">
+        <span style={{ width: `${normalizedRate}%` }} />
+      </div>
+      <p>{formatRate(rate)}</p>
+    </article>
+  )
+}
+
 function DashboardReadingMeta({ annotation }) {
   if (!annotation) {
     return null
@@ -86,14 +107,36 @@ export default function DashboardOverview({
         </div>
       </section>
 
+      <section className="dashboard-progress-grid" aria-label="Progresso de leitura">
+        <article className="dashboard-progress-card dashboard-progress-card-total">
+          <div className="dashboard-progress-card-head">
+            <span>Total no acervo</span>
+            <strong>{metrics.totalBooks}</strong>
+          </div>
+          <p>{metrics.favoriteCount === 1 ? '1 favorito' : `${metrics.favoriteCount} favoritos`}</p>
+        </article>
+        <DashboardProgressCard
+          label="Concluídos"
+          value={metrics.finishedCount}
+          rate={metrics.completionRate}
+        />
+        <DashboardProgressCard
+          label="Com anotação"
+          value={metrics.annotationCount}
+          rate={metrics.annotationRate}
+        />
+        <DashboardProgressCard
+          label="Com resenha"
+          value={metrics.reviewCount}
+          rate={metrics.reviewRate}
+        />
+      </section>
+
       <section className="dashboard-reading-panel">
         <div className="dashboard-panel-head">
           <div>
             <h2>Status da coleção</h2>
           </div>
-          <span className="dashboard-panel-pill">
-            {metrics.favoriteCount === 1 ? '1 favorito' : `${metrics.favoriteCount} favoritos`}
-          </span>
         </div>
 
         <div className="dashboard-status-grid">
@@ -101,14 +144,14 @@ export default function DashboardOverview({
             <div className="dashboard-status-card-body">
               <strong>{metrics.wantToReadCount}</strong>
               <span>Quero ler</span>
-              <p>Livros separados para a proxima leva de leitura.</p>
+              <p>Fila de próximas leituras.</p>
             </div>
           </article>
           <article className="dashboard-status-card dashboard-status-card-reading">
             <div className="dashboard-status-card-body">
               <strong>{metrics.readingNowCount}</strong>
               <span>Lendo</span>
-              <p>Leituras em andamento pedindo continuidade.</p>
+              <p>Em andamento agora.</p>
             </div>
           </article>
           <article className="dashboard-status-card dashboard-status-card-finished">
