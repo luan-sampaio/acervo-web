@@ -1838,17 +1838,22 @@ button { cursor: pointer; }
 .annotation-panel {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  margin-top: 0.95rem;
-  padding-top: 0.9rem;
-  border-top: 1px solid var(--border);
+  gap: 1rem;
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
 }
 
 .annotation-panel-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 0.75rem;
+  gap: 1rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid var(--border);
 }
 
 .annotation-panel-header > div {
@@ -1868,7 +1873,7 @@ button { cursor: pointer; }
 
 .annotation-panel-header strong {
   color: var(--text);
-  font-size: 0.96rem;
+  font-size: 1.04rem;
   line-height: 1.3;
 }
 
@@ -1896,14 +1901,14 @@ button { cursor: pointer; }
 
 .annotation-grid {
   display: grid;
-  grid-template-columns: minmax(7.5rem, 0.8fr) repeat(2, minmax(8.5rem, 1fr));
-  gap: 0.6rem;
+  grid-template-columns: minmax(8rem, 0.75fr) repeat(2, minmax(9rem, 1fr));
+  gap: 0.8rem;
 }
 
 .annotation-panel label {
   display: flex;
   flex-direction: column;
-  gap: 0.28rem;
+  gap: 0.34rem;
   min-width: 0;
 }
 
@@ -1929,13 +1934,13 @@ button { cursor: pointer; }
 
 .annotation-panel input,
 .annotation-panel select {
-  min-height: 2.35rem;
-  padding: 0.5rem 0.68rem;
+  min-height: 2.55rem;
+  padding: 0.58rem 0.72rem;
 }
 
 .annotation-panel textarea {
-  min-height: 6.5rem;
-  padding: 0.65rem 0.72rem;
+  min-height: 8.5rem;
+  padding: 0.78rem 0.82rem;
   resize: vertical;
   line-height: 1.5;
 }
@@ -1953,9 +1958,15 @@ button { cursor: pointer; }
 
 .annotation-actions {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
-  gap: 0.5rem;
+  gap: 0.65rem;
   flex-wrap: wrap;
+  padding-top: 0.15rem;
+}
+
+.annotation-actions .danger-button {
+  margin-right: auto;
 }
 
 /* ── PAGINATION ── */
@@ -2443,6 +2454,19 @@ button { cursor: pointer; }
 
   .annotation-grid {
     grid-template-columns: 1fr;
+  }
+
+  .annotation-panel {
+    padding: 0.9rem;
+  }
+
+  .annotation-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .annotation-actions .danger-button {
+    margin-right: 0;
   }
 }
 
