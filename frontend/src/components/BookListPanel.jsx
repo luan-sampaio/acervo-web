@@ -426,25 +426,28 @@ export default function BookListPanel({
           {isLoading ? (
             <div className="empty-state">
               <div className="empty-state-card">
-                <span className="empty-state-kicker">Carregando</span>
-                <strong>Buscando livros da sua colecao</strong>
-                <p>Estamos atualizando os registros para mostrar a lista mais recente.</p>
+                <strong>Carregando livros</strong>
+                <p>Atualizando a colecao...</p>
               </div>
             </div>
           ) : books.length === 0 && !hasActiveFilters ? (
             <div className="empty-state">
               <div className="empty-state-card">
-                <span className="empty-state-kicker">Biblioteca vazia</span>
-                <strong>Nenhum livro cadastrado ate o momento</strong>
-                <p>Comece adicionando o primeiro livro para montar sua colecao.</p>
+                <strong>Sua biblioteca ainda esta vazia</strong>
+                <p>Adicione o primeiro livro para comecar a montar sua colecao.</p>
+                <button type="button" className="action-button primary-button empty-state-action" onClick={onOpenCreateModal}>
+                  Novo livro
+                </button>
               </div>
             </div>
           ) : books.length === 0 ? (
             <div className="empty-state">
               <div className="empty-state-card">
-                <span className="empty-state-kicker">Sem resultados</span>
-                <strong>Nenhum livro encontrado para essa busca</strong>
-                <p>Tente outro termo ou limpe os filtros para ver toda a colecao novamente.</p>
+                <strong>Nenhum resultado encontrado</strong>
+                <p>Tente outro termo ou volte para a colecao completa.</p>
+                <button type="button" className="secondary-button empty-state-action" onClick={onClearFilters}>
+                  Limpar filtros
+                </button>
               </div>
             </div>
           ) : (
