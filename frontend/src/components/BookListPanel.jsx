@@ -360,7 +360,7 @@ export default function BookListPanel({
         </div>
         <div className="list-header-actions">
           <button type="button" className="action-button primary-button list-create-button" onClick={onOpenCreateModal}>
-            Novo livro
+            + Novo livro
           </button>
         </div>
       </div>
@@ -436,7 +436,7 @@ export default function BookListPanel({
                 <strong>Sua biblioteca ainda esta vazia</strong>
                 <p>Adicione o primeiro livro para comecar a montar sua colecao.</p>
                 <button type="button" className="action-button primary-button empty-state-action" onClick={onOpenCreateModal}>
-                  Novo livro
+                  + Novo livro
                 </button>
               </div>
             </div>
