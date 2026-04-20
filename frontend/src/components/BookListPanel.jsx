@@ -49,7 +49,7 @@ function BookCard({
   const hasReadingSummaryDetails = Boolean(ratingLabel || readingPeriod || reviewPreview)
 
   return (
-    <article key={book.id} className={`book-card ${getCardAccentClass(book.status_leitura)}`}>
+    <article key={book.id} className={`book-card ${isEditing ? 'book-card-editing' : ''} ${getCardAccentClass(book.status_leitura)}`}>
       <div className="book-card-top">
         {isEditing ? (
           <form id={`edit-book-${book.id}`} className="book-main book-main-editing" onSubmit={(event) => onSave(book.id, event)}>
@@ -109,23 +109,25 @@ function BookCard({
               {book.favorito ? <span className="book-favorite-badge">Favorito</span> : null}
             </div>
 
-            {canAnnotate ? (
-              <div className="book-reading-summary">
-                <div className="book-reading-summary-tags">
-                  {hasReadingSummaryDetails ? (
-                    <>
-                      {ratingLabel ? <span>{ratingLabel}</span> : null}
-                      {readingPeriod ? <span>{readingPeriod}</span> : null}
-                    </>
-                  ) : (
-                    <span className="book-reading-summary-placeholder">Sem avaliação</span>
-                  )}
-                </div>
-                <p className={reviewPreview ? '' : 'book-reading-summary-empty'}>
-                  {reviewPreview || 'Nenhuma resenha registrada'}
-                </p>
+            <div className={`book-reading-summary ${canAnnotate ? '' : 'book-reading-summary-locked'}`}>
+              <div className="book-reading-summary-tags">
+                {canAnnotate && hasReadingSummaryDetails ? (
+                  <>
+                    {ratingLabel ? <span>{ratingLabel}</span> : null}
+                    {readingPeriod ? <span>{readingPeriod}</span> : null}
+                  </>
+                ) : (
+                  <span className="book-reading-summary-placeholder">
+                    {canAnnotate ? 'Sem avaliação' : 'Avaliação após leitura'}
+                  </span>
+                )}
               </div>
-            ) : null}
+              <p className={reviewPreview ? '' : 'book-reading-summary-empty'}>
+                {canAnnotate
+                  ? reviewPreview || 'Nenhuma resenha registrada'
+                  : 'Marque como lido para registrar notas'}
+              </p>
+            </div>
 
             <div className="book-card-footer">
               <span className="book-date">Adicionado em {formatShortDate(book.created_at)}</span>

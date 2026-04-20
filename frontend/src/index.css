@@ -1437,6 +1437,9 @@ button { cursor: pointer; }
 }
 
 .book-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 13.7rem;
   padding: 0.92rem 0.95rem;
   border-radius: var(--r-xl);
   border: 1.5px solid var(--border);
@@ -1446,7 +1449,11 @@ button { cursor: pointer; }
   transition: border-color 0.15s, box-shadow 0.15s, transform 0.12s;
 }
 
-.book-card:not(.editing):hover {
+.book-card-editing {
+  min-height: 0;
+}
+
+.book-card:not(.book-card-editing):hover {
   border-color: var(--primary);
   box-shadow: 0 8px 24px rgba(79, 70, 229, 0.12);
   transform: translateY(-1px);
@@ -1461,9 +1468,12 @@ button { cursor: pointer; }
   align-items: flex-start;
   gap: 0.7rem;
   width: 100%;
+  flex: 1;
 }
 
 .book-main {
+  display: flex;
+  flex-direction: column;
   flex: 1;
   min-width: 0;
 }
@@ -1478,7 +1488,7 @@ button { cursor: pointer; }
   align-items: center;
   justify-content: flex-start;
   gap: 0.5rem;
-  margin-top: 0.72rem;
+  margin-top: auto;
   padding-top: 0.55rem;
   border-top: 1px solid var(--border);
   flex-wrap: wrap;
@@ -1489,23 +1499,25 @@ button { cursor: pointer; }
   font-size: 1.08rem;
   font-weight: 800;
   color: var(--text);
-  white-space: normal;
-  overflow: visible;
-  text-overflow: unset;
   line-height: 1.22;
+  min-height: 2.64rem;
   max-width: 34rem;
-  text-wrap: balance;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .book-author {
   margin: 0.22rem 0 0;
   font-size: 0.9rem;
   color: var(--text-2);
-  white-space: normal;
-  overflow: visible;
-  text-overflow: unset;
   line-height: 1.5;
+  min-height: 1.35rem;
   max-width: 42rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .book-badges {
@@ -1514,6 +1526,7 @@ button { cursor: pointer; }
   gap: 0.35rem;
   flex-wrap: wrap;
   margin-top: 0.62rem;
+  min-height: 1.55rem;
 }
 
 .book-status-badge {
@@ -1566,6 +1579,11 @@ button { cursor: pointer; }
   background: var(--surface-2);
   border: 1px solid var(--border);
   overflow: hidden;
+}
+
+.book-reading-summary-locked {
+  background: #FAFAFA;
+  border-style: dashed;
 }
 
 .book-reading-summary-tags {
