@@ -1,10 +1,10 @@
 import httpx
-from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from .. import models, schemas
 from ..config import settings
 from ..providers import google_books, open_library
+from .book_identity import build_book_identity
 
 
 class ExternalBookSearchError(Exception):
@@ -98,8 +98,8 @@ def _mark_existing_books(
     db: Session,
 ) -> list[schemas.BookSearchResult]:
     external_ids = [result.external_id for result in parsed_results if result.external_id]
-    normalized_pairs = [
-        (result.titulo.strip().lower(), result.autor.strip().lower())
+    result_identities = [
+        build_book_identity(result.titulo, result.autor)
         for result in parsed_results
         if result.titulo and result.autor
     ]
@@ -119,30 +119,26 @@ def _mark_existing_books(
             if external_id
         }
 
-    existing_title_author_pairs = set()
-    if normalized_pairs:
-        existing_title_author_pairs = {
-            (titulo, autor)
+    existing_book_identities = set()
+    if result_identities:
+        existing_book_identities = {
+            build_book_identity(titulo, autor)
             for titulo, autor in (
-                db.query(
-                    func.lower(func.btrim(models.Book.titulo)),
-                    func.lower(func.btrim(models.Book.autor)),
-                )
+                db.query(models.Book.titulo, models.Book.autor)
                 .filter(models.Book.user_id == user_id)
                 .all()
             )
-            if (titulo, autor) in normalized_pairs
         }
 
     results = []
     for result in parsed_results:
-        normalized_pair = (result.titulo.strip().lower(), result.autor.strip().lower())
+        result_identity = build_book_identity(result.titulo, result.autor)
         results.append(
             result.model_copy(
                 update={
                     "already_in_library": (
                         result.external_id in existing_external_ids
-                        or normalized_pair in existing_title_author_pairs
+                        or result_identity in existing_book_identities
                     )
                 }
             )

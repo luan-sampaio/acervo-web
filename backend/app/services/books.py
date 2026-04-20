@@ -5,6 +5,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
 
 from .. import models, schemas
+from .book_identity import build_book_identity
 
 
 class BookNotFoundError(Exception):
@@ -273,13 +274,14 @@ def get_duplicate_book_by_title_author(
     db: Session,
     exclude_book_id: int | None = None,
 ) -> models.Book | None:
-    query = db.query(models.Book).filter(
-        models.Book.user_id == user_id,
-        func.lower(func.btrim(models.Book.titulo)) == titulo.strip().lower(),
-        func.lower(func.btrim(models.Book.autor)) == autor.strip().lower(),
-    )
+    target_identity = build_book_identity(titulo, autor)
+    query = db.query(models.Book).filter(models.Book.user_id == user_id)
 
     if exclude_book_id is not None:
         query = query.filter(models.Book.id != exclude_book_id)
 
-    return query.first()
+    for existing_book in query.all():
+        if build_book_identity(existing_book.titulo, existing_book.autor) == target_identity:
+            return existing_book
+
+    return None
