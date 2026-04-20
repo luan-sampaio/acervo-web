@@ -1,3 +1,4 @@
+from datetime import date
 from typing import Literal
 
 from sqlalchemy import and_, func, or_
@@ -156,6 +157,10 @@ def list_books(
 
 
 def get_book_stats(user_id: int, db: Session) -> dict:
+    current_year = date.today().year
+    year_start = date(current_year, 1, 1)
+    next_year_start = date(current_year + 1, 1, 1)
+
     stats = (
         db.query(
             func.count(models.Book.id).label("total_books"),
@@ -194,6 +199,14 @@ def get_book_stats(user_id: int, db: Session) -> dict:
                 )
             )
             .label("review_count"),
+            func.count(models.ReadingAnnotation.id)
+            .filter(
+                and_(
+                    models.ReadingAnnotation.finished_at >= year_start,
+                    models.ReadingAnnotation.finished_at < next_year_start,
+                )
+            )
+            .label("annual_finished_count"),
         )
         .outerjoin(
             models.ReadingAnnotation,

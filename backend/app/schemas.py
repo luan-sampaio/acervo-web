@@ -168,6 +168,9 @@ class BookStatsResponse(BaseModel):
     average_rating: float | None = None
     dated_reading_count: int = Field(ge=0)
     review_count: int = Field(ge=0)
+    annual_finished_count: int = Field(ge=0)
+    annual_goal: int = Field(gt=0)
     completion_rate: float = Field(ge=0, le=100)
     annotation_rate: float = Field(ge=0, le=100)
     review_rate: float = Field(ge=0, le=100)
+    annual_goal_rate: float = Field(ge=0, le=100)

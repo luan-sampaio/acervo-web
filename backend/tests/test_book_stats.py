@@ -21,6 +21,7 @@ class BookStatsResponseTest(unittest.TestCase):
             average_rating=4.25,
             dated_reading_count=4,
             review_count=3,
+            annual_finished_count=6,
         )
 
         response = build_book_stats_response(stats)
@@ -36,9 +37,12 @@ class BookStatsResponseTest(unittest.TestCase):
         self.assertEqual(response["average_rating"], 4.25)
         self.assertEqual(response["dated_reading_count"], 4)
         self.assertEqual(response["review_count"], 3)
+        self.assertEqual(response["annual_finished_count"], 6)
+        self.assertEqual(response["annual_goal"], 12)
         self.assertEqual(response["completion_rate"], 66.7)
         self.assertEqual(response["annotation_rate"], 75.0)
         self.assertEqual(response["review_rate"], 37.5)
+        self.assertEqual(response["annual_goal_rate"], 50.0)
 
     def test_builds_zeroed_stats_without_dividing_by_zero(self):
         stats = SimpleNamespace(
@@ -52,6 +56,7 @@ class BookStatsResponseTest(unittest.TestCase):
             average_rating=None,
             dated_reading_count=0,
             review_count=0,
+            annual_finished_count=0,
         )
 
         response = build_book_stats_response(stats)
@@ -62,6 +67,7 @@ class BookStatsResponseTest(unittest.TestCase):
         self.assertEqual(response["completion_rate"], 0)
         self.assertEqual(response["annotation_rate"], 0)
         self.assertEqual(response["review_rate"], 0)
+        self.assertEqual(response["annual_goal_rate"], 0)
 
     def test_never_returns_negative_unrated_finished_count(self):
         stats = SimpleNamespace(
@@ -75,11 +81,31 @@ class BookStatsResponseTest(unittest.TestCase):
             average_rating=5,
             dated_reading_count=0,
             review_count=0,
+            annual_finished_count=0,
         )
 
         response = build_book_stats_response(stats)
 
         self.assertEqual(response["unrated_finished_count"], 0)
+
+    def test_caps_annual_goal_rate_at_one_hundred(self):
+        stats = SimpleNamespace(
+            total_books=20,
+            favorite_count=0,
+            reading_now_count=0,
+            finished_count=20,
+            want_to_read_count=0,
+            annotation_count=20,
+            rated_count=20,
+            average_rating=5,
+            dated_reading_count=20,
+            review_count=0,
+            annual_finished_count=18,
+        )
+
+        response = build_book_stats_response(stats)
+
+        self.assertEqual(response["annual_goal_rate"], 100)
 
 
 if __name__ == "__main__":
