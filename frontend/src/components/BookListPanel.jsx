@@ -1,4 +1,4 @@
-import { formatRatingLabel, formatReadingPeriod, formatShortDate } from '../utils'
+import { formatReadingPeriod, formatShortDate } from '../utils'
 
 function getReadingStatusLabel(value, readingStatusOptions) {
   return readingStatusOptions.find((option) => option.value === value)?.label ?? value
@@ -30,6 +30,22 @@ function BookCoverThumbnail({ book }) {
   )
 }
 
+function RatingStars({ rating }) {
+  if (!rating) {
+    return null
+  }
+
+  return (
+    <span className="book-rating-stars" aria-label={`Nota ${rating} de 5`}>
+      {Array.from({ length: 5 }).map((_, index) => (
+        <span key={index} aria-hidden="true" className={index < rating ? 'book-rating-star-active' : ''}>
+          ★
+        </span>
+      ))}
+    </span>
+  )
+}
+
 function BookCard({
   book,
   isEditing,
@@ -54,11 +70,10 @@ function BookCard({
 }) {
   const annotation = book.annotation
   const ratingValue = annotation?.rating ? String(annotation.rating) : ''
-  const ratingLabel = formatRatingLabel(annotation?.rating)
   const readingPeriod = formatReadingPeriod(annotation)
   const reviewPreview = annotation?.review?.trim() ?? ''
   const canAnnotate = book.status_leitura === 'lido'
-  const hasReadingSummaryDetails = Boolean(ratingLabel || readingPeriod || reviewPreview)
+  const hasReadingSummaryDetails = Boolean(annotation?.rating || readingPeriod || reviewPreview)
 
   return (
     <article key={book.id} className={`book-card ${isEditing ? 'book-card-editing' : ''}`}>
@@ -129,8 +144,8 @@ function BookCard({
                   <div className="book-reading-summary-tags">
                     {hasReadingSummaryDetails ? (
                       <>
-                        {ratingLabel ? <span>{ratingLabel}</span> : null}
-                        {readingPeriod ? <span>{readingPeriod}</span> : null}
+                        <RatingStars rating={annotation?.rating} />
+                        {readingPeriod ? <span className="book-reading-period">{readingPeriod}</span> : null}
                       </>
                     ) : (
                       <span className="book-reading-summary-placeholder">Sem avaliação</span>
