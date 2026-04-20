@@ -71,19 +71,15 @@ export default function DashboardOverview({
     <section className="dashboard-grid">
       <section className="dashboard-hero">
         <div className="dashboard-hero-copy">
-          <h1>Seu painel de leitura, em um só lugar.</h1>
-          <p>
-            Acompanhe o crescimento da sua biblioteca, veja o que merece atenção agora e
-            avance para a coleção sempre que quiser cadastrar ou revisar livros.
-          </p>
-          <div className="dashboard-actions">
-            <button type="button" className="home-primary-action" onClick={onOpenCollection}>
-              Ir para a coleção
-            </button>
-          </div>
+          <h1>Dashboard</h1>
+          <p>Resumo rápido da sua biblioteca.</p>
         </div>
 
-        <div className="dashboard-hero-side" aria-hidden="true" />
+        <div className="dashboard-actions">
+          <button type="button" className="home-primary-action" onClick={onOpenCollection}>
+            Abrir coleção
+          </button>
+        </div>
       </section>
 
       <section className="dashboard-reading-panel">
