@@ -11,18 +11,31 @@ export default function DashboardPage() {
     queryFn: fetchBookStats,
   })
 
-  const recentBooksQuery = useQuery({
-    queryKey: ['dashboard-recent-books'],
+  const readingNowQuery = useQuery({
+    queryKey: ['dashboard-reading-now'],
+    queryFn: () => fetchBooks({
+      limit: 1,
+      offset: 0,
+      status_leitura: 'lendo',
+      sort_by: 'created_at',
+      sort_order: 'desc',
+    }),
+  })
+
+  const wantToReadQuery = useQuery({
+    queryKey: ['dashboard-want-to-read'],
     queryFn: () => fetchBooks({
       limit: 4,
       offset: 0,
+      status_leitura: 'quero_ler',
       sort_by: 'created_at',
       sort_order: 'desc',
     }),
   })
 
   const stats = statsQuery.data
-  const recentBooks = recentBooksQuery.data?.items ?? []
+  const readingNowBook = readingNowQuery.data?.items?.[0] ?? null
+  const wantToReadBooks = wantToReadQuery.data?.items ?? []
   const metrics = {
     totalBooks: stats?.total_books ?? 0,
     favoriteCount: stats?.favorite_count ?? 0,
@@ -40,7 +53,7 @@ export default function DashboardPage() {
     reviewRate: stats?.review_rate ?? 0,
   }
 
-  if (statsQuery.isLoading || recentBooksQuery.isLoading) {
+  if (statsQuery.isLoading || readingNowQuery.isLoading || wantToReadQuery.isLoading) {
     return (
       <section className="skeleton-page">
         <div className="panel skeleton-panel">
@@ -75,11 +88,11 @@ export default function DashboardPage() {
     )
   }
 
-  if (statsQuery.isError || recentBooksQuery.isError) {
+  if (statsQuery.isError || readingNowQuery.isError || wantToReadQuery.isError) {
     return (
       <section className="dashboard-panel">
         <div className="feedback error">
-          {statsQuery.error?.message ?? recentBooksQuery.error?.message}
+          {statsQuery.error?.message ?? readingNowQuery.error?.message ?? wantToReadQuery.error?.message}
         </div>
       </section>
     )
@@ -88,7 +101,8 @@ export default function DashboardPage() {
   return (
     <DashboardOverview
       metrics={metrics}
-      recentBooks={recentBooks}
+      readingNowBook={readingNowBook}
+      wantToReadBooks={wantToReadBooks}
       onOpenCollection={() => navigate('/collection')}
     />
   )

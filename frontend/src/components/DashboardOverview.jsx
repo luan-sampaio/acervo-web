@@ -1,83 +1,42 @@
-import { formatDate, formatRatingLabel, formatReadingPeriod } from '../utils'
+import { formatRatingLabel, formatReadingPeriod } from '../utils'
 
 function getReadingStatusLabel(value) {
-  if (value === 'quero_ler') {
-    return 'Quero ler'
-  }
-
-  if (value === 'lendo') {
-    return 'Lendo'
-  }
-
-  if (value === 'lido') {
-    return 'Lido'
-  }
-
+  if (value === 'quero_ler') return 'Quero ler'
+  if (value === 'lendo') return 'Lendo'
+  if (value === 'lido') return 'Lido'
   return value
 }
 
 function getReadingStatusClassName(value) {
-  if (value === 'quero_ler') {
-    return 'dashboard-status-tone-want'
-  }
-
-  if (value === 'lendo') {
-    return 'dashboard-status-tone-reading'
-  }
-
-  if (value === 'lido') {
-    return 'dashboard-status-tone-finished'
-  }
-
+  if (value === 'quero_ler') return 'dashboard-status-tone-want'
+  if (value === 'lendo') return 'dashboard-status-tone-reading'
+  if (value === 'lido') return 'dashboard-status-tone-finished'
   return ''
 }
 
-function formatAverageRating(value) {
-  if (!value) {
-    return '-'
-  }
-
-  return value.toFixed(1).replace('.', ',')
-}
-
-function formatRate(value) {
-  return `${value.toFixed(value % 1 === 0 ? 0 : 1).replace('.', ',')}%`
-}
-
-function DashboardProgressCard({
+function KpiCard({
   label,
   value,
-  rate,
-  emptyText,
+  hint,
+  tone = '',
 }) {
-  const normalizedRate = Math.max(0, Math.min(rate, 100))
-
   return (
-    <article className="dashboard-progress-card">
-      <div className="dashboard-progress-card-head">
-        <span>{label}</span>
-        <strong>{value}</strong>
-      </div>
-      <div className="dashboard-progress-track" aria-hidden="true">
-        <span style={{ width: `${normalizedRate}%` }} />
-      </div>
-      <p>{value === 0 && emptyText ? emptyText : formatRate(rate)}</p>
+    <article className={`dashboard-kpi-card ${tone}`}>
+      <span>{label}</span>
+      <strong>{value}</strong>
+      <p>{hint}</p>
     </article>
   )
 }
 
 function DashboardReadingMeta({ annotation }) {
-  if (!annotation) {
-    return null
-  }
+  if (!annotation) return null
 
   const ratingLabel = formatRatingLabel(annotation.rating)
   const readingPeriod = formatReadingPeriod(annotation)
   const hasReview = Boolean(annotation.review)
 
-  if (!ratingLabel && !readingPeriod && !hasReview) {
-    return null
-  }
+  if (!ratingLabel && !readingPeriod && !hasReview) return null
 
   return (
     <div className="dashboard-reading-meta">
@@ -116,34 +75,39 @@ function getAchievements(metrics) {
     },
   ].map((achievement) => ({
     ...achievement,
-    progress: Math.min((achievement.current / achievement.target) * 100, 100),
     unlocked: achievement.current >= achievement.target,
   }))
 }
 
+function QueueBookCard({ book }) {
+  return (
+    <article className="dashboard-queue-card">
+      <span className={`dashboard-recent-status ${getReadingStatusClassName(book.status_leitura)}`}>
+        {getReadingStatusLabel(book.status_leitura)}
+      </span>
+      <h3>{book.titulo}</h3>
+      <p>{book.autor}</p>
+    </article>
+  )
+}
+
 export default function DashboardOverview({
   metrics,
-  recentBooks,
+  readingNowBook,
+  wantToReadBooks,
   onOpenCollection,
 }) {
   const achievements = getAchievements(metrics)
   const unlockedAchievements = achievements.filter((achievement) => achievement.unlocked).length
   const hasBooks = metrics.totalBooks > 0
-  const hasFinishedBooks = metrics.finishedCount > 0
 
   return (
     <section className="dashboard-grid">
-      <section className="dashboard-hero">
-        <div className="dashboard-hero-copy">
-          <h1>Dashboard</h1>
-          <p>{hasBooks ? 'Resumo rápido da sua biblioteca.' : 'Adicione livros para começar a acompanhar seu progresso.'}</p>
-        </div>
-
-        <div className="dashboard-actions">
-          <button type="button" className="home-primary-action" onClick={onOpenCollection}>
-            {hasBooks ? 'Abrir coleção' : '+ Novo livro'}
-          </button>
-        </div>
+      <section className="dashboard-kpi-grid" aria-label="Resumo da coleção">
+        <KpiCard label="Total no acervo" value={metrics.totalBooks} hint={`${metrics.favoriteCount} favoritos`} />
+        <KpiCard label="Lidos" value={metrics.finishedCount} hint="Concluídos" tone="dashboard-kpi-finished" />
+        <KpiCard label="Lendo" value={metrics.readingNowCount} hint="Em andamento" tone="dashboard-kpi-reading" />
+        <KpiCard label="Quero ler" value={metrics.wantToReadCount} hint="Fila de próximas leituras" tone="dashboard-kpi-want" />
       </section>
 
       {!hasBooks ? (
@@ -156,87 +120,64 @@ export default function DashboardOverview({
         </section>
       ) : null}
 
-      <section className="dashboard-progress-grid" aria-label="Progresso de leitura">
-        <article className="dashboard-progress-card dashboard-progress-card-total">
-          <div className="dashboard-progress-card-head">
-            <span>Total no acervo</span>
-            <strong>{metrics.totalBooks}</strong>
-          </div>
-          <p>{metrics.favoriteCount === 1 ? '1 favorito' : `${metrics.favoriteCount} favoritos`}</p>
-        </article>
-        <DashboardProgressCard
-          label="Concluídos"
-          value={metrics.finishedCount}
-          rate={metrics.completionRate}
-          emptyText="Nenhum lido ainda"
-        />
-        <DashboardProgressCard
-          label="Com anotação"
-          value={metrics.annotationCount}
-          rate={metrics.annotationRate}
-          emptyText={hasFinishedBooks ? 'Sem anotações' : 'Leia para anotar'}
-        />
-        <DashboardProgressCard
-          label="Com resenha"
-          value={metrics.reviewCount}
-          rate={metrics.reviewRate}
-          emptyText={hasFinishedBooks ? 'Sem resenhas' : 'Leia para resenhar'}
-        />
-      </section>
-
-      <section className="dashboard-reading-panel">
+      <section className="dashboard-panel dashboard-current-reading-panel">
         <div className="dashboard-panel-head">
           <div>
-            <h2>Status da coleção</h2>
+            <h2>Lendo agora</h2>
           </div>
+          <button type="button" className="secondary-button" onClick={onOpenCollection}>
+            Atualizar progresso
+          </button>
         </div>
 
-        <div className="dashboard-status-grid">
-          <article className="dashboard-status-card dashboard-status-card-want">
-            <div className="dashboard-status-card-body">
-              <strong>{metrics.wantToReadCount}</strong>
-              <span>Quero ler</span>
-              <p>Fila de próximas leituras.</p>
+        {readingNowBook ? (
+          <article className="dashboard-current-book">
+            {readingNowBook.cover_url ? (
+              <img src={readingNowBook.cover_url} alt={`Capa de ${readingNowBook.titulo}`} loading="lazy" />
+            ) : (
+              <div className="dashboard-current-book-cover" aria-hidden="true">Livro</div>
+            )}
+            <div className="dashboard-current-book-copy">
+              <span className={`dashboard-recent-status ${getReadingStatusClassName(readingNowBook.status_leitura)}`}>
+                {getReadingStatusLabel(readingNowBook.status_leitura)}
+              </span>
+              <h3>{readingNowBook.titulo}</h3>
+              <p>{readingNowBook.autor}</p>
+              <DashboardReadingMeta annotation={readingNowBook.annotation} />
             </div>
           </article>
-          <article className="dashboard-status-card dashboard-status-card-reading">
-            <div className="dashboard-status-card-body">
-              <strong>{metrics.readingNowCount}</strong>
-              <span>Lendo</span>
-              <p>Em andamento agora.</p>
-            </div>
-          </article>
-          <article className="dashboard-status-card dashboard-status-card-finished">
-            <div className="dashboard-status-card-body">
-              <strong>{metrics.finishedCount}</strong>
-              <span>Lidos</span>
-              <p>{formatRate(metrics.completionRate)} do acervo concluido.</p>
-            </div>
-          </article>
+        ) : (
+          <div className="dashboard-current-empty">
+            <strong>Nenhuma leitura em andamento</strong>
+            <p>Escolha um livro da fila e marque como Lendo para acompanhar por aqui.</p>
+            <button type="button" className="action-button primary-button" onClick={onOpenCollection}>
+              Escolher da fila
+            </button>
+          </div>
+        )}
+      </section>
+
+      <section className="dashboard-panel">
+        <div className="dashboard-panel-head">
+          <div>
+            <h2>Fila de próximas leituras</h2>
+          </div>
+          <button type="button" className="secondary-button" onClick={onOpenCollection}>
+            Ver coleção
+          </button>
         </div>
 
-        <div className="dashboard-reading-summary-grid">
-          <article className="dashboard-reading-summary-card">
-            <strong>{metrics.annotationCount}</strong>
-            <span>Anotados</span>
-            <p>{hasFinishedBooks ? `${formatRate(metrics.annotationRate)} dos lidos têm registro.` : 'Conclua uma leitura para registrar notas.'}</p>
-          </article>
-          <article className="dashboard-reading-summary-card">
-            <strong>{formatAverageRating(metrics.averageRating)}</strong>
-            <span>Média de nota</span>
-            <p>{metrics.ratedCount > 0 ? `${metrics.ratedCount} avaliados, ${metrics.unratedFinishedCount} lidos sem nota.` : 'Nenhuma nota registrada ainda.'}</p>
-          </article>
-          <article className="dashboard-reading-summary-card">
-            <strong>{metrics.datedReadingCount}</strong>
-            <span>Com histórico</span>
-            <p>Leituras com início ou término registrado.</p>
-          </article>
-          <article className="dashboard-reading-summary-card">
-            <strong>{metrics.reviewCount}</strong>
-            <span>Resenhados</span>
-            <p>{hasFinishedBooks ? `${formatRate(metrics.reviewRate)} dos lidos já têm comentário.` : 'Resenhas aparecem após leituras concluídas.'}</p>
-          </article>
-        </div>
+        {wantToReadBooks.length > 0 ? (
+          <div className="dashboard-queue-list">
+            {wantToReadBooks.map((book) => (
+              <QueueBookCard key={book.id} book={book} />
+            ))}
+          </div>
+        ) : (
+          <div className="empty-state dashboard-empty-state">
+            <p>Nenhum livro na fila. Marque livros como Quero ler para formar sua próxima seleção.</p>
+          </div>
+        )}
       </section>
 
       <section className="dashboard-panel dashboard-achievements-panel">
@@ -261,49 +202,11 @@ export default function DashboardOverview({
               <div className="dashboard-achievement-copy">
                 <strong>{achievement.title}</strong>
                 <span>{achievement.description}</span>
-                <div className="dashboard-achievement-track" aria-hidden="true">
-                  <span style={{ width: `${achievement.progress}%` }} />
-                </div>
+                <small>{achievement.current}/{achievement.target}</small>
               </div>
             </article>
           ))}
         </div>
-      </section>
-
-      <section className="dashboard-panel">
-        <div className="dashboard-panel-head">
-          <div>
-            <h2>Últimos livros cadastrados</h2>
-          </div>
-          <button type="button" className="secondary-button" onClick={onOpenCollection}>
-            Ver coleção
-          </button>
-        </div>
-
-        {recentBooks.length > 0 ? (
-          <div className="dashboard-recent-list">
-            {recentBooks.map((book) => (
-              <article key={book.id} className="dashboard-recent-card">
-                <div className="dashboard-recent-copy">
-                  <div className="dashboard-recent-badges">
-                    <span className={`dashboard-recent-status ${getReadingStatusClassName(book.status_leitura)}`}>
-                      {getReadingStatusLabel(book.status_leitura)}
-                    </span>
-                    {book.favorito ? <span className="dashboard-recent-favorite">Favorito</span> : null}
-                  </div>
-                  <h3>{book.titulo}</h3>
-                  <p>{book.autor}</p>
-                  <DashboardReadingMeta annotation={book.annotation} />
-                </div>
-                <span className="dashboard-recent-date">{formatDate(book.created_at)}</span>
-              </article>
-            ))}
-          </div>
-        ) : (
-          <div className="empty-state dashboard-empty-state">
-            <p>Nenhum livro cadastrado ainda. Sua coleção vai aparecer aqui assim que o primeiro registro entrar.</p>
-          </div>
-        )}
       </section>
     </section>
   )
