@@ -14,17 +14,19 @@ function getReadingStatusClassName(value) {
 function BookCoverThumbnail({ book }) {
   if (book.cover_url) {
     return (
-      <img
-        className="book-cover-thumbnail"
-        src={book.cover_url}
-        alt={`Capa de ${book.titulo}`}
-        loading="lazy"
-      />
+      <div className="book-cover-frame">
+        <img
+          className="book-cover-thumbnail"
+          src={book.cover_url}
+          alt={`Capa de ${book.titulo}`}
+          loading="lazy"
+        />
+      </div>
     )
   }
 
   return (
-    <div className="book-cover-thumbnail book-cover-thumbnail-placeholder" aria-hidden="true">
+    <div className="book-cover-frame book-cover-thumbnail-placeholder" aria-hidden="true">
       <span>Livro</span>
     </div>
   )
