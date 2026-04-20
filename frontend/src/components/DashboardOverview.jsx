@@ -48,35 +48,28 @@ function DashboardReadingMeta({ annotation }) {
 }
 
 function getAchievements(metrics) {
-  return [
-    {
-      title: 'Primeira leitura',
-      description: 'Conclua 1 livro.',
-      current: metrics.finishedCount,
-      target: 1,
-    },
-    {
-      title: 'Leitor consistente',
-      description: 'Conclua 10 livros.',
-      current: metrics.finishedCount,
-      target: 10,
-    },
-    {
-      title: 'Crítico do acervo',
-      description: 'Avalie 5 livros.',
-      current: metrics.ratedCount,
-      target: 5,
-    },
-    {
-      title: 'Curador',
-      description: 'Marque 5 favoritos.',
-      current: metrics.favoriteCount,
-      target: 5,
-    },
-  ].map((achievement) => ({
-    ...achievement,
-    unlocked: achievement.current >= achievement.target,
-  }))
+  const tracks = [
+    { title: 'Leitor', description: 'Livros concluídos', current: metrics.finishedCount, targets: [1, 10, 25] },
+    { title: 'Crítico', description: 'Livros avaliados', current: metrics.ratedCount, targets: [1, 5, 15] },
+    { title: 'Curador', description: 'Favoritos marcados', current: metrics.favoriteCount, targets: [1, 5, 12] },
+    { title: 'Memorialista', description: 'Resenhas escritas', current: metrics.reviewCount, targets: [1, 5, 10] },
+  ]
+
+  return tracks.map((track) => {
+    const unlockedLevel = track.targets.filter((target) => track.current >= target).length
+    const nextTarget = track.targets.find((target) => track.current < target) ?? track.targets[track.targets.length - 1]
+    const previousTarget = unlockedLevel > 0 ? track.targets[unlockedLevel - 1] : 0
+    const progressRange = Math.max(nextTarget - previousTarget, 1)
+    const progress = Math.min(Math.max(((track.current - previousTarget) / progressRange) * 100, 0), 100)
+
+    return {
+      ...track,
+      unlockedLevel,
+      nextTarget,
+      progress,
+      completed: unlockedLevel === track.targets.length,
+    }
+  })
 }
 
 function QueueBookCard({ book }) {
@@ -98,7 +91,8 @@ export default function DashboardOverview({
   onOpenCollection,
 }) {
   const achievements = getAchievements(metrics)
-  const unlockedAchievements = achievements.filter((achievement) => achievement.unlocked).length
+  const unlockedAchievements = achievements.reduce((total, achievement) => total + achievement.unlockedLevel, 0)
+  const totalAchievementLevels = achievements.reduce((total, achievement) => total + achievement.targets.length, 0)
   const hasBooks = metrics.totalBooks > 0
 
   return (
@@ -186,7 +180,7 @@ export default function DashboardOverview({
             <h2>Conquistas</h2>
           </div>
           <span className="dashboard-panel-pill">
-            {unlockedAchievements}/{achievements.length}
+            {unlockedAchievements}/{totalAchievementLevels}
           </span>
         </div>
 
@@ -194,15 +188,22 @@ export default function DashboardOverview({
           {achievements.map((achievement) => (
             <article
               key={achievement.title}
-              className={`dashboard-achievement-card ${achievement.unlocked ? 'dashboard-achievement-card-unlocked' : ''}`}
+              className={`dashboard-achievement-card ${achievement.completed ? 'dashboard-achievement-card-unlocked' : ''}`}
             >
               <div className="dashboard-achievement-mark" aria-hidden="true">
-                {achievement.unlocked ? '✓' : achievement.current}
+                {achievement.completed ? '✓' : achievement.unlockedLevel}
               </div>
               <div className="dashboard-achievement-copy">
                 <strong>{achievement.title}</strong>
                 <span>{achievement.description}</span>
-                <small>{achievement.current}/{achievement.target}</small>
+                <div className="dashboard-achievement-track" aria-hidden="true">
+                  <span style={{ width: `${achievement.progress}%` }} />
+                </div>
+                <small>
+                  {achievement.completed
+                    ? 'Trilha completa'
+                    : `${achievement.current}/${achievement.nextTarget} para o próximo nível`}
+                </small>
               </div>
             </article>
           ))}

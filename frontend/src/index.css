@@ -974,7 +974,7 @@ button { cursor: pointer; }
   display: flex;
   align-items: flex-start;
   gap: 0.62rem;
-  min-height: 5.2rem;
+  min-height: 6rem;
   padding: 0.72rem;
   border-radius: var(--r-lg);
   background: #FFFFFF;
@@ -996,13 +996,23 @@ button { cursor: pointer; }
   border-radius: var(--r-full);
   background: var(--surface-2);
   color: var(--muted);
-  font-size: 0.82rem;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.dashboard-achievement-mark::before {
+  content: "Nv ";
+  font-size: 0.58rem;
   font-weight: 800;
 }
 
 .dashboard-achievement-card-unlocked .dashboard-achievement-mark {
   background: #DCFCE7;
   color: #166534;
+}
+
+.dashboard-achievement-card-unlocked .dashboard-achievement-mark::before {
+  content: "";
 }
 
 .dashboard-achievement-copy {
@@ -1026,7 +1036,6 @@ button { cursor: pointer; }
 }
 
 .dashboard-achievement-copy small {
-  margin-top: auto;
   color: var(--muted-2);
   font-size: 0.7rem;
   font-weight: 700;
@@ -1034,7 +1043,7 @@ button { cursor: pointer; }
 
 .dashboard-achievement-track {
   height: 0.32rem;
-  margin-top: auto;
+  margin-top: 0.28rem;
   overflow: hidden;
   border-radius: var(--r-full);
   background: var(--surface-2);
