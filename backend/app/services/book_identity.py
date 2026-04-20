@@ -12,6 +12,7 @@ _EDITION_WORDS_RE = re.compile(
     r")\b"
 )
 _EDITION_NUMBER_RE = re.compile(r"\b\d+\s*(a|ª|o|º)?\s*(edicao|edição|ed)\b")
+_AUTHOR_SEPARATOR_RE = re.compile(r"\s*[,;]\s*")
 _PUNCTUATION_RE = re.compile(r"[^a-z0-9]+")
 _SPACE_RE = re.compile(r"\s+")
 
@@ -32,5 +33,10 @@ def normalize_book_title(value: str) -> str:
     return normalize_identity_text(title)
 
 
+def normalize_book_author(value: str) -> str:
+    primary_author = _AUTHOR_SEPARATOR_RE.split(value, maxsplit=1)[0]
+    return normalize_identity_text(primary_author)
+
+
 def build_book_identity(titulo: str, autor: str) -> tuple[str, str]:
-    return normalize_book_title(titulo), normalize_identity_text(autor)
+    return normalize_book_title(titulo), normalize_book_author(autor)
