@@ -49,10 +49,10 @@ function DashboardReadingMeta({ annotation }) {
 
 function getAchievements(metrics) {
   const tracks = [
-    { title: 'Leitor', description: 'Livros concluídos', current: metrics.finishedCount, targets: [1, 10, 25] },
-    { title: 'Crítico', description: 'Livros avaliados', current: metrics.ratedCount, targets: [1, 5, 15] },
-    { title: 'Curador', description: 'Favoritos marcados', current: metrics.favoriteCount, targets: [1, 5, 12] },
-    { title: 'Memorialista', description: 'Resenhas escritas', current: metrics.reviewCount, targets: [1, 5, 10] },
+    { title: 'Leitor', description: 'Livros concluídos', action: 'Concluir uma leitura', current: metrics.finishedCount, targets: [1, 10, 25] },
+    { title: 'Crítico', description: 'Livros avaliados', action: 'Adicionar uma nota', current: metrics.ratedCount, targets: [1, 5, 15] },
+    { title: 'Curador', description: 'Favoritos marcados', action: 'Marcar um favorito', current: metrics.favoriteCount, targets: [1, 5, 12] },
+    { title: 'Memorialista', description: 'Resenhas escritas', action: 'Escrever uma resenha', current: metrics.reviewCount, targets: [1, 5, 10] },
   ]
 
   return tracks.map((track) => {
@@ -66,6 +66,7 @@ function getAchievements(metrics) {
       ...track,
       unlockedLevel,
       nextTarget,
+      remaining: Math.max(nextTarget - track.current, 0),
       progress,
       completed: unlockedLevel === track.targets.length,
     }
@@ -93,6 +94,9 @@ export default function DashboardOverview({
   const achievements = getAchievements(metrics)
   const unlockedAchievements = achievements.reduce((total, achievement) => total + achievement.unlockedLevel, 0)
   const totalAchievementLevels = achievements.reduce((total, achievement) => total + achievement.targets.length, 0)
+  const nextAchievement = achievements
+    .filter((achievement) => !achievement.completed)
+    .sort((a, b) => a.remaining - b.remaining)[0]
   const hasBooks = metrics.totalBooks > 0
 
   return (
@@ -183,6 +187,29 @@ export default function DashboardOverview({
             {unlockedAchievements}/{totalAchievementLevels}
           </span>
         </div>
+
+        {nextAchievement ? (
+          <article className="dashboard-next-achievement">
+            <div>
+              <span>Próximo objetivo</span>
+              <strong>{nextAchievement.action}</strong>
+              <p>
+                Faltam {nextAchievement.remaining} para {nextAchievement.title} nível {nextAchievement.unlockedLevel + 1}.
+              </p>
+            </div>
+            <button type="button" className="secondary-button" onClick={onOpenCollection}>
+              Avançar
+            </button>
+          </article>
+        ) : (
+          <article className="dashboard-next-achievement dashboard-next-achievement-complete">
+            <div>
+              <span>Conquistas completas</span>
+              <strong>Todas as trilhas foram concluídas</strong>
+              <p>Seu acervo já desbloqueou todos os marcos atuais.</p>
+            </div>
+          </article>
+        )}
 
         <div className="dashboard-achievements-grid">
           {achievements.map((achievement) => (
