@@ -789,6 +789,90 @@ button { cursor: pointer; }
   font-weight: 700;
 }
 
+.dashboard-achievements-panel {
+  padding: 0.95rem 1rem;
+}
+
+.dashboard-achievements-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.62rem;
+}
+
+.dashboard-achievement-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.62rem;
+  min-height: 5.2rem;
+  padding: 0.72rem;
+  border-radius: var(--r-lg);
+  background: #FFFFFF;
+  border: 1px solid var(--border);
+}
+
+.dashboard-achievement-card-unlocked {
+  border-color: rgba(22, 163, 74, 0.22);
+  background: linear-gradient(180deg, #FFFFFF 0%, #F0FDF4 100%);
+}
+
+.dashboard-achievement-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 2rem;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--r-full);
+  background: var(--surface-2);
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.dashboard-achievement-card-unlocked .dashboard-achievement-mark {
+  background: #DCFCE7;
+  color: #166534;
+}
+
+.dashboard-achievement-copy {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.18rem;
+}
+
+.dashboard-achievement-copy strong {
+  color: var(--text);
+  font-size: 0.82rem;
+  line-height: 1.25;
+}
+
+.dashboard-achievement-copy span {
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
+.dashboard-achievement-track {
+  height: 0.32rem;
+  margin-top: auto;
+  overflow: hidden;
+  border-radius: var(--r-full);
+  background: var(--surface-2);
+}
+
+.dashboard-achievement-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #4F46E5;
+}
+
+.dashboard-achievement-card-unlocked .dashboard-achievement-track span {
+  background: #16A34A;
+}
+
 .dashboard-recent-list {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -2510,6 +2594,7 @@ button { cursor: pointer; }
 
   .dashboard-stats,
   .dashboard-progress-grid,
+  .dashboard-achievements-grid,
   .dashboard-status-grid,
   .dashboard-reading-summary-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -2634,6 +2719,7 @@ button { cursor: pointer; }
 
   .dashboard-stats,
   .dashboard-progress-grid,
+  .dashboard-achievements-grid,
   .dashboard-status-grid {
     grid-template-columns: 1fr 1fr;
   }
@@ -2641,6 +2727,7 @@ button { cursor: pointer; }
   .dashboard-recent-list,
   .dashboard-stats,
   .dashboard-progress-grid,
+  .dashboard-achievements-grid,
   .dashboard-status-grid,
   .dashboard-reading-summary-grid {
     grid-template-columns: 1fr;

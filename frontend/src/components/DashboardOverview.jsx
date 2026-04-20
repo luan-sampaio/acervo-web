@@ -87,11 +87,47 @@ function DashboardReadingMeta({ annotation }) {
   )
 }
 
+function getAchievements(metrics) {
+  return [
+    {
+      title: 'Primeira leitura',
+      description: 'Conclua 1 livro.',
+      current: metrics.finishedCount,
+      target: 1,
+    },
+    {
+      title: 'Leitor consistente',
+      description: 'Conclua 10 livros.',
+      current: metrics.finishedCount,
+      target: 10,
+    },
+    {
+      title: 'Crítico do acervo',
+      description: 'Avalie 5 livros.',
+      current: metrics.ratedCount,
+      target: 5,
+    },
+    {
+      title: 'Curador',
+      description: 'Marque 5 favoritos.',
+      current: metrics.favoriteCount,
+      target: 5,
+    },
+  ].map((achievement) => ({
+    ...achievement,
+    progress: Math.min((achievement.current / achievement.target) * 100, 100),
+    unlocked: achievement.current >= achievement.target,
+  }))
+}
+
 export default function DashboardOverview({
   metrics,
   recentBooks,
   onOpenCollection,
 }) {
+  const achievements = getAchievements(metrics)
+  const unlockedAchievements = achievements.filter((achievement) => achievement.unlocked).length
+
   return (
     <section className="dashboard-grid">
       <section className="dashboard-hero">
@@ -184,6 +220,37 @@ export default function DashboardOverview({
             <span>Resenhados</span>
             <p>{formatRate(metrics.reviewRate)} dos lidos já têm comentário.</p>
           </article>
+        </div>
+      </section>
+
+      <section className="dashboard-panel dashboard-achievements-panel">
+        <div className="dashboard-panel-head">
+          <div>
+            <h2>Conquistas</h2>
+          </div>
+          <span className="dashboard-panel-pill">
+            {unlockedAchievements}/{achievements.length}
+          </span>
+        </div>
+
+        <div className="dashboard-achievements-grid">
+          {achievements.map((achievement) => (
+            <article
+              key={achievement.title}
+              className={`dashboard-achievement-card ${achievement.unlocked ? 'dashboard-achievement-card-unlocked' : ''}`}
+            >
+              <div className="dashboard-achievement-mark" aria-hidden="true">
+                {achievement.unlocked ? '✓' : achievement.current}
+              </div>
+              <div className="dashboard-achievement-copy">
+                <strong>{achievement.title}</strong>
+                <span>{achievement.description}</span>
+                <div className="dashboard-achievement-track" aria-hidden="true">
+                  <span style={{ width: `${achievement.progress}%` }} />
+                </div>
+              </div>
+            </article>
+          ))}
         </div>
       </section>
 
