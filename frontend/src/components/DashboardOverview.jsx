@@ -40,6 +40,10 @@ function formatAverageRating(value) {
   return value.toFixed(1).replace('.', ',')
 }
 
+function formatRate(value) {
+  return `${value.toFixed(value % 1 === 0 ? 0 : 1).replace('.', ',')}%`
+}
+
 function DashboardReadingMeta({ annotation }) {
   if (!annotation) {
     return null
@@ -111,7 +115,7 @@ export default function DashboardOverview({
             <div className="dashboard-status-card-body">
               <strong>{metrics.finishedCount}</strong>
               <span>Lidos</span>
-              <p>Titulos concluidos e ja absorvidos no acervo.</p>
+              <p>{formatRate(metrics.completionRate)} do acervo concluido.</p>
             </div>
           </article>
         </div>
@@ -120,12 +124,12 @@ export default function DashboardOverview({
           <article className="dashboard-reading-summary-card">
             <strong>{metrics.annotationCount}</strong>
             <span>Anotados</span>
-            <p>Livros com nota, resenha ou datas de leitura.</p>
+            <p>{formatRate(metrics.annotationRate)} dos lidos têm registro.</p>
           </article>
           <article className="dashboard-reading-summary-card">
             <strong>{formatAverageRating(metrics.averageRating)}</strong>
             <span>Média de nota</span>
-            <p>Calculada sobre os livros avaliados.</p>
+            <p>{metrics.ratedCount} avaliados, {metrics.unratedFinishedCount} lidos sem nota.</p>
           </article>
           <article className="dashboard-reading-summary-card">
             <strong>{metrics.datedReadingCount}</strong>
@@ -135,7 +139,7 @@ export default function DashboardOverview({
           <article className="dashboard-reading-summary-card">
             <strong>{metrics.reviewCount}</strong>
             <span>Resenhados</span>
-            <p>Livros que já receberam comentário pessoal.</p>
+            <p>{formatRate(metrics.reviewRate)} dos lidos já têm comentário.</p>
           </article>
         </div>
       </section>

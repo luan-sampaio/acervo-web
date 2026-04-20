@@ -24,14 +24,20 @@ export default function DashboardPage() {
   const stats = statsQuery.data
   const recentBooks = recentBooksQuery.data?.items ?? []
   const metrics = {
+    totalBooks: stats?.total_books ?? 0,
     favoriteCount: stats?.favorite_count ?? 0,
     readingNowCount: stats?.reading_now_count ?? 0,
     finishedCount: stats?.finished_count ?? 0,
     wantToReadCount: stats?.want_to_read_count ?? 0,
     annotationCount: stats?.annotation_count ?? 0,
+    ratedCount: stats?.rated_count ?? 0,
+    unratedFinishedCount: stats?.unrated_finished_count ?? 0,
     averageRating: stats?.average_rating ?? null,
     datedReadingCount: stats?.dated_reading_count ?? 0,
     reviewCount: stats?.review_count ?? 0,
+    completionRate: stats?.completion_rate ?? 0,
+    annotationRate: stats?.annotation_rate ?? 0,
+    reviewRate: stats?.review_rate ?? 0,
   }
 
   if (statsQuery.isLoading || recentBooksQuery.isLoading) {
