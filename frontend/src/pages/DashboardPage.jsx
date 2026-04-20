@@ -48,9 +48,12 @@ export default function DashboardPage() {
     averageRating: stats?.average_rating ?? null,
     datedReadingCount: stats?.dated_reading_count ?? 0,
     reviewCount: stats?.review_count ?? 0,
+    annualFinishedCount: stats?.annual_finished_count ?? 0,
+    annualGoal: stats?.annual_goal ?? 12,
     completionRate: stats?.completion_rate ?? 0,
     annotationRate: stats?.annotation_rate ?? 0,
     reviewRate: stats?.review_rate ?? 0,
+    annualGoalRate: stats?.annual_goal_rate ?? 0,
   }
 
   if (statsQuery.isLoading || readingNowQuery.isLoading || wantToReadQuery.isLoading) {

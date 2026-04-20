@@ -49,10 +49,38 @@ function DashboardReadingMeta({ annotation }) {
 
 function getAchievements(metrics) {
   const tracks = [
-    { title: 'Leitor', description: 'Livros concluídos', action: 'Concluir uma leitura', current: metrics.finishedCount, targets: [1, 10, 25] },
-    { title: 'Crítico', description: 'Livros avaliados', action: 'Adicionar uma nota', current: metrics.ratedCount, targets: [1, 5, 15] },
-    { title: 'Curador', description: 'Favoritos marcados', action: 'Marcar um favorito', current: metrics.favoriteCount, targets: [1, 5, 12] },
-    { title: 'Memorialista', description: 'Resenhas escritas', action: 'Escrever uma resenha', current: metrics.reviewCount, targets: [1, 5, 10] },
+    {
+      title: 'Leitor',
+      description: 'Livros concluídos',
+      action: 'Concluir uma leitura',
+      current: metrics.finishedCount,
+      targets: [1, 10, 25],
+      levels: ['Primeiro passo', 'Ritmo constante', 'Leitor veterano'],
+    },
+    {
+      title: 'Crítico',
+      description: 'Livros avaliados',
+      action: 'Adicionar uma nota',
+      current: metrics.ratedCount,
+      targets: [1, 5, 15],
+      levels: ['Olhar atento', 'Opinião formada', 'Referência'],
+    },
+    {
+      title: 'Curador',
+      description: 'Favoritos marcados',
+      action: 'Marcar um favorito',
+      current: metrics.favoriteCount,
+      targets: [1, 5, 12],
+      levels: ['Seleção inicial', 'Estante afetiva', 'Coleção essencial'],
+    },
+    {
+      title: 'Memorialista',
+      description: 'Resenhas escritas',
+      action: 'Escrever uma resenha',
+      current: metrics.reviewCount,
+      targets: [1, 5, 10],
+      levels: ['Registro breve', 'Memória ativa', 'Arquivo pessoal'],
+    },
   ]
 
   return tracks.map((track) => {
@@ -66,6 +94,8 @@ function getAchievements(metrics) {
       ...track,
       unlockedLevel,
       nextTarget,
+      currentLevelLabel: unlockedLevel > 0 ? track.levels[unlockedLevel - 1] : 'A iniciar',
+      nextLevelLabel: track.levels[unlockedLevel] ?? track.levels[track.levels.length - 1],
       remaining: Math.max(nextTarget - track.current, 0),
       progress,
       completed: unlockedLevel === track.targets.length,
@@ -98,6 +128,8 @@ export default function DashboardOverview({
     .filter((achievement) => !achievement.completed)
     .sort((a, b) => a.remaining - b.remaining)[0]
   const hasBooks = metrics.totalBooks > 0
+  const currentYear = new Date().getFullYear()
+  const annualGoalRate = Math.min(metrics.annualGoalRate, 100)
 
   return (
     <section className="dashboard-grid">
@@ -194,7 +226,7 @@ export default function DashboardOverview({
               <span>Próxima meta</span>
               <strong>{nextAchievement.action}</strong>
               <p>
-                Faltam {nextAchievement.remaining} para {nextAchievement.title} nível {nextAchievement.unlockedLevel + 1}.
+                Faltam {nextAchievement.remaining} para desbloquear {nextAchievement.nextLevelLabel}.
               </p>
             </div>
             <button type="button" className="secondary-button" onClick={onOpenCollection}>
@@ -211,6 +243,23 @@ export default function DashboardOverview({
           </article>
         )}
 
+        <article className="dashboard-annual-goal">
+          <div className="dashboard-annual-goal-copy">
+            <span>Meta anual {currentYear}</span>
+            <strong>
+              {metrics.annualFinishedCount}/{metrics.annualGoal} livros lidos
+            </strong>
+            <p>
+              {metrics.annualFinishedCount >= metrics.annualGoal
+                ? 'Meta batida. Agora é só aumentar o desafio quando fizer sentido.'
+                : `Faltam ${metrics.annualGoal - metrics.annualFinishedCount} para fechar a meta do ano.`}
+            </p>
+          </div>
+          <div className="dashboard-annual-goal-progress" aria-hidden="true">
+            <span style={{ width: `${annualGoalRate}%` }} />
+          </div>
+        </article>
+
         <div className="dashboard-achievements-grid">
           {achievements.map((achievement) => (
             <article
@@ -218,11 +267,12 @@ export default function DashboardOverview({
               className={`dashboard-achievement-card ${achievement.completed ? 'dashboard-achievement-card-unlocked' : ''}`}
             >
               <div className="dashboard-achievement-mark" aria-hidden="true">
-                {achievement.completed ? '✓' : achievement.unlockedLevel}
+                {achievement.completed ? '✓' : achievement.unlockedLevel + 1}
               </div>
               <div className="dashboard-achievement-copy">
                 <strong>{achievement.title}</strong>
                 <span>{achievement.description}</span>
+                <em>{achievement.completed ? achievement.currentLevelLabel : `Próximo: ${achievement.nextLevelLabel}`}</em>
                 <div className="dashboard-achievement-track" aria-hidden="true">
                   <span style={{ width: `${achievement.progress}%` }} />
                 </div>
