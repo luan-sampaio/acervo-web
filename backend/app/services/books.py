@@ -156,7 +156,7 @@ def list_books(
     }
 
 
-def get_book_stats(user_id: int, db: Session) -> dict:
+def get_book_stats(user_id: int, db: Session, annual_goal: int = 12) -> dict:
     current_year = date.today().year
     year_start = date(current_year, 1, 1)
     next_year_start = date(current_year + 1, 1, 1)
@@ -219,7 +219,7 @@ def get_book_stats(user_id: int, db: Session) -> dict:
         .one()
     )
 
-    return build_book_stats_response(stats)
+    return build_book_stats_response(stats, annual_goal=annual_goal)
 
 
 def update_book(

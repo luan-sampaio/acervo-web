@@ -74,7 +74,11 @@ def get_book_stats(
     db: Session = Depends(database.get_db),
     current_user: models.User = Depends(get_current_user),
 ):
-    return book_service.get_book_stats(current_user.id, db)
+    return book_service.get_book_stats(
+        current_user.id,
+        db,
+        annual_goal=current_user.annual_reading_goal,
+    )
 
 
 @router.get("/{book_id}", response_model=schemas.BookResponse)

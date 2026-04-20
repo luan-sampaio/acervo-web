@@ -27,6 +27,11 @@ export function AuthProvider({ children }) {
     setUser(null)
   }, [])
 
+  const updateUser = useCallback((userData) => {
+    localStorage.setItem(USER_KEY, JSON.stringify(userData))
+    setUser(userData)
+  }, [])
+
   useEffect(() => {
     function handleUnauthorized() {
       setToken(null)
@@ -41,7 +46,7 @@ export function AuthProvider({ children }) {
   }, [])
 
   return (
-    <AuthContext.Provider value={{ token, user, login, logout, isAuthenticated: Boolean(token) }}>
+    <AuthContext.Provider value={{ token, user, login, logout, updateUser, isAuthenticated: Boolean(token) }}>
       {children}
     </AuthContext.Provider>
   )

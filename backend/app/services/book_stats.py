@@ -1,13 +1,11 @@
-ANNUAL_READING_GOAL = 12
-
-
-def build_book_stats_response(stats) -> dict:
+def build_book_stats_response(stats, annual_goal: int = 12) -> dict:
     total_books = stats.total_books or 0
     finished_count = stats.finished_count or 0
     annotation_count = stats.annotation_count or 0
     rated_count = stats.rated_count or 0
     review_count = stats.review_count or 0
     annual_finished_count = stats.annual_finished_count or 0
+    normalized_annual_goal = max(annual_goal, 1)
 
     return {
         "total_books": total_books,
@@ -22,11 +20,11 @@ def build_book_stats_response(stats) -> dict:
         "dated_reading_count": stats.dated_reading_count or 0,
         "review_count": review_count,
         "annual_finished_count": annual_finished_count,
-        "annual_goal": ANNUAL_READING_GOAL,
+        "annual_goal": normalized_annual_goal,
         "completion_rate": _percentage(finished_count, total_books),
         "annotation_rate": _percentage(annotation_count, finished_count),
         "review_rate": _percentage(review_count, finished_count),
-        "annual_goal_rate": min(_percentage(annual_finished_count, ANNUAL_READING_GOAL), 100),
+        "annual_goal_rate": min(_percentage(annual_finished_count, normalized_annual_goal), 100),
     }
 
 

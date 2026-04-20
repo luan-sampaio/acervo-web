@@ -1,10 +1,13 @@
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import DashboardOverview from '../components/DashboardOverview'
-import { fetchBooks, fetchBookStats } from '../services/api'
+import { useAuth } from '../context/AuthContext'
+import { fetchBooks, fetchBookStats, updateUserPreferences } from '../services/api'
 
 export default function DashboardPage() {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  const { updateUser } = useAuth()
 
   const statsQuery = useQuery({
     queryKey: ['book-stats'],
@@ -31,6 +34,14 @@ export default function DashboardPage() {
       sort_by: 'created_at',
       sort_order: 'desc',
     }),
+  })
+
+  const annualGoalMutation = useMutation({
+    mutationFn: (annualReadingGoal) => updateUserPreferences({ annual_reading_goal: annualReadingGoal }),
+    onSuccess: (user) => {
+      updateUser(user)
+      queryClient.invalidateQueries({ queryKey: ['book-stats'] })
+    },
   })
 
   const stats = statsQuery.data
@@ -107,6 +118,9 @@ export default function DashboardPage() {
       readingNowBook={readingNowBook}
       wantToReadBooks={wantToReadBooks}
       onOpenCollection={() => navigate('/collection')}
+      onUpdateAnnualGoal={(annualReadingGoal) => annualGoalMutation.mutateAsync(annualReadingGoal)}
+      isUpdatingAnnualGoal={annualGoalMutation.isPending}
+      annualGoalError={annualGoalMutation.error?.message ?? ''}
     />
   )
 }

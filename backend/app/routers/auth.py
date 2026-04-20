@@ -53,3 +53,21 @@ def login(payload: schemas.UserCreate, db: Session = Depends(database.get_db)):
         access_token=create_access_token(user.id),
         user=user,
     )
+
+
+@router.get("/me", response_model=schemas.UserResponse)
+def get_me(current_user: models.User = Depends(get_current_user)):
+    return current_user
+
+
+@router.patch("/me", response_model=schemas.UserResponse)
+def update_me(
+    payload: schemas.UserPreferencesUpdate,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(database.get_db),
+):
+    current_user.annual_reading_goal = payload.annual_reading_goal
+    db.add(current_user)
+    db.commit()
+    db.refresh(current_user)
+    return current_user

@@ -38,6 +38,7 @@ api.interceptors.response.use(
 
 export const register = (payload) => api.post('/auth/register', payload)
 export const login = (payload) => api.post('/auth/login', payload)
+export const updateUserPreferences = (payload) => api.patch('/auth/me', payload)
 
 export const fetchBooks = (params = {}) => api.get('/books', { params })
 export const fetchBookStats = () => api.get('/books/stats')

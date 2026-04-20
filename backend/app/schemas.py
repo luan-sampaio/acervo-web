@@ -14,9 +14,14 @@ class UserCreate(BaseModel):
 class UserResponse(BaseModel):
     id: int
     email: str
+    annual_reading_goal: int = Field(gt=0, le=365)
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class UserPreferencesUpdate(BaseModel):
+    annual_reading_goal: int = Field(gt=0, le=365)
 
 
 class Token(BaseModel):

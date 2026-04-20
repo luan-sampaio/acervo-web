@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { formatRatingLabel, formatReadingPeriod } from '../utils'
 
 function getReadingStatusLabel(value) {
@@ -115,11 +116,87 @@ function QueueBookCard({ book }) {
   )
 }
 
+function AnnualGoalCard({
+  metrics,
+  currentYear,
+  annualGoalRate,
+  onUpdateAnnualGoal,
+  isUpdatingAnnualGoal,
+  error,
+}) {
+  const [goalValue, setGoalValue] = useState(String(metrics.annualGoal))
+  const [localError, setLocalError] = useState('')
+
+  useEffect(() => {
+    setGoalValue(String(metrics.annualGoal))
+  }, [metrics.annualGoal])
+
+  async function handleSubmit(event) {
+    event.preventDefault()
+    const parsedGoal = Number(goalValue)
+
+    if (!Number.isInteger(parsedGoal) || parsedGoal < 1 || parsedGoal > 365) {
+      setLocalError('Informe uma meta entre 1 e 365 livros.')
+      return
+    }
+
+    setLocalError('')
+    try {
+      await onUpdateAnnualGoal(parsedGoal)
+    } catch {
+      // A mensagem visual vem da mutation do React Query.
+    }
+  }
+
+  return (
+    <article className="dashboard-annual-goal">
+      <div className="dashboard-annual-goal-copy">
+        <span>Meta anual {currentYear}</span>
+        <strong>
+          {metrics.annualFinishedCount}/{metrics.annualGoal} livros lidos
+        </strong>
+        <p>
+          {metrics.annualFinishedCount >= metrics.annualGoal
+            ? 'Meta batida. Agora é só aumentar o desafio quando fizer sentido.'
+            : `Faltam ${metrics.annualGoal - metrics.annualFinishedCount} para fechar a meta do ano.`}
+        </p>
+        {localError || error ? <small>{localError || error}</small> : null}
+      </div>
+      <form className="dashboard-annual-goal-form" onSubmit={handleSubmit}>
+        <div className="dashboard-annual-goal-progress" aria-hidden="true">
+          <span style={{ width: `${annualGoalRate}%` }} />
+        </div>
+        <label>
+          <span>Meta</span>
+          <input
+            type="number"
+            min="1"
+            max="365"
+            value={goalValue}
+            onChange={(event) => setGoalValue(event.target.value)}
+            disabled={isUpdatingAnnualGoal}
+          />
+        </label>
+        <button
+          type="submit"
+          className="secondary-button"
+          disabled={isUpdatingAnnualGoal || Number(goalValue) === metrics.annualGoal}
+        >
+          {isUpdatingAnnualGoal ? 'Salvando' : 'Salvar'}
+        </button>
+      </form>
+    </article>
+  )
+}
+
 export default function DashboardOverview({
   metrics,
   readingNowBook,
   wantToReadBooks,
   onOpenCollection,
+  onUpdateAnnualGoal,
+  isUpdatingAnnualGoal,
+  annualGoalError,
 }) {
   const achievements = getAchievements(metrics)
   const unlockedAchievements = achievements.reduce((total, achievement) => total + achievement.unlockedLevel, 0)
@@ -243,22 +320,14 @@ export default function DashboardOverview({
           </article>
         )}
 
-        <article className="dashboard-annual-goal">
-          <div className="dashboard-annual-goal-copy">
-            <span>Meta anual {currentYear}</span>
-            <strong>
-              {metrics.annualFinishedCount}/{metrics.annualGoal} livros lidos
-            </strong>
-            <p>
-              {metrics.annualFinishedCount >= metrics.annualGoal
-                ? 'Meta batida. Agora é só aumentar o desafio quando fizer sentido.'
-                : `Faltam ${metrics.annualGoal - metrics.annualFinishedCount} para fechar a meta do ano.`}
-            </p>
-          </div>
-          <div className="dashboard-annual-goal-progress" aria-hidden="true">
-            <span style={{ width: `${annualGoalRate}%` }} />
-          </div>
-        </article>
+        <AnnualGoalCard
+          metrics={metrics}
+          currentYear={currentYear}
+          annualGoalRate={annualGoalRate}
+          onUpdateAnnualGoal={onUpdateAnnualGoal}
+          isUpdatingAnnualGoal={isUpdatingAnnualGoal}
+          error={annualGoalError}
+        />
 
         <div className="dashboard-achievements-grid">
           {achievements.map((achievement) => (
