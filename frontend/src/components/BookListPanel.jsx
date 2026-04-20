@@ -11,11 +11,23 @@ function getReadingStatusClassName(value) {
   return ''
 }
 
-function getCardAccentClass(value) {
-  if (value === 'quero_ler') return 'book-card-want'
-  if (value === 'lendo') return 'book-card-reading'
-  if (value === 'lido') return 'book-card-finished'
-  return ''
+function BookCoverThumbnail({ book }) {
+  if (book.cover_url) {
+    return (
+      <img
+        className="book-cover-thumbnail"
+        src={book.cover_url}
+        alt={`Capa de ${book.titulo}`}
+        loading="lazy"
+      />
+    )
+  }
+
+  return (
+    <div className="book-cover-thumbnail book-cover-thumbnail-placeholder" aria-hidden="true">
+      <span>Livro</span>
+    </div>
+  )
 }
 
 function BookCard({
@@ -49,7 +61,7 @@ function BookCard({
   const hasReadingSummaryDetails = Boolean(ratingLabel || readingPeriod || reviewPreview)
 
   return (
-    <article key={book.id} className={`book-card ${isEditing ? 'book-card-editing' : ''} ${getCardAccentClass(book.status_leitura)}`}>
+    <article key={book.id} className={`book-card ${isEditing ? 'book-card-editing' : ''}`}>
       <div className="book-card-top">
         {isEditing ? (
           <form id={`edit-book-${book.id}`} className="book-main book-main-editing" onSubmit={(event) => onSave(book.id, event)}>
@@ -99,40 +111,42 @@ function BookCard({
             </div>
           </form>
         ) : (
-          <div className="book-main">
-            <h3>{book.titulo}</h3>
-            <p className="book-author">{book.autor}</p>
-            <div className="book-badges">
-              <span className={`book-status-badge ${getReadingStatusClassName(book.status_leitura)}`}>
-                {getReadingStatusLabel(book.status_leitura, readingStatusOptions)}
-              </span>
-              {book.favorito ? <span className="book-favorite-badge">Favorito</span> : null}
-            </div>
+          <>
+            <BookCoverThumbnail book={book} />
 
-            <div className={`book-reading-summary ${canAnnotate ? '' : 'book-reading-summary-locked'}`}>
-              <div className="book-reading-summary-tags">
-                {canAnnotate && hasReadingSummaryDetails ? (
-                  <>
-                    {ratingLabel ? <span>{ratingLabel}</span> : null}
-                    {readingPeriod ? <span>{readingPeriod}</span> : null}
-                  </>
-                ) : (
-                  <span className="book-reading-summary-placeholder">
-                    {canAnnotate ? 'Sem avaliação' : 'Avaliação após leitura'}
-                  </span>
-                )}
+            <div className="book-main">
+              <h3>{book.titulo}</h3>
+              <p className="book-author">{book.autor}</p>
+              <div className="book-badges">
+                <span className={`book-status-badge ${getReadingStatusClassName(book.status_leitura)}`}>
+                  {getReadingStatusLabel(book.status_leitura, readingStatusOptions)}
+                </span>
+                {book.favorito ? <span className="book-favorite-badge">Favorito</span> : null}
               </div>
-              <p className={reviewPreview ? '' : 'book-reading-summary-empty'}>
-                {canAnnotate
-                  ? reviewPreview || 'Nenhuma resenha registrada'
-                  : 'Marque como lido para registrar notas'}
-              </p>
-            </div>
 
-            <div className="book-card-footer">
-              <span className="book-date">Adicionado em {formatShortDate(book.created_at)}</span>
+              {canAnnotate ? (
+                <div className="book-reading-summary">
+                  <div className="book-reading-summary-tags">
+                    {hasReadingSummaryDetails ? (
+                      <>
+                        {ratingLabel ? <span>{ratingLabel}</span> : null}
+                        {readingPeriod ? <span>{readingPeriod}</span> : null}
+                      </>
+                    ) : (
+                      <span className="book-reading-summary-placeholder">Sem avaliação</span>
+                    )}
+                  </div>
+                  <p className={reviewPreview ? '' : 'book-reading-summary-empty'}>
+                    {reviewPreview || 'Nenhuma resenha registrada'}
+                  </p>
+                </div>
+              ) : null}
+
+              <div className="book-card-footer">
+                <span className="book-date">Adicionado em {formatShortDate(book.created_at)}</span>
+              </div>
             </div>
-          </div>
+          </>
         )}
 
         <div className="book-meta">
@@ -152,10 +166,12 @@ function BookCard({
 
               {activeMenuBookId === book.id ? (
                 <div className="card-menu" role="menu">
-                  <button type="button" role="menuitem" onClick={() => onOpenAnnotation(book)}>
-                    <span className="card-menu-icon" aria-hidden="true">✎</span>
-                    <span>Anotações</span>
-                  </button>
+                  {canAnnotate ? (
+                    <button type="button" role="menuitem" onClick={() => onOpenAnnotation(book)}>
+                      <span className="card-menu-icon" aria-hidden="true">✎</span>
+                      <span>Anotações</span>
+                    </button>
+                  ) : null}
                   <button type="button" role="menuitem" onClick={() => onStartEditing(book)}>
                     <span className="card-menu-icon" aria-hidden="true">✐</span>
                     <span>Editar</span>
@@ -189,29 +205,6 @@ function BookCard({
           >
             Cancelar
           </button>
-        </div>
-      ) : null}
-
-      {!isEditing && isAnnotationOpen && !canAnnotate ? (
-        <div className="annotation-panel annotation-panel-locked">
-          <div className="annotation-panel-header">
-            <div>
-              <span className="annotation-kicker">Anotações de leitura</span>
-              <strong>Marque como lido para avaliar</strong>
-            </div>
-            <button
-              type="button"
-              className="annotation-close-button"
-              onClick={onCloseAnnotation}
-              aria-label="Fechar anotações"
-            >
-              ×
-            </button>
-          </div>
-
-          <p className="annotation-locked-message">
-            Notas, resenhas e período de leitura ficam disponíveis apenas para livros com status Lido.
-          </p>
         </div>
       ) : null}
 
