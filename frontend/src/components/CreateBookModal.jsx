@@ -161,7 +161,6 @@ export default function CreateBookModal({ onClose, onCreated }) {
         <div className="create-book-modal-header">
           <div>
             <h2 id="create-book-modal-title">Novo livro</h2>
-            <p>Busque no Google Books primeiro. Se nao encontrar, cadastre manualmente.</p>
           </div>
           <button type="button" className="create-book-close-button" onClick={onClose} disabled={createBookMutation.isPending} aria-label="Fechar">
             ✕
@@ -310,17 +309,7 @@ export default function CreateBookModal({ onClose, onCreated }) {
                   </div>
                 </div>
               </div>
-            ) : !hasQuery ? (
-              <div className="search-state-card search-state-card-neutral">
-                <strong>Pesquise para importar um livro.</strong>
-                <p>Voce pode tentar por titulo, autor ou ISBN. Se preferir, use o cadastro manual.</p>
-                <div className="search-state-actions">
-                  <button type="button" className="action-button secondary-button" onClick={() => setMode('manual')}>
-                    Cadastrar manualmente
-                  </button>
-                </div>
-              </div>
-            ) : isSearching ? (
+            ) : !hasQuery ? null : isSearching ? (
               <div className="search-results-grid">
                 {Array.from({ length: 6 }).map((_, index) => (
                   <div key={index} className="search-result-card search-result-card-skeleton">
@@ -334,13 +323,13 @@ export default function CreateBookModal({ onClose, onCreated }) {
               </div>
             ) : results.length === 0 ? (
               <div className="search-state-card search-state-card-empty">
-                <strong>Nenhum resultado encontrado para "{query}".</strong>
-                <p>Tente outro termo, busque pelo ISBN ou siga com o cadastro manual.</p>
+                <strong>Livro nao encontrado.</strong>
+                <p>Nenhum resultado apareceu para "{query}".</p>
                 <div className="search-state-actions">
                   <button type="button" className="action-button secondary-button" onClick={handleRetrySearch}>
                     Pesquisar novamente
                   </button>
-                  <button type="button" className="action-button secondary-button" onClick={() => setMode('manual')}>
+                  <button type="button" className="action-button primary-button" onClick={() => setMode('manual')}>
                     Cadastrar manualmente
                   </button>
                 </div>
