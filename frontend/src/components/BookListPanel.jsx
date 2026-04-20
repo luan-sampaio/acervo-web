@@ -378,26 +378,28 @@ export default function BookListPanel({
             />
           </label>
 
-          <label className="toolbar-select-field">
-            <span>Ordenar por</span>
-            <select value={query.sortBy} onChange={onSortByChange}>
-              {sortOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </label>
+          <div className="toolbar-sort-group">
+            <label className="toolbar-select-field">
+              <span>Ordenar por</span>
+              <select value={query.sortBy} onChange={onSortByChange}>
+                {sortOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
 
-          <button
-            type="button"
-            className="secondary-button sort-order-toggle"
-            onClick={onToggleSortOrder}
-            aria-label={query.sortOrder === 'asc' ? 'Ordem crescente' : 'Ordem decrescente'}
-            title={query.sortOrder === 'asc' ? 'Crescente' : 'Decrescente'}
-          >
-            <span className="sort-order-toggle-icon">{query.sortOrder === 'asc' ? '↑' : '↓'}</span>
-          </button>
+            <button
+              type="button"
+              className="secondary-button sort-order-toggle"
+              onClick={onToggleSortOrder}
+              aria-label={query.sortOrder === 'asc' ? 'Ordem crescente' : 'Ordem decrescente'}
+              title={query.sortOrder === 'asc' ? 'Crescente' : 'Decrescente'}
+            >
+              <span className="sort-order-toggle-icon">{query.sortOrder === 'asc' ? '↑' : '↓'}</span>
+            </button>
+          </div>
         </div>
 
         <div className="quick-filter-row" aria-label="Filtros rápidos">
@@ -412,7 +414,7 @@ export default function BookListPanel({
             </button>
           ))}
           {hasActiveFilters ? (
-            <button type="button" className="secondary-button toolbar-clear-button toolbar-clear-button-inline" onClick={onClearFilters}>
+            <button type="button" className="toolbar-clear-button toolbar-clear-button-inline" onClick={onClearFilters}>
               Limpar filtros
             </button>
           ) : null}
