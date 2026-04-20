@@ -976,13 +976,20 @@ button { cursor: pointer; }
   border: 1px solid var(--border);
 }
 
+.dashboard-next-achievement-copy {
+  min-width: 0;
+}
+
 .dashboard-next-achievement span {
   display: block;
+  width: max-content;
+  max-width: 100%;
   color: var(--primary);
   font-size: 0.68rem;
   font-weight: 800;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .dashboard-next-achievement strong {

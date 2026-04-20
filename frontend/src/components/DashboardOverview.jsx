@@ -190,8 +190,8 @@ export default function DashboardOverview({
 
         {nextAchievement ? (
           <article className="dashboard-next-achievement">
-            <div>
-              <span>Próximo objetivo</span>
+            <div className="dashboard-next-achievement-copy">
+              <span>Próxima meta</span>
               <strong>{nextAchievement.action}</strong>
               <p>
                 Faltam {nextAchievement.remaining} para {nextAchievement.title} nível {nextAchievement.unlockedLevel + 1}.
@@ -203,7 +203,7 @@ export default function DashboardOverview({
           </article>
         ) : (
           <article className="dashboard-next-achievement dashboard-next-achievement-complete">
-            <div>
+            <div className="dashboard-next-achievement-copy">
               <span>Conquistas completas</span>
               <strong>Todas as trilhas foram concluídas</strong>
               <p>Seu acervo já desbloqueou todos os marcos atuais.</p>
