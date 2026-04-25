@@ -1,16 +1,34 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { login as apiLogin, register as apiRegister } from '../services/api'
 
 export default function LoginPage() {
-  const { login } = useAuth()
+  const { isAuthenticated, login } = useAuth()
   const navigate = useNavigate()
-  const [mode, setMode] = useState('login')
+  const [searchParams, setSearchParams] = useSearchParams()
+  const initialMode = searchParams.get('mode') === 'register' ? 'register' : 'login'
+  const [mode, setMode] = useState(initialMode)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+
+  useEffect(() => {
+    setMode(searchParams.get('mode') === 'register' ? 'register' : 'login')
+  }, [searchParams])
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/collection', { replace: true })
+    }
+  }, [isAuthenticated, navigate])
+
+  function switchMode(nextMode) {
+    setMode(nextMode)
+    setError('')
+    setSearchParams(nextMode === 'register' ? { mode: 'register' } : {})
+  }
 
   async function handleSubmit(event) {
     event.preventDefault()
@@ -94,7 +112,7 @@ export default function LoginPage() {
           <button
             type="button"
             className="auth-switch-link"
-            onClick={() => { setMode(mode === 'login' ? 'register' : 'login'); setError('') }}
+            onClick={() => switchMode(mode === 'login' ? 'register' : 'login')}
           >
             {mode === 'login' ? 'Cadastre-se' : 'Entrar'}
           </button>
