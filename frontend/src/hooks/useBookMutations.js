@@ -14,11 +14,14 @@ export function useBookMutations({
 
   const updateBookMutation = useMutation({
     mutationFn: ({ bookId, payload }) => updateBook(bookId, payload),
-    onSuccess: async () => {
-      setEditingBookId(null)
+    onSuccess: async (_, variables) => {
+      if (variables.closeEditor !== false) {
+        setEditingBookId(null)
+      }
+
       showSnackbar({
-        message: 'Livro atualizado',
-        detail: 'As alterações foram salvas na sua coleção.',
+        message: variables.successMessage ?? 'Livro atualizado',
+        detail: variables.successDetail ?? 'As alterações foram salvas na sua coleção.',
       })
       await queryClient.invalidateQueries({ queryKey: ['books'] })
     },

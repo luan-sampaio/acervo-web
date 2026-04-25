@@ -1,4 +1,4 @@
-import { Pencil, StickyNote, Trash2 } from 'lucide-react'
+import { Pencil, Trash2 } from 'lucide-react'
 import { formatReadingPeriod, formatShortDate } from '../utils'
 
 function getReadingStatusLabel(value, readingStatusOptions) {
@@ -66,6 +66,7 @@ function BookCard({
   onOpenAnnotation,
   onRequestDelete,
   onSave,
+  onQuickStatusChange,
   onCancelEditing,
   onSaveAnnotation,
   onDeleteAnnotation,
@@ -142,6 +143,22 @@ function BookCard({
                 {book.favorito ? <span className="book-favorite-badge">Favorito</span> : null}
               </div>
 
+              <label className="book-quick-status-field">
+                <span>Status</span>
+                <select
+                  value={book.status_leitura}
+                  onChange={(event) => onQuickStatusChange(book, event.target.value)}
+                  disabled={isSaving}
+                  aria-label={`Atualizar status de leitura de ${book.titulo}`}
+                >
+                  {readingStatusOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
               {canAnnotate ? (
                 <div className="book-reading-summary">
                   <div className="book-reading-summary-tags">
@@ -161,6 +178,18 @@ function BookCard({
               ) : null}
 
               <div className="book-card-footer">
+                {canAnnotate ? (
+                  <div className="book-inline-actions">
+                    <button
+                      type="button"
+                      className="book-inline-action"
+                      onClick={() => onOpenAnnotation(book)}
+                      disabled={isSavingAnnotation || isDeletingAnnotation}
+                    >
+                      {annotation ? 'Anotações' : 'Adicionar anotações'}
+                    </button>
+                  </div>
+                ) : null}
                 <span className="book-date">Adicionado em {formatShortDate(book.created_at)}</span>
               </div>
             </div>
@@ -184,12 +213,6 @@ function BookCard({
 
               {activeMenuBookId === book.id ? (
                 <div className="card-menu" role="menu">
-                  {canAnnotate ? (
-                    <button type="button" role="menuitem" onClick={() => onOpenAnnotation(book)}>
-                      <StickyNote className="card-menu-icon" aria-hidden="true" size={15} strokeWidth={2} />
-                      <span>Anotações</span>
-                    </button>
-                  ) : null}
                   <button type="button" role="menuitem" onClick={() => onStartEditing(book)}>
                     <Pencil className="card-menu-icon" aria-hidden="true" size={15} strokeWidth={2} />
                     <span>Editar</span>
@@ -344,6 +367,7 @@ export default function BookListPanel({
   onOpenAnnotation,
   onRequestDelete,
   onSave,
+  onQuickStatusChange,
   onCancelEditing,
   onSaveAnnotation,
   onDeleteAnnotation,
@@ -482,6 +506,7 @@ export default function BookListPanel({
                   onOpenAnnotation={onOpenAnnotation}
                   onRequestDelete={onRequestDelete}
                   onSave={onSave}
+                  onQuickStatusChange={onQuickStatusChange}
                   onCancelEditing={onCancelEditing}
                   onSaveAnnotation={onSaveAnnotation}
                   onDeleteAnnotation={onDeleteAnnotation}

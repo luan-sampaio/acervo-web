@@ -198,6 +198,20 @@ export default function CollectionPage() {
     await updateBookMutation.mutateAsync({ bookId, payload })
   }
 
+  async function handleQuickStatusChange(book, nextStatus) {
+    if (book.status_leitura === nextStatus || updateBookMutation.isPending) {
+      return
+    }
+
+    await updateBookMutation.mutateAsync({
+      bookId: book.id,
+      payload: { status_leitura: nextStatus },
+      closeEditor: false,
+      successMessage: 'Status atualizado',
+      successDetail: `"${book.titulo}" foi movido para ${readingStatusOptions.find((option) => option.value === nextStatus)?.label ?? nextStatus}.`,
+    })
+  }
+
   function requestDeleteBook(book) {
     setActiveMenuBookId(null)
     setBookPendingDelete(book)
@@ -336,6 +350,7 @@ export default function CollectionPage() {
           onOpenAnnotation={openAnnotationPanel}
           onRequestDelete={requestDeleteBook}
           onSave={handleUpdateBook}
+          onQuickStatusChange={handleQuickStatusChange}
           onCancelEditing={cancelEditing}
           onSaveAnnotation={handleSaveAnnotation}
           onDeleteAnnotation={handleDeleteAnnotation}

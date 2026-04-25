@@ -81,13 +81,13 @@ export function useAnnotationMutations({
         queryClient.setQueryData(queryKey, data)
       })
     },
-    onSuccess: async (savedAnnotation, { bookId }) => {
+    onSuccess: async (savedAnnotation, { bookId, successMessage, successDetail }) => {
       setAnnotationError('')
       setAnnotationBookId(null)
       updateBookAnnotationInCache(queryClient, bookId, savedAnnotation)
       showSnackbar({
-        message: 'Anotação salva',
-        detail: 'Sua avaliação foi vinculada ao livro.',
+        message: successMessage ?? 'Anotação salva',
+        detail: successDetail ?? 'Sua avaliação foi vinculada ao livro.',
       })
       await queryClient.invalidateQueries({ queryKey: ['books'] })
     },
