@@ -73,8 +73,11 @@ export default function LandingPage() {
         </Link>
 
         <div className="landing-header-actions">
-          <Link to="/login" className="secondary-button landing-header-link">
-            Entrar
+          <Link
+            to={isAuthenticated ? '/dashboard' : '/login'}
+            className="secondary-button landing-header-link"
+          >
+            {isAuthenticated ? 'Abrir painel' : 'Entrar'}
           </Link>
         </div>
       </header>
@@ -90,10 +93,10 @@ export default function LandingPage() {
 
             <div className="landing-hero-actions">
               <Link
-                to={isAuthenticated ? '/collection' : '/login?mode=register'}
+                to={isAuthenticated ? '/dashboard' : '/login?mode=register'}
                 className="action-button primary-button landing-cta-primary"
               >
-                {isAuthenticated ? 'Abrir minha biblioteca' : 'Criar minha biblioteca gratis'}
+                {isAuthenticated ? 'Abrir meu painel' : 'Criar minha biblioteca gratis'}
               </Link>
             </div>
 

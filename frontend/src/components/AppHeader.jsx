@@ -25,16 +25,16 @@ export default function AppHeader() {
 
       <nav className="app-nav" aria-label="Navegacao principal">
         <NavLink
-          to="/collection"
-          className={({ isActive }) => (isActive ? 'app-nav-link app-nav-link-active' : 'app-nav-link')}
-        >
-          Coleção
-        </NavLink>
-        <NavLink
           to="/dashboard"
           className={({ isActive }) => (isActive ? 'app-nav-link app-nav-link-active' : 'app-nav-link')}
         >
           Painel
+        </NavLink>
+        <NavLink
+          to="/collection"
+          className={({ isActive }) => (isActive ? 'app-nav-link app-nav-link-active' : 'app-nav-link')}
+        >
+          Coleção
         </NavLink>
       </nav>
 

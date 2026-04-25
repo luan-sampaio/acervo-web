@@ -19,9 +19,19 @@ O frontend foi construído com React, Vite e TanStack Query, oferecendo uma expe
 ### 🔐 Autenticação
 
 - **Cadastro e login com JWT:** acesso seguro por usuário.
-- **Rotas privadas:** coleção e painel exigem autenticação.
+- **Rotas privadas:** painel e coleção exigem autenticação.
 - **Logout automático em `401`:** tokens expirados ou inválidos limpam a sessão local.
 - **Preferências do usuário:** meta anual de leitura configurável pelo próprio usuário.
+
+### 📊 Painel
+
+- **KPIs principais:** total no acervo, lidos, lendo e quero ler.
+- **Leitura em andamento:** card de destaque para o livro com status `Lendo`.
+- **Fila de próximas leituras:** lista baseada nos livros marcados como `Quero ler`.
+- **Métricas agregadas no backend:** o painel não depende de buscar apenas os primeiros livros da coleção.
+- **Conquistas:** trilhas de progresso para leitor, crítico, curador e memorialista.
+- **Níveis nomeados:** conquistas usam nomes como `Primeiro passo`, `Ritmo constante` e `Leitor veterano`.
+- **Meta anual configurável:** o usuário define quantos livros quer ler no ano e acompanha o progresso.
 
 ### 📖 Coleção
 
@@ -43,16 +53,6 @@ O frontend foi construído com React, Vite e TanStack Query, oferecendo uma expe
 - **Anotações apenas para livros lidos:** a API impede nota, resenha ou período de leitura em livros que ainda não estão como `Lido`.
 - **Validação de datas:** a data de término não pode ser anterior à data de início.
 - **Uma anotação por livro:** cada usuário pode manter uma anotação por livro.
-
-### 📊 Painel
-
-- **KPIs principais:** total no acervo, lidos, lendo e quero ler.
-- **Leitura em andamento:** card de destaque para o livro com status `Lendo`.
-- **Fila de próximas leituras:** lista baseada nos livros marcados como `Quero ler`.
-- **Métricas agregadas no backend:** o painel não depende de buscar apenas os primeiros livros da coleção.
-- **Conquistas:** trilhas de progresso para leitor, crítico, curador e memorialista.
-- **Níveis nomeados:** conquistas usam nomes como `Primeiro passo`, `Ritmo constante` e `Leitor veterano`.
-- **Meta anual configurável:** o usuário define quantos livros quer ler no ano e acompanha o progresso.
 
 ---
 

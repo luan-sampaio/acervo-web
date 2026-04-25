@@ -1,10 +1,18 @@
 import { useEffect, useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { login as apiLogin, register as apiRegister } from '../services/api'
 
+function getRedirectPath(state) {
+  const from = state?.from
+  const path = `${from?.pathname ?? ''}${from?.search ?? ''}${from?.hash ?? ''}`
+
+  return path || '/dashboard'
+}
+
 export default function LoginPage() {
   const { isAuthenticated, login } = useAuth()
+  const location = useLocation()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const initialMode = searchParams.get('mode') === 'register' ? 'register' : 'login'
@@ -13,6 +21,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const redirectPath = getRedirectPath(location.state)
 
   useEffect(() => {
     setMode(searchParams.get('mode') === 'register' ? 'register' : 'login')
@@ -20,9 +29,9 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/collection', { replace: true })
+      navigate(redirectPath, { replace: true })
     }
-  }, [isAuthenticated, navigate])
+  }, [isAuthenticated, navigate, redirectPath])
 
   function switchMode(nextMode) {
     setMode(nextMode)
@@ -39,7 +48,7 @@ export default function LoginPage() {
       const fn = mode === 'login' ? apiLogin : apiRegister
       const data = await fn({ email, password })
       login(data.access_token, data.user)
-      navigate('/', { replace: true })
+      navigate(redirectPath, { replace: true })
     } catch (err) {
       setError(err.message ?? 'Ocorreu um erro. Tente novamente.')
     } finally {
