@@ -83,22 +83,37 @@ export default function CreateBookModal({ onClose, onCreated }) {
     inputRef.current?.focus()
   }, [])
 
+  useEffect(() => {
+    if (mode !== 'search') {
+      return undefined
+    }
+
+    const nextQuery = inputValue.trim()
+
+    if (!nextQuery) {
+      setQuery('')
+      setSelectedResult(null)
+      return undefined
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setQuery((currentQuery) => {
+        if (currentQuery === nextQuery) {
+          return currentQuery
+        }
+
+        setSelectedResult(null)
+        return nextQuery
+      })
+    }, 500)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [inputValue, mode])
+
   function handleOverlayClick(event) {
     if (event.target === event.currentTarget && !createBookMutation.isPending) {
       onClose()
     }
-  }
-
-  function handleSearch(event) {
-    event.preventDefault()
-    const nextQuery = inputValue.trim()
-
-    if (!nextQuery) {
-      return
-    }
-
-    setQuery(nextQuery)
-    setSelectedResult(null)
   }
 
   function handleRetrySearch() {
@@ -213,7 +228,7 @@ export default function CreateBookModal({ onClose, onCreated }) {
 
         {mode === 'search' ? (
           <div className="create-book-modal-body">
-            <form className="external-search-form create-book-search-form" onSubmit={handleSearch}>
+            <div className="external-search-form create-book-search-form">
               <label className="external-search-label">
                 <input
                   ref={inputRef}
@@ -224,10 +239,7 @@ export default function CreateBookModal({ onClose, onCreated }) {
                   onChange={(event) => setInputValue(event.target.value)}
                 />
               </label>
-              <button type="submit" className="action-button primary-button" disabled={isSearching || !inputValue.trim()}>
-                {isSearching ? 'Pesquisando...' : 'Pesquisar'}
-              </button>
-            </form>
+            </div>
 
             {isSearching ? (
               <div className="search-status-banner search-status-banner-loading" role="status" aria-live="polite">

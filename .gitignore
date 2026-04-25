@@ -5,10 +5,13 @@
 /postman/
 
 # Documentation
-/docs/
+/docs/*
+!/docs/
+!/docs/*.md
 *.pyc
 .venv/
 venv/
+docs/
 node_modules/
 dist/
 frontend/.env
