@@ -1,40 +1,20 @@
-import { useEffect, useState } from 'react'
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
+import { useState } from 'react'
+import { useNavigate, useOutletContext, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { login as apiLogin, register as apiRegister } from '../services/api'
 
-function getRedirectPath(state) {
-  const from = state?.from
-  const path = `${from?.pathname ?? ''}${from?.search ?? ''}${from?.hash ?? ''}`
-
-  return path || '/dashboard'
-}
-
 export default function LoginPage() {
-  const { isAuthenticated, login } = useAuth()
-  const location = useLocation()
+  const { login } = useAuth()
   const navigate = useNavigate()
+  const { redirectPath } = useOutletContext()
   const [searchParams, setSearchParams] = useSearchParams()
-  const initialMode = searchParams.get('mode') === 'register' ? 'register' : 'login'
-  const [mode, setMode] = useState(initialMode)
+  const mode = searchParams.get('mode') === 'register' ? 'register' : 'login'
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const redirectPath = getRedirectPath(location.state)
-
-  useEffect(() => {
-    setMode(searchParams.get('mode') === 'register' ? 'register' : 'login')
-  }, [searchParams])
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate(redirectPath, { replace: true })
-    }
-  }, [isAuthenticated, navigate, redirectPath])
 
   function switchMode(nextMode) {
-    setMode(nextMode)
     setError('')
     setSearchParams(nextMode === 'register' ? { mode: 'register' } : {})
   }

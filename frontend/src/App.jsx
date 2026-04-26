@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
+import GuestRoute from './components/GuestRoute'
 import PrivateRoute from './components/PrivateRoute'
 import CollectionPage from './pages/CollectionPage'
 import DashboardPage from './pages/DashboardPage'
@@ -9,7 +10,10 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<LandingPage />} />
-      <Route path="/login" element={<LoginPage />} />
+
+      <Route element={<GuestRoute />}>
+        <Route path="/login" element={<LoginPage />} />
+      </Route>
 
       <Route element={<PrivateRoute />}>
         <Route path="/collection" element={<CollectionPage />} />
