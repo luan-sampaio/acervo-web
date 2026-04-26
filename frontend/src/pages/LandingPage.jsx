@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { getLoginRoute, LOGIN_MODE, ROUTES } from '../routes'
 
 const featureCards = [
   {
@@ -61,7 +62,7 @@ export default function LandingPage() {
   return (
     <div className="landing-page">
       <header className="landing-header">
-        <Link to="/" className="landing-brand">
+        <Link to={ROUTES.landing} className="landing-brand">
           <span className="app-brand-mark" aria-hidden="true">
             <span className="app-brand-mark-book" />
             <span className="app-brand-mark-page" />
@@ -74,7 +75,7 @@ export default function LandingPage() {
 
         <div className="landing-header-actions">
           <Link
-            to={isAuthenticated ? '/dashboard' : '/login'}
+            to={isAuthenticated ? ROUTES.dashboard : ROUTES.login}
             className="secondary-button landing-header-link"
           >
             {isAuthenticated ? 'Abrir painel' : 'Entrar'}
@@ -93,7 +94,7 @@ export default function LandingPage() {
 
             <div className="landing-hero-actions">
               <Link
-                to={isAuthenticated ? '/dashboard' : '/login?mode=register'}
+                to={isAuthenticated ? ROUTES.dashboard : getLoginRoute(LOGIN_MODE.register)}
                 className="action-button primary-button landing-cta-primary"
               >
                 {isAuthenticated ? 'Abrir meu painel' : 'Criar minha biblioteca gratis'}

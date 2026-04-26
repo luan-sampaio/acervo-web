@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useOutletContext, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { LOGIN_MODE } from '../routes'
 import { login as apiLogin, register as apiRegister } from '../services/api'
 
 export default function LoginPage() {
@@ -8,7 +9,7 @@ export default function LoginPage() {
   const navigate = useNavigate()
   const { redirectPath } = useOutletContext()
   const [searchParams, setSearchParams] = useSearchParams()
-  const mode = searchParams.get('mode') === 'register' ? 'register' : 'login'
+  const mode = searchParams.get('mode') === LOGIN_MODE.register ? LOGIN_MODE.register : LOGIN_MODE.login
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -16,7 +17,7 @@ export default function LoginPage() {
 
   function switchMode(nextMode) {
     setError('')
-    setSearchParams(nextMode === 'register' ? { mode: 'register' } : {})
+    setSearchParams(nextMode === LOGIN_MODE.register ? { mode: LOGIN_MODE.register } : {})
   }
 
   async function handleSubmit(event) {
@@ -25,7 +26,7 @@ export default function LoginPage() {
     setIsLoading(true)
 
     try {
-      const fn = mode === 'login' ? apiLogin : apiRegister
+      const fn = mode === LOGIN_MODE.login ? apiLogin : apiRegister
       const data = await fn({ email, password })
       login(data.access_token, data.user)
       navigate(redirectPath, { replace: true })
@@ -48,7 +49,7 @@ export default function LoginPage() {
         </div>
 
         <h1 className="auth-title">
-          {mode === 'login' ? 'Entrar na sua conta' : 'Criar uma conta'}
+          {mode === LOGIN_MODE.login ? 'Entrar na sua conta' : 'Criar uma conta'}
         </h1>
 
         <form className="auth-form" onSubmit={handleSubmit} noValidate>
@@ -73,7 +74,7 @@ export default function LoginPage() {
               className="form-input"
               type="password"
               name="password"
-              autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+              autoComplete={mode === LOGIN_MODE.login ? 'current-password' : 'new-password'}
               required
               minLength={6}
               value={password}
@@ -90,20 +91,20 @@ export default function LoginPage() {
           >
             {isLoading
               ? 'Aguarde...'
-              : mode === 'login'
+              : mode === LOGIN_MODE.login
                 ? 'Entrar'
                 : 'Criar conta'}
           </button>
         </form>
 
         <p className="auth-switch">
-          {mode === 'login' ? 'Não tem uma conta?' : 'Já tem uma conta?'}{' '}
+          {mode === LOGIN_MODE.login ? 'Não tem uma conta?' : 'Já tem uma conta?'}{' '}
           <button
             type="button"
             className="auth-switch-link"
-            onClick={() => switchMode(mode === 'login' ? 'register' : 'login')}
+            onClick={() => switchMode(mode === LOGIN_MODE.login ? LOGIN_MODE.register : LOGIN_MODE.login)}
           >
-            {mode === 'login' ? 'Cadastre-se' : 'Entrar'}
+            {mode === LOGIN_MODE.login ? 'Cadastre-se' : 'Entrar'}
           </button>
         </p>
       </div>

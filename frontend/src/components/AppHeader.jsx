@@ -1,5 +1,6 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { ROUTES } from '../routes'
 
 export default function AppHeader() {
   const { user, logout } = useAuth()
@@ -7,7 +8,7 @@ export default function AppHeader() {
 
   function handleLogout() {
     logout()
-    navigate('/login', { replace: true })
+    navigate(ROUTES.login, { replace: true })
   }
 
   return (
@@ -25,13 +26,13 @@ export default function AppHeader() {
 
       <nav className="app-nav" aria-label="Navegacao principal">
         <NavLink
-          to="/dashboard"
+          to={ROUTES.dashboard}
           className={({ isActive }) => (isActive ? 'app-nav-link app-nav-link-active' : 'app-nav-link')}
         >
           Painel
         </NavLink>
         <NavLink
-          to="/collection"
+          to={ROUTES.collection}
           className={({ isActive }) => (isActive ? 'app-nav-link app-nav-link-active' : 'app-nav-link')}
         >
           Coleção

@@ -5,22 +5,23 @@ import CollectionPage from './pages/CollectionPage'
 import DashboardPage from './pages/DashboardPage'
 import LandingPage from './pages/LandingPage'
 import LoginPage from './pages/LoginPage'
+import { ROUTES } from './routes'
 
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<LandingPage />} />
+      <Route path={ROUTES.landing} element={<LandingPage />} />
 
       <Route element={<GuestRoute />}>
-        <Route path="/login" element={<LoginPage />} />
+        <Route path={ROUTES.login} element={<LoginPage />} />
       </Route>
 
       <Route element={<PrivateRoute />}>
-        <Route path="/collection" element={<CollectionPage />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path={ROUTES.collection} element={<CollectionPage />} />
+        <Route path={ROUTES.dashboard} element={<DashboardPage />} />
       </Route>
 
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<Navigate to={ROUTES.landing} replace />} />
     </Routes>
   )
 }

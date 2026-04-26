@@ -1,11 +1,12 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { ROUTES } from '../routes'
 
 function getRedirectPath(state) {
   const from = state?.from
   const path = `${from?.pathname ?? ''}${from?.search ?? ''}${from?.hash ?? ''}`
 
-  return path || '/dashboard'
+  return path || ROUTES.dashboard
 }
 
 export default function GuestRoute() {

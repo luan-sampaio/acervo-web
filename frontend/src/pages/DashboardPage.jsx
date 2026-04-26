@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import DashboardOverview from '../components/DashboardOverview'
 import { useAuth } from '../context/AuthContext'
+import { ROUTES } from '../routes'
 import { fetchBooks, fetchBookStats, updateUserPreferences } from '../services/api'
 
 export default function DashboardPage() {
@@ -117,7 +118,7 @@ export default function DashboardPage() {
       metrics={metrics}
       readingNowBook={readingNowBook}
       wantToReadBooks={wantToReadBooks}
-      onOpenCollection={() => navigate('/collection')}
+      onOpenCollection={() => navigate(ROUTES.collection)}
       onUpdateAnnualGoal={(annualReadingGoal) => annualGoalMutation.mutateAsync(annualReadingGoal)}
       isUpdatingAnnualGoal={annualGoalMutation.isPending}
       annualGoalError={annualGoalMutation.error?.message ?? ''}
