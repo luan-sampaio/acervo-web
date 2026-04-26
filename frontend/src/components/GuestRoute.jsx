@@ -1,18 +1,11 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { ROUTES } from '../routes'
-
-function getRedirectPath(state) {
-  const from = state?.from
-  const path = `${from?.pathname ?? ''}${from?.search ?? ''}${from?.hash ?? ''}`
-
-  return path || ROUTES.dashboard
-}
+import { getAuthRedirectPath } from '../routes'
 
 export default function GuestRoute() {
   const { isAuthenticated } = useAuth()
   const location = useLocation()
-  const redirectPath = getRedirectPath(location.state)
+  const redirectPath = getAuthRedirectPath(location.state?.from)
 
   if (isAuthenticated) {
     return <Navigate to={redirectPath} replace />

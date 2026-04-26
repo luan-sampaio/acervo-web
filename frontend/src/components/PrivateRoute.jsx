@@ -8,7 +8,19 @@ export default function PrivateRoute() {
   const location = useLocation()
 
   if (!isAuthenticated) {
-    return <Navigate to={ROUTES.login} replace state={{ from: location }} />
+    return (
+      <Navigate
+        to={ROUTES.login}
+        replace
+        state={{
+          from: {
+            pathname: location.pathname,
+            search: location.search,
+            hash: location.hash,
+          },
+        }}
+      />
+    )
   }
 
   return (
