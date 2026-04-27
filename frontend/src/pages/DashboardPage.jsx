@@ -68,6 +68,12 @@ export default function DashboardPage() {
     annualGoalRate: stats?.annual_goal_rate ?? 0,
   }
 
+  function openCollectionAction(action = {}) {
+    navigate(ROUTES.collection, {
+      state: { dashboardAction: action },
+    })
+  }
+
   if (statsQuery.isLoading || readingNowQuery.isLoading || wantToReadQuery.isLoading) {
     return (
       <section className="skeleton-page">
@@ -119,6 +125,7 @@ export default function DashboardPage() {
       readingNowBook={readingNowBook}
       wantToReadBooks={wantToReadBooks}
       onOpenCollection={() => navigate(ROUTES.collection)}
+      onOpenCollectionAction={openCollectionAction}
       onUpdateAnnualGoal={(annualReadingGoal) => annualGoalMutation.mutateAsync(annualReadingGoal)}
       isUpdatingAnnualGoal={annualGoalMutation.isPending}
       annualGoalError={annualGoalMutation.error?.message ?? ''}

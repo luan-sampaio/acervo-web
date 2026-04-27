@@ -1059,6 +1059,132 @@ button { cursor: pointer; }
   color: #15803D;
 }
 
+.dashboard-quick-actions {
+  display: grid;
+  gap: 0.65rem;
+  padding: 0.95rem;
+  border-radius: var(--r-xl);
+  background: #FFFFFF;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+.dashboard-quick-actions-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.dashboard-quick-actions-head span {
+  display: block;
+  color: var(--primary);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.dashboard-quick-actions-head h2 {
+  margin: 0.12rem 0 0;
+  color: var(--text);
+  font-size: 1.08rem;
+  line-height: 1.2;
+}
+
+.dashboard-quick-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+
+.dashboard-quick-action {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 0.55rem 0.62rem;
+  min-width: 0;
+  min-height: 6.4rem;
+  padding: 0.74rem;
+  border-radius: var(--r-lg);
+  background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
+  border: 1px solid var(--border);
+  color: inherit;
+  text-align: left;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+}
+
+.dashboard-quick-action:hover {
+  border-color: var(--border-strong);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+  transform: translateY(-1px);
+}
+
+.dashboard-quick-action-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--r-md);
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.dashboard-quick-action-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.12rem;
+}
+
+.dashboard-quick-action-copy strong {
+  color: var(--text);
+  font-size: 0.88rem;
+  line-height: 1.25;
+}
+
+.dashboard-quick-action-copy span {
+  color: var(--muted);
+  font-size: 0.74rem;
+  line-height: 1.35;
+}
+
+.dashboard-quick-action em {
+  grid-column: 1 / -1;
+  align-self: end;
+  width: fit-content;
+  max-width: 100%;
+  padding: 0.22rem 0.5rem;
+  border-radius: var(--r-full);
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-size: 0.7rem;
+  font-style: normal;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.dashboard-quick-action-primary .dashboard-quick-action-icon {
+  background: #EEF2FF;
+  color: #4338CA;
+}
+
+.dashboard-quick-action-reading .dashboard-quick-action-icon {
+  background: #EFF6FF;
+  color: #2563EB;
+}
+
+.dashboard-quick-action-want .dashboard-quick-action-icon {
+  background: #FFFBEB;
+  color: #B45309;
+}
+
+.dashboard-quick-action-finished .dashboard-quick-action-icon {
+  background: #F0FDF4;
+  color: #15803D;
+}
+
 .dashboard-progress-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -3488,6 +3614,7 @@ button { cursor: pointer; }
 
   .dashboard-kpi-grid,
   .dashboard-top-highlight,
+  .dashboard-quick-actions-grid,
   .dashboard-progress-grid,
   .dashboard-achievements-grid,
   .dashboard-status-grid,
@@ -3531,6 +3658,7 @@ button { cursor: pointer; }
   }
 
   .dashboard-actions,
+  .dashboard-quick-actions-head .secondary-button,
   .dashboard-start-card .action-button,
   .dashboard-next-achievement .secondary-button,
   .dashboard-actions .home-primary-action,
@@ -3685,6 +3813,7 @@ button { cursor: pointer; }
 
   .dashboard-kpi-grid,
   .dashboard-top-highlight,
+  .dashboard-quick-actions-grid,
   .dashboard-progress-grid,
   .dashboard-achievements-grid,
   .dashboard-status-grid {
@@ -3694,6 +3823,7 @@ button { cursor: pointer; }
   .dashboard-recent-list,
   .dashboard-kpi-grid,
   .dashboard-top-highlight,
+  .dashboard-quick-actions-grid,
   .dashboard-progress-grid,
   .dashboard-achievements-grid,
   .dashboard-status-grid,
@@ -3708,8 +3838,14 @@ button { cursor: pointer; }
 
   .dashboard-panel,
   .dashboard-reading-panel,
-  .dashboard-current-reading-panel {
+  .dashboard-current-reading-panel,
+  .dashboard-quick-actions {
     padding: 1rem;
+  }
+
+  .dashboard-quick-actions-head {
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .dashboard-current-book {

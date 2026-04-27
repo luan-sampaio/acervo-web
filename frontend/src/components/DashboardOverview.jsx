@@ -1,4 +1,10 @@
 import { useEffect, useState } from 'react'
+import {
+  BookOpen,
+  CheckCircle2,
+  ListPlus,
+  Plus,
+} from 'lucide-react'
 import { formatRatingLabel, formatReadingPeriod } from '../utils'
 
 function getReadingStatusLabel(value) {
@@ -189,6 +195,88 @@ function AnnualGoalCard({
   )
 }
 
+function DashboardQuickActions({
+  metrics,
+  onOpenCollectionAction,
+}) {
+  const quickActions = [
+    {
+      key: 'create-book',
+      title: 'Novo livro',
+      description: 'Cadastrar uma leitura no acervo',
+      meta: `${metrics.totalBooks} no acervo`,
+      icon: Plus,
+      tone: 'dashboard-quick-action-primary',
+      action: { type: 'create-book' },
+    },
+    {
+      key: 'reading-now',
+      title: 'Continuar lendo',
+      description: 'Ver livros em andamento',
+      meta: `${metrics.readingNowCount} lendo`,
+      icon: BookOpen,
+      tone: 'dashboard-quick-action-reading',
+      action: { statusFilter: 'lendo' },
+    },
+    {
+      key: 'reading-queue',
+      title: 'Organizar fila',
+      description: 'Priorizar próximas leituras',
+      meta: `${metrics.wantToReadCount} na fila`,
+      icon: ListPlus,
+      tone: 'dashboard-quick-action-want',
+      action: { statusFilter: 'quero_ler' },
+    },
+    {
+      key: 'finished-review',
+      title: 'Registrar avaliação',
+      description: 'Completar notas e resenhas',
+      meta: `${metrics.unratedFinishedCount} sem nota`,
+      icon: CheckCircle2,
+      tone: 'dashboard-quick-action-finished',
+      action: { statusFilter: 'lido' },
+    },
+  ]
+
+  return (
+    <section className="dashboard-quick-actions" aria-label="Ações rápidas">
+      <div className="dashboard-quick-actions-head">
+        <div>
+          <span>Atalhos</span>
+          <h2>Ações rápidas</h2>
+        </div>
+        <button type="button" className="secondary-button" onClick={() => onOpenCollectionAction({})}>
+          Abrir coleção
+        </button>
+      </div>
+
+      <div className="dashboard-quick-actions-grid">
+        {quickActions.map((item) => {
+          const Icon = item.icon
+
+          return (
+            <button
+              key={item.key}
+              type="button"
+              className={`dashboard-quick-action ${item.tone}`}
+              onClick={() => onOpenCollectionAction(item.action)}
+            >
+              <span className="dashboard-quick-action-icon" aria-hidden="true">
+                <Icon size={18} strokeWidth={2.4} />
+              </span>
+              <span className="dashboard-quick-action-copy">
+                <strong>{item.title}</strong>
+                <span>{item.description}</span>
+              </span>
+              <em>{item.meta}</em>
+            </button>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
+
 function DashboardProgressHighlights({
   metrics,
   currentYear,
@@ -304,6 +392,7 @@ export default function DashboardOverview({
   readingNowBook,
   wantToReadBooks,
   onOpenCollection,
+  onOpenCollectionAction,
   onUpdateAnnualGoal,
   isUpdatingAnnualGoal,
   annualGoalError,
@@ -340,6 +429,8 @@ export default function DashboardOverview({
         <KpiCard label="Lendo" value={metrics.readingNowCount} hint="Em andamento" tone="dashboard-kpi-reading" />
         <KpiCard label="Quero ler" value={metrics.wantToReadCount} hint="Fila de próximas leituras" tone="dashboard-kpi-want" />
       </section>
+
+      <DashboardQuickActions metrics={metrics} onOpenCollectionAction={onOpenCollectionAction} />
 
       {!hasBooks ? (
         <section className="dashboard-start-card">

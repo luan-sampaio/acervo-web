@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import BookListPanel from '../components/BookListPanel'
 import CreateBookModal from '../components/CreateBookModal'
 import DeleteBookModal from '../components/DeleteBookModal'
@@ -13,6 +14,8 @@ import { getBookFieldErrorsFromApi } from '../services/apiErrors'
 import { getTextFieldError } from '../utils'
 
 export default function CollectionPage() {
+  const location = useLocation()
+  const navigate = useNavigate()
   const [editingBookId, setEditingBookId] = useState(null)
   const [annotationBookId, setAnnotationBookId] = useState(null)
   const [annotationError, setAnnotationError] = useState('')
@@ -98,6 +101,31 @@ export default function CollectionPage() {
     onBeforeQueryChange: closeOpenInteractions,
     onBeforeSearchChange: closeSearchInteractions,
   })
+
+  useEffect(() => {
+    const dashboardAction = location.state?.dashboardAction
+
+    if (!dashboardAction) {
+      return
+    }
+
+    closeOpenInteractions()
+
+    if (dashboardAction.statusFilter) {
+      setQuery((current) => ({
+        ...current,
+        search: '',
+        statusFilter: dashboardAction.statusFilter,
+        offset: 0,
+      }))
+    }
+
+    if (dashboardAction.type === 'create-book') {
+      setIsCreateModalOpen(true)
+    }
+
+    navigate(location.pathname, { replace: true, state: null })
+  }, [closeOpenInteractions, location.pathname, location.state, navigate, setQuery])
 
   useEffect(() => {
     if (!snackbar) {
