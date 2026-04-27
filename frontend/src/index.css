@@ -820,6 +820,154 @@ button { cursor: pointer; }
   box-shadow: var(--shadow-sm);
 }
 
+.dashboard-top-highlight {
+  display: grid;
+  grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr) minmax(0, 1.28fr);
+  gap: 0.72rem;
+  align-items: stretch;
+}
+
+.dashboard-progress-overview,
+.dashboard-achievement-spotlight {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 11.5rem;
+  padding: 0.92rem;
+  border-radius: var(--r-xl);
+  background: #FFFFFF;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+.dashboard-progress-overview {
+  background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
+}
+
+.dashboard-achievement-spotlight {
+  background: linear-gradient(180deg, #FFFFFF 0%, #F7FFF9 100%);
+  border-color: rgba(22, 163, 74, 0.18);
+}
+
+.dashboard-highlight-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.8rem;
+  margin-bottom: 0.72rem;
+}
+
+.dashboard-highlight-head div {
+  min-width: 0;
+}
+
+.dashboard-highlight-head span {
+  display: block;
+  color: var(--primary);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.dashboard-highlight-head strong {
+  display: block;
+  margin-top: 0.16rem;
+  color: var(--text);
+  font-size: 1.15rem;
+  line-height: 1.15;
+}
+
+.dashboard-highlight-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  min-width: 3rem;
+  min-height: 2rem;
+  padding: 0.22rem 0.58rem;
+  border-radius: var(--r-full);
+  background: #EEF2FF;
+  color: #4338CA;
+  border: 1px solid #C7D2FE;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.dashboard-highlight-pill-success {
+  background: #DCFCE7;
+  color: #166534;
+  border-color: #BBF7D0;
+}
+
+.dashboard-progress-meters {
+  display: grid;
+  gap: 0.7rem;
+  margin-top: auto;
+}
+
+.dashboard-progress-meter {
+  display: grid;
+  gap: 0.38rem;
+}
+
+.dashboard-progress-meter div:first-child {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.dashboard-progress-meter span {
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.dashboard-progress-meter strong {
+  color: var(--text);
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.dashboard-progress-track-note span {
+  background: linear-gradient(90deg, #0891B2 0%, #4F46E5 100%);
+}
+
+.dashboard-achievement-strip {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin-top: auto;
+}
+
+.dashboard-achievement-strip-item {
+  min-width: 0;
+  padding: 0.55rem;
+  border-radius: var(--r-lg);
+  background: rgba(255, 255, 255, 0.84);
+  border: 1px solid rgba(22, 163, 74, 0.14);
+}
+
+.dashboard-achievement-strip-item > span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.dashboard-achievement-strip-item > strong {
+  display: block;
+  margin-top: 0.12rem;
+  overflow: hidden;
+  color: var(--text);
+  font-size: 0.74rem;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .dashboard-hero-copy h1 {
   margin: 0 0 0.12rem;
   font-size: 1.22rem;
@@ -1318,11 +1466,12 @@ button { cursor: pointer; }
   grid-template-columns: minmax(0, 1fr) 11rem;
   align-items: center;
   gap: 1rem;
-  margin-bottom: 0.72rem;
+  min-height: 11.5rem;
   padding: 0.84rem 0.9rem;
   border-radius: var(--r-lg);
   background: #FEFCE8;
   border: 1px solid #FDE68A;
+  box-shadow: var(--shadow-sm);
 }
 
 .dashboard-annual-goal-copy {
@@ -3338,6 +3487,7 @@ button { cursor: pointer; }
   }
 
   .dashboard-kpi-grid,
+  .dashboard-top-highlight,
   .dashboard-progress-grid,
   .dashboard-achievements-grid,
   .dashboard-status-grid,
@@ -3361,6 +3511,12 @@ button { cursor: pointer; }
 
   .dashboard-annual-goal {
     grid-template-columns: 1fr;
+  }
+
+  .dashboard-progress-overview,
+  .dashboard-achievement-spotlight,
+  .dashboard-annual-goal {
+    min-height: auto;
   }
 
   .dashboard-hero {
@@ -3528,6 +3684,7 @@ button { cursor: pointer; }
   }
 
   .dashboard-kpi-grid,
+  .dashboard-top-highlight,
   .dashboard-progress-grid,
   .dashboard-achievements-grid,
   .dashboard-status-grid {
@@ -3536,6 +3693,7 @@ button { cursor: pointer; }
 
   .dashboard-recent-list,
   .dashboard-kpi-grid,
+  .dashboard-top-highlight,
   .dashboard-progress-grid,
   .dashboard-achievements-grid,
   .dashboard-status-grid,
@@ -3574,6 +3732,16 @@ button { cursor: pointer; }
 
   .dashboard-annual-goal {
     padding: 0.78rem;
+  }
+
+  .dashboard-achievement-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-progress-meter div:first-child {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.16rem;
   }
 
   .list-control-group {

@@ -189,6 +189,116 @@ function AnnualGoalCard({
   )
 }
 
+function DashboardProgressHighlights({
+  metrics,
+  currentYear,
+  annualGoalRate,
+  achievements,
+  unlockedAchievements,
+  totalAchievementLevels,
+  nextAchievement,
+  onOpenCollection,
+  onUpdateAnnualGoal,
+  isUpdatingAnnualGoal,
+  annualGoalError,
+}) {
+  const completionRate = Math.min(metrics.completionRate, 100)
+  const annotationRate = Math.min(metrics.annotationRate, 100)
+  const featuredAchievements = achievements.slice(0, 4)
+
+  return (
+    <section className="dashboard-top-highlight" aria-label="Progresso e conquistas">
+      <AnnualGoalCard
+        metrics={metrics}
+        currentYear={currentYear}
+        annualGoalRate={annualGoalRate}
+        onUpdateAnnualGoal={onUpdateAnnualGoal}
+        isUpdatingAnnualGoal={isUpdatingAnnualGoal}
+        error={annualGoalError}
+      />
+
+      <article className="dashboard-progress-overview">
+        <div className="dashboard-highlight-head">
+          <div>
+            <span>Progresso do acervo</span>
+            <strong>{metrics.finishedCount} concluídos</strong>
+          </div>
+          <span className="dashboard-highlight-pill">{completionRate}%</span>
+        </div>
+
+        <div className="dashboard-progress-meters">
+          <div className="dashboard-progress-meter">
+            <div>
+              <span>Leituras concluídas</span>
+              <strong>{metrics.finishedCount}/{metrics.totalBooks}</strong>
+            </div>
+            <div className="dashboard-progress-track" aria-hidden="true">
+              <span style={{ width: `${completionRate}%` }} />
+            </div>
+          </div>
+
+          <div className="dashboard-progress-meter">
+            <div>
+              <span>Anotações em livros lidos</span>
+              <strong>{metrics.annotationCount}/{metrics.finishedCount}</strong>
+            </div>
+            <div className="dashboard-progress-track dashboard-progress-track-note" aria-hidden="true">
+              <span style={{ width: `${annotationRate}%` }} />
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article className="dashboard-achievement-spotlight">
+        <div className="dashboard-highlight-head">
+          <div>
+            <span>Conquistas</span>
+            <strong>{unlockedAchievements}/{totalAchievementLevels} níveis</strong>
+          </div>
+          <span className="dashboard-highlight-pill dashboard-highlight-pill-success">
+            {featuredAchievements.filter((achievement) => achievement.completed).length}/{featuredAchievements.length}
+          </span>
+        </div>
+
+        {nextAchievement ? (
+          <div className="dashboard-next-achievement dashboard-next-achievement-top">
+            <div className="dashboard-next-achievement-copy">
+              <span>Próxima meta</span>
+              <strong>{nextAchievement.action}</strong>
+              <p>
+                Faltam {nextAchievement.remaining} para desbloquear {nextAchievement.nextLevelLabel}.
+              </p>
+            </div>
+            <button type="button" className="secondary-button" onClick={onOpenCollection}>
+              Avançar
+            </button>
+          </div>
+        ) : (
+          <div className="dashboard-next-achievement dashboard-next-achievement-complete dashboard-next-achievement-top">
+            <div className="dashboard-next-achievement-copy">
+              <span>Conquistas completas</span>
+              <strong>Todas as trilhas foram concluídas</strong>
+              <p>Seu acervo já desbloqueou todos os marcos atuais.</p>
+            </div>
+          </div>
+        )}
+
+        <div className="dashboard-achievement-strip">
+          {featuredAchievements.map((achievement) => (
+            <div key={achievement.title} className="dashboard-achievement-strip-item">
+              <span>{achievement.title}</span>
+              <strong>{achievement.currentLevelLabel}</strong>
+              <div className="dashboard-achievement-track" aria-hidden="true">
+                <span style={{ width: `${achievement.progress}%` }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </article>
+    </section>
+  )
+}
+
 export default function DashboardOverview({
   metrics,
   readingNowBook,
@@ -210,6 +320,20 @@ export default function DashboardOverview({
 
   return (
     <section className="dashboard-grid">
+      <DashboardProgressHighlights
+        metrics={metrics}
+        currentYear={currentYear}
+        annualGoalRate={annualGoalRate}
+        achievements={achievements}
+        unlockedAchievements={unlockedAchievements}
+        totalAchievementLevels={totalAchievementLevels}
+        nextAchievement={nextAchievement}
+        onOpenCollection={onOpenCollection}
+        onUpdateAnnualGoal={onUpdateAnnualGoal}
+        isUpdatingAnnualGoal={isUpdatingAnnualGoal}
+        annualGoalError={annualGoalError}
+      />
+
       <section className="dashboard-kpi-grid" aria-label="Resumo da coleção">
         <KpiCard label="Total no acervo" value={metrics.totalBooks} hint={`${metrics.favoriteCount} favoritos`} />
         <KpiCard label="Lidos" value={metrics.finishedCount} hint="Concluídos" tone="dashboard-kpi-finished" />
@@ -290,44 +414,12 @@ export default function DashboardOverview({
       <section className="dashboard-panel dashboard-achievements-panel">
         <div className="dashboard-panel-head">
           <div>
-            <h2>Conquistas</h2>
+            <h2>Trilhas de conquistas</h2>
           </div>
           <span className="dashboard-panel-pill">
             {unlockedAchievements}/{totalAchievementLevels}
           </span>
         </div>
-
-        {nextAchievement ? (
-          <article className="dashboard-next-achievement">
-            <div className="dashboard-next-achievement-copy">
-              <span>Próxima meta</span>
-              <strong>{nextAchievement.action}</strong>
-              <p>
-                Faltam {nextAchievement.remaining} para desbloquear {nextAchievement.nextLevelLabel}.
-              </p>
-            </div>
-            <button type="button" className="secondary-button" onClick={onOpenCollection}>
-              Avançar
-            </button>
-          </article>
-        ) : (
-          <article className="dashboard-next-achievement dashboard-next-achievement-complete">
-            <div className="dashboard-next-achievement-copy">
-              <span>Conquistas completas</span>
-              <strong>Todas as trilhas foram concluídas</strong>
-              <p>Seu acervo já desbloqueou todos os marcos atuais.</p>
-            </div>
-          </article>
-        )}
-
-        <AnnualGoalCard
-          metrics={metrics}
-          currentYear={currentYear}
-          annualGoalRate={annualGoalRate}
-          onUpdateAnnualGoal={onUpdateAnnualGoal}
-          isUpdatingAnnualGoal={isUpdatingAnnualGoal}
-          error={annualGoalError}
-        />
 
         <div className="dashboard-achievements-grid">
           {achievements.map((achievement) => (
